@@ -26,8 +26,9 @@
 
 He strolls, bonks into crates, dozes off mid-sit, chases butterflies, freezes
 at falling gems, fetches his little oven to bake (and devour) a cake, dances
-to a silent beat, builds a rocket, and watches it explode — then shakes off
-the soot and strolls on. On the very first run, he hatches out of an egg. 🥚
+to a silent beat, juggles a ball until it bonks him dizzy, builds a rocket,
+and watches it explode — then shakes off the soot and strolls on. On the very
+first run, he hatches out of an egg. 🥚
 
 ## Quick start
 

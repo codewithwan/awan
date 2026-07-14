@@ -179,3 +179,17 @@ fn characters_recolor_but_share_choreography() {
     // Same scene beats; different body art.
     assert_ne!(a, o);
 }
+
+#[test]
+fn soccer_ball_rolls_in_juggles_then_is_booted_away() {
+    use crate::scene::soccer::ball_at;
+    assert!(ball_at(2).2, "the ball should roll in early");
+    assert!(
+        ball_at(10).1 < 10,
+        "the ball should bounce up while juggling"
+    );
+    assert!(
+        !ball_at(64).2,
+        "the ball should be booted off-screen by the end"
+    );
+}

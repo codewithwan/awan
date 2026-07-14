@@ -10,6 +10,7 @@ pub(crate) mod dance;
 pub(crate) mod gem;
 pub(crate) mod hatch;
 pub(crate) mod rocket;
+pub(crate) mod soccer;
 pub(crate) mod street;
 pub(crate) mod wander;
 
@@ -46,6 +47,8 @@ pub(crate) static FULL_SHOW: &[Scene] = &[
     scene(50, false, rocket::launch), // liftoff → BOOM → charred, blinking
     scene(12, true, stroll),
     scene(dance::DANCE_TICKS, false, dance::dance), // bounces to a silent beat
+    scene(12, true, stroll),
+    scene(soccer::SOCCER_TICKS, false, soccer::soccer), // juggles a ball, bonks his head
     scene(12, true, stroll),
 ];
 
