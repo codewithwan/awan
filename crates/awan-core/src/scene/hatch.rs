@@ -1,8 +1,10 @@
-//! The hatch intro: the egg settles, hops, cracks spread, and — POP — the
-//! top bursts off in a shower of sparks. The buddy blinks awake wearing a
-//! bit of shell as a hat, looks left and right at the world, watches the
-//! shell halves tumble away, shakes the cap off, and hops for joy.
+//! The hatch intro: the egg settles, hops, and cracks spread until — POP —
+//! the top bursts off in a shower of sparks. The buddy wakes wearing a bit of
+//! shell as a hat, looks around, watches the shell halves tumble away, shakes
+//! the cap off, and hops for joy. The leftover shell bits blink away rather
+//! than vanishing outright.
 
+use super::blink_out;
 use crate::character::Character;
 use crate::grid::{Grid, blit};
 use crate::palette::Role;
@@ -13,7 +15,6 @@ use crate::stage::MASCOT_HOME;
 pub(crate) const HATCH_TICKS: i32 = 56;
 const POP: i32 = 22;
 
-/// Draws the whole hatch frame (egg, shell, and the buddy once revealed).
 pub(crate) fn hatch_frame(k: i32, grid: &mut Grid, ch: &Character) {
     let home = MASCOT_HOME;
     if k < POP {
@@ -28,11 +29,9 @@ pub(crate) fn hatch_frame(k: i32, grid: &mut Grid, ch: &Character) {
             _ => LegsMode::Still,
         },
         eyes: match k {
-            ..26 => EyeMode::Closed, // groggy
-            30..33 => EyeMode::Left, // a first look around
-            33..36 => EyeMode::Right,
-            36..39 => EyeMode::Left, // …then watching the shells fly
-            39..42 => EyeMode::Right,
+            ..26 => EyeMode::Closed,
+            30..33 | 36..39 => EyeMode::Left, // looking around, then tracking the shells
+            33..36 | 39..42 => EyeMode::Right,
             48..54 => EyeMode::Happy,
             _ => EyeMode::Auto,
         },
@@ -53,13 +52,12 @@ pub(crate) fn hatch_frame(k: i32, grid: &mut Grid, ch: &Character) {
         Role::Body,
     );
 
-    // The top of the shell sails up and away…
+    // The top shell sails up and away in a burst of sparks.
     if let 22..26 = k {
         const FLIGHT: [(i32, i32); 4] = [(0, 4), (1, 2), (2, 0), (3, -2)];
         let (fx, fy) = FLIGHT[(k - POP) as usize];
         blit(grid, SHELL_TOP, home + fx, fy, Role::EyeWhite);
     }
-    // …in a burst of sparks.
     if k < 26 {
         grid.set(home - 1, 5, "░░", Role::Spark);
         grid.set(home + 10, 5, "░░", Role::Spark);
@@ -91,7 +89,7 @@ fn egg_phase(k: i32, grid: &mut Grid, home: i32) {
         Role::EyeWhite,
     );
     if matches!(k, 8..14 if k % 3 == 1) {
-        grid.set(home - 1, 11, "░░", Role::Dust); // landing puff
+        grid.set(home - 1, 11, "░░", Role::Dust);
         grid.set(home + 10, 11, "░░", Role::Dust);
     }
     const CRACKS: [(i32, i32); 5] = [(3, 8), (5, 9), (6, 8), (2, 9), (4, 7)];
@@ -104,12 +102,13 @@ fn egg_phase(k: i32, grid: &mut Grid, home: i32) {
         grid.set(home + jx + cx, cy, "▓▓", Role::Eye);
     }
     if k >= 20 {
-        grid.set(home + 2, 11, "░░", Role::EyeWhite); // first flecks give way
+        grid.set(home + 2, 11, "░░", Role::EyeWhite);
         grid.set(home + 7, 11, "░░", Role::EyeWhite);
     }
 }
 
-/// The bottom of the shell: worn like a nest, then split halves tumble away.
+/// The bottom shell: worn like a nest, split halves tumble to the edges, then
+/// blink away.
 fn shell_bottom(k: i32, grid: &mut Grid, home: i32) {
     match k {
         ..36 => blit(grid, SHELL_BOTTOM, home, 10, Role::EyeWhite),
@@ -120,28 +119,35 @@ fn shell_bottom(k: i32, grid: &mut Grid, home: i32) {
             blit(grid, SHELL_RIGHT, home + 5 + off, 10 + dy, Role::EyeWhite);
         }
         _ => {
-            // resting where they landed
-            blit(grid, SHELL_LEFT, home - 11, 10, Role::EyeWhite);
-            blit(grid, SHELL_RIGHT, home + 16, 10, Role::EyeWhite);
+            blink_out(grid, SHELL_LEFT, (home - 11, 10), Role::EyeWhite, k, 48, 8);
+            blink_out(grid, SHELL_RIGHT, (home + 16, 10), Role::EyeWhite, k, 48, 8);
         }
     }
 }
 
-/// The shell-cap gag: worn since the pop, shaken off, and left on the ground.
+/// The shell cap: worn since the pop, shaken off in an arc, then blinks away.
 fn cap(k: i32, grid: &mut Grid, wx: i32) {
     match k {
-        ..42 => blit(grid, SHELL_CAP, wx + 3, 5, Role::EyeWhite), // sitting
-        42..47 => blit(grid, SHELL_CAP, wx + 3, 4, Role::EyeWhite), // standing
+        ..42 => blit(grid, SHELL_CAP, wx + 3, 5, Role::EyeWhite),
+        42..47 => blit(grid, SHELL_CAP, wx + 3, 4, Role::EyeWhite),
         47..52 => {
             const ARC: [(i32, i32); 5] = [(5, 3), (7, 3), (9, 5), (11, 7), (12, 9)];
             let (fx, fy) = ARC[(k - 47) as usize];
             blit(grid, SHELL_CAP, MASCOT_HOME + fx, fy, Role::EyeWhite);
         }
         _ => {
-            blit(grid, SHELL_CAP, MASCOT_HOME + 12, 10, Role::EyeWhite);
-            if k < 54 {
+            if k == 52 {
                 grid.set(MASCOT_HOME + 11, 11, "░░", Role::Dust); // landing poof
             }
+            blink_out(
+                grid,
+                SHELL_CAP,
+                (MASCOT_HOME + 12, 10),
+                Role::EyeWhite,
+                k,
+                52,
+                4,
+            );
         }
     }
 }

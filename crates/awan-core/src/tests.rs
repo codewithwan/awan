@@ -145,6 +145,11 @@ fn bake_tells_a_full_story() {
         crate::pose::LegsMode::Sit,
         "he should plop down, stuffed, after the cake"
     );
+    let boom = bake::bake(107, 0, &mut Grid::new());
+    assert!(
+        !boom.charred && boom.mouth_open,
+        "the oven blows up but he never gets charred"
+    );
 }
 
 #[test]

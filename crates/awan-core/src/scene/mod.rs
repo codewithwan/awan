@@ -12,7 +12,8 @@ pub(crate) mod rocket;
 pub(crate) mod street;
 pub(crate) mod wander;
 
-use crate::grid::Grid;
+use crate::grid::{Grid, blit};
+use crate::palette::Role;
 use crate::pose::{LegsMode, Pose};
 
 pub(crate) type SceneFn = fn(k: i32, t: i32, grid: &mut Grid) -> Pose;
@@ -80,5 +81,23 @@ fn stroll(_k: i32, _t: i32, _grid: &mut Grid) -> Pose {
     Pose {
         legs: LegsMode::Walk,
         ..Pose::default()
+    }
+}
+
+/// Draw a sprite that fades out smoothly: solid until `fade`, then flickering
+/// on alternating ticks for `span` ticks, then gone — so leftovers blink away
+/// instead of popping out of existence.
+pub(crate) fn blink_out<S: AsRef<str>>(
+    grid: &mut Grid,
+    sprite: &[S],
+    at: (i32, i32),
+    role: Role,
+    k: i32,
+    fade: i32,
+    span: i32,
+) {
+    let d = k - fade;
+    if d < 0 || (d < span && d % 2 == 0) {
+        blit(grid, sprite, at.0, at.1, role);
     }
 }
