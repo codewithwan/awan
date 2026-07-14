@@ -1,55 +1,110 @@
 # awan ☁️
 
+[![CI](https://github.com/codewithwan/awan/actions/workflows/ci.yml/badge.svg)](https://github.com/codewithwan/awan/actions/workflows/ci.yml)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
+
 > A tiny living character for your terminal — and a **personality layer** any
 > CLI can embed: `wait`, `ask`, `react`.
 
-**Status: early development (v0.0.x).** The core engine — scenes, the face
-system, and the frame composer — is ported from an earlier battle-tested Go
-implementation and verified frame-by-frame. Characters are fully data-driven
-TOML specs. Expect breaking changes until v0.1.
+```text
+  ░░▓▓▓▓▓▓▓▓▓▓▓▓░░
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░
+  ▓▓▓▓▓▓░░
+  ▓▓▓▓▓▓▓▓░░
+                                              ██  ██
+                                              ██████
+                                                ██
+                          ░░▓▓████████▓▓░░
+                        ▓▓████████████████▓▓          ▓▓████████▓▓
+                        ████▀▀▀▀████▀▀▀▀████          ██░░████░░██
+                        ████████████████████          ██░░░░░░░░██
+      ·                 ▓▓████████████████▓▓      · ░░░░████████▓▓
+  ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+```
 
-On the very first `awan demo`, the buddy hatches out of an egg. 🥚
+*He just baked a cake, ate the whole thing, and is very pleased about it.*
 
-## Workspace layout
+He strolls, bonks into crates, dozes off mid-sit, chases butterflies, freezes
+at falling gems, fetches his little oven to bake (and devour) a cake, builds
+a rocket, and watches it explode — then shakes off the soot and strolls on.
+On the very first run, he hatches out of an egg. 🥚
 
-| Crate | Purpose |
-|---|---|
-| `awan-core` | Scene engine, face system, character spec (TOML) loader |
-| `awan-render` | Seam-free terminal backends: half-block + bg-color, 256-color ladder, graphics protocols |
-| `awan` | Public embed API for CLI authors: `wait` / `ask` / `react` |
-| `awan-cli` | The `awan` binary: `demo`, `watch`, `idle`, `statusline`, `event` |
+## Quick start
 
 ```sh
-cargo run -p awan-cli -- demo                            # play the show (Ctrl+C to stop)
-cargo run -p awan-cli -- demo -c characters/oyen.toml    # same show, different character
-cargo run -p awan-cli -- busy "compiling"                # the working loop, with a caption
-cargo test --workspace                                   # engine + spec + detection tests
+git clone https://github.com/codewithwan/awan && cd awan
+cargo run -p awan-cli -- demo
 ```
+
+| Command | What it does |
+|---|---|
+| `awan demo` | Play the full show on a loop (Ctrl+C to stop) |
+| `awan demo --hatch` | Replay the first-run hatching intro |
+| `awan demo -c characters/oyen.toml` | Same show, different character |
+| `awan busy "compiling"` | The making-things loop with an animated caption — a living progress indicator |
+
+**Status: early development (v0.0.x).** The engine is ported 1:1 from a
+battle-tested Go implementation and verified frame-by-frame. Expect breaking
+changes until v0.1.
 
 ## Characters
 
-Characters are plain TOML — pixel rows plus a palette, zero Rust. The engine
-derives all the face animation (blinks, glances, happy eyes, the startled
-open mouth) from your art:
+Characters are plain TOML — pixel rows plus a palette, **zero Rust**:
 
 | Spec | Who |
 |---|---|
 | [characters/awan.toml](characters/awan.toml) | Awan ☁️ — the reference cloud buddy |
 | [characters/oyen.toml](characters/oyen.toml) | Oyen 🐈 — a chunky orange cat |
 
-Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+The heart of a spec is the pixel art — here's the sprite block, abridged
+(`eye_row`/`mouth_row`/`legs_row` point the engine at the rows to animate):
+
+```toml
+[sprite]
+rows = [
+    " #+    +# ",   # '#' solid · '+' dense · '-' light · '@' eye
+    "+########+",
+    "##@@##@@##",   # the engine derives blinks, glances & happy eyes from here
+    "###----###",   # …and opens the mouth here when startled
+    "+########+",
+    " # #  # # ",
+]
+eye_row = 2
+mouth_row = 3
+legs_row = 5
+# …plus sit_rows, leg_frames, a palette, and metadata
+```
+
+Copy [characters/awan.toml](characters/awan.toml) as your starting point,
+edit the art, and run `awan demo -c my-character.toml`. The loader validates
+the spec with friendly errors and drops your character into the full scene
+library — no Rust, no rebuild of the engine.
+
+## How it works
+
+| Crate | Purpose |
+|---|---|
+| `awan-core` | Scene engine: deterministic frames from `(tick, character)` — no wall-clock, no RNG, snapshot-testable |
+| `awan-render` | Terminal backends: color-depth detection now; seam-free half-block rendering next |
+| `awan` | Public embed API for CLI authors: `wait` / `ask` / `react` (planned) |
+| `awan-cli` | The `awan` binary |
 
 ## Roadmap
 
 - **v0.1** — seam-free half-block rendering, polished `awan` binary
 - **v0.2** — embed API for CLI authors, ambient daemon, cross-language event
   protocol (any language, zero SDK)
-- **Later** — more characters, graphics-protocol backends, community roster
+- **Later** — more characters and skits, graphics-protocol backends,
+  community roster
 
 ## Promises
 
-No telemetry · no network calls · single static binary · characters are data
-(contribute one without writing Rust).
+No telemetry · no network calls · single static binary · characters are data.
+
+## Contributing
+
+Three lanes: character art (TOML only), scenes/skits (light Rust), or engine
+work. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

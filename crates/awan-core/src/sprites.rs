@@ -46,6 +46,12 @@ pub(crate) const SHELL_LEFT: &[&str] = &["+####", " +###"];
 pub(crate) const SHELL_RIGHT: &[&str] = &["####+", "###+ "];
 
 /// Baking props: mixing bowl, little oven, and the cake that pops out.
-pub(crate) const BOWL: &[&str] = &["#----#", "+####+"];
+pub(crate) const BOWL: &[&str] = &["#---#", "+###+"];
 pub(crate) const OVEN: &[&str] = &["+####+", "#-##-#", "#----#", "+####+"];
 pub(crate) const CAKE: &[&str] = &["-##-", "####", "+##+"];
+
+/// A little heart, floated up when the buddy is happy and full.
+pub(crate) const HEART: &[&str] = &["# #", "###", " # "];
+
+/// The classic gag: a bit of shell worn as a hat after hatching.
+pub(crate) const SHELL_CAP: &[&str] = &[" ## ", "+##+"];

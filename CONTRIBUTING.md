@@ -7,7 +7,7 @@ lanes, pick your comfort level:
 |---|---|---|
 | **Characters** | Pixel art + TOML — **zero Rust** | `characters/*.toml` (see `characters/awan.toml` for the spec format; blinks, glances, and the startled mouth are derived automatically from your eye/mouth rows) |
 | **Scenes / skits** | Light Rust (mostly choreography data) | `crates/awan-core/src/scene/` |
-| **Engine** | Rust | `awan-core`, `awan-render`, the daemon |
+| **Engine** | Rust | `awan-core`, `awan-render` (the ambient daemon is planned — see the roadmap) |
 
 ## Development setup
 
@@ -27,8 +27,9 @@ cargo fmt --all && cargo clippy --all-targets -- -D warnings
 
 ## Character PRs
 
-- Include the spec TOML and cell-art rows; PNG sprite sheet optional.
-- CI renders a preview GIF and attaches it to the PR — art is reviewed by eye.
+- Add a `characters/<name>.toml` spec (see `characters/awan.toml` for the
+  full format) and paste a few frames of `awan demo -c characters/<name>.toml`
+  into the PR so the art can be reviewed by eye.
 - Original work only; no trademarked/branded characters.
 
 ## License

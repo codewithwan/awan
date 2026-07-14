@@ -7,7 +7,7 @@ use crate::character::{Character, MASCOT_W};
 use crate::grid::{CANVAS_W, Grid};
 use crate::scene::street::{BONK_TICK, CRATE_FLIGHT, crate_at};
 use crate::scene::wander::{CONFUSED_TICKS, butterfly_at, pace_dx};
-use crate::scene::{FULL_SHOW, gem::gem_state, rocket, show_ticks};
+use crate::scene::{FULL_SHOW, bake, gem::gem_state, rocket, show_ticks};
 use crate::stage::{Intro, MASCOT_HOME, Stage, WALK_IN_TICKS};
 
 fn stage() -> Stage {
@@ -128,12 +128,23 @@ fn hatch_starts_as_an_egg_and_ends_standing() {
 }
 
 #[test]
-fn bake_glows_then_reveals_a_cake() {
+fn bake_tells_a_full_story() {
     let s = stage();
     let bake_start = WALK_IN_TICKS + FULL_SHOW[..9].iter().map(|sc| sc.dur).sum::<i32>();
-    let stirring = s.frame(bake_start + 4, false);
-    let cake = s.frame(bake_start + 36, false);
-    assert_ne!(stirring, cake, "stirring and the cake reveal should differ");
+    let stirring = s.frame(bake_start + 50, false);
+    let eating = s.frame(bake_start + 88, false);
+    assert_ne!(stirring, eating, "stirring and eating should differ");
+
+    let fetching = bake::bake(12, 0, &mut Grid::new());
+    assert!(fetching.dx < -8, "he should scamper off to fetch the oven");
+    let munching = bake::bake(88, 0, &mut Grid::new());
+    assert!(munching.mouth_open, "he should be mid-bite at k=88");
+    let full = bake::bake(100, 0, &mut Grid::new());
+    assert_eq!(
+        full.legs,
+        crate::pose::LegsMode::Sit,
+        "he should plop down, stuffed, after the cake"
+    );
 }
 
 #[test]

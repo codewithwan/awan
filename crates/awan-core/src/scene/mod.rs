@@ -38,7 +38,7 @@ pub(crate) static FULL_SHOW: &[Scene] = &[
     scene(12, true, stroll),
     scene(42, false, gem::fall), // a gem drops; freeze… blink-blink… sparkle
     scene(12, true, stroll),
-    scene(48, false, bake::bake), // stirs, bakes, and unveils a little cake
+    scene(bake::BAKE_TICKS, false, bake::bake), // fetches his oven, bakes a cake, eats it all
     scene(12, true, stroll),
     scene(40, false, rocket::build), // hammers a little rocket together
     scene(50, false, rocket::launch), // liftoff → BOOM → charred, blinking
@@ -47,7 +47,7 @@ pub(crate) static FULL_SHOW: &[Scene] = &[
 
 /// The "working…" loop: just the making-things skits, for busy indicators.
 pub(crate) static BUSY_SHOW: &[Scene] = &[
-    scene(48, false, bake::bake),
+    scene(bake::BAKE_TICKS, false, bake::bake),
     scene(40, false, rocket::build),
 ];
 
