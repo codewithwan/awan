@@ -1,0 +1,25 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/awan-core",
+    "crates/awan-render",
+    "crates/awan",
+    "crates/awan-cli",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/codewithwan/awan"
+authors = ["codewithwan"]
+keywords = ["terminal", "cli", "mascot", "animation", "ascii"]
+categories = ["command-line-interface"]
+
+[workspace.dependencies]
+awan-core = { path = "crates/awan-core", version = "0.0.1" }
+awan-render = { path = "crates/awan-render", version = "0.0.1" }
+ctrlc = "3"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"

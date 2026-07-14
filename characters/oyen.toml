@@ -1,0 +1,53 @@
+# Oyen — the orange cat. 🐈
+# Glyph language: '#' solid · '+' dense · '-' light · '@' eye · ' ' empty.
+# Face variants (blinks, glances, happy eyes, open mouth) are derived by the
+# engine from the eye/mouth rows.
+
+spec_version = 1
+
+[character]
+name = "Oyen"
+author = "codewithwan"
+description = "A chunky orange cat — unbothered, hungry, secretly proud."
+
+[character.palette]
+body = "#E8963C" # tabby orange (232,150,60)
+eye = "#3A2A1E"  # dark amber (58,42,30)
+
+[sprite]
+rows = [
+    " #+    +# ",
+    "+########+",
+    "##@@##@@##",
+    "###----###",
+    "+########+",
+    " # #  # # ",
+]
+sit_rows = [
+    "          ",
+    " #+    +# ",
+    "+########+",
+    "##@@##@@##",
+    "###----###",
+    "+########+",
+]
+leg_frames = [
+    " # #  # # ",
+    "# #  # #  ",
+    " # #  # # ",
+    "  # #  # #",
+]
+shimmer_row = " #+    ## " # ear twitch
+eye_row = 2
+mouth_row = 3
+legs_row = 5
+
+[personality]
+blink_rate = 0.8
+walk_speed = 0.9
+chaos = 0.3
+
+[reactions]
+"cmd.failed" = "charred"
+"task.done" = "celebrate"
+"idle" = "sleep"

@@ -1,0 +1,53 @@
+# Awan — the reference character. ☁️
+# Glyph language: '#' solid · '+' dense fluff · '-' light fluff · '@' eye · ' ' empty.
+# Face variants (blinks, glances, happy eyes, open mouth) are derived by the
+# engine from the eye/mouth rows — art stays as small as possible.
+
+spec_version = 1
+
+[character]
+name = "Awan"
+author = "codewithwan"
+description = "A small cloud buddy — cheerful, curious, easily startled."
+
+[character.palette]
+body = "#EBEEF5" # cloud white (235,238,245)
+eye = "#2D303C"  # near-black slate (45,48,60)
+
+[sprite]
+rows = [
+    " -+####+- ",
+    "+########+",
+    "##@@##@@##",
+    "##########",
+    "+########+",
+    " ## ## ## ",
+]
+sit_rows = [
+    "          ",
+    " -+####+- ",
+    "+########+",
+    "##@@##@@##",
+    "##########",
+    "+########+",
+]
+leg_frames = [
+    " ## ## ## ",
+    "## ## ##  ",
+    " ## ## ## ",
+    "  ## ## ##",
+]
+shimmer_row = "-+######+-" # idle fluff shimmer on the top row
+eye_row = 2
+mouth_row = 3
+legs_row = 5
+
+[personality]
+blink_rate = 1.0
+walk_speed = 1.0
+chaos = 0.1
+
+[reactions]
+"cmd.failed" = "charred"
+"task.done" = "celebrate"
+"idle" = "sleep"

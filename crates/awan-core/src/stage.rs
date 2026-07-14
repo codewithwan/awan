@@ -1,0 +1,147 @@
+//! The stage: composes a character, a show, and an intro into frames.
+
+use crate::character::{Character, MASCOT_W};
+use crate::grid::{CANVAS_H, CANVAS_W, GROUND_Y, Grid, blit};
+use crate::palette::Role;
+use crate::pose::{LegsMode, Pose};
+use crate::scene::hatch::{HATCH_TICKS, hatch_frame};
+use crate::scene::{BUSY_SHOW, FULL_SHOW, Scene, locate, show_ticks, show_walk_ticks};
+use crate::sprites::{CLOUD_BIG, CLOUD_SMALL};
+
+/// Where the buddy settles (roughly centered).
+pub(crate) const MASCOT_HOME: i32 = 11;
+/// Walk-in from the left, played once.
+pub(crate) const WALK_IN_TICKS: i32 = 21;
+
+/// How a run begins, before the show loops.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Intro {
+    /// Strolls in from the left (the default).
+    WalkIn,
+    /// Hatches out of an egg — the first-run arrival.
+    Hatch,
+    /// Straight into the show (busy indicators).
+    None,
+}
+
+impl Intro {
+    fn ticks(self) -> i32 {
+        match self {
+            Intro::WalkIn => WALK_IN_TICKS,
+            Intro::Hatch => HATCH_TICKS,
+            Intro::None => 0,
+        }
+    }
+}
+
+/// A character on a show, ready to render frames.
+pub struct Stage {
+    pub character: Character,
+    show: &'static [Scene],
+    intro: Intro,
+}
+
+impl Stage {
+    /// The full looping show, walk-in intro.
+    pub fn show(character: Character) -> Self {
+        Self {
+            character,
+            show: FULL_SHOW,
+            intro: Intro::WalkIn,
+        }
+    }
+
+    /// The "working…" loop — just the making-things skits, no intro.
+    pub fn busy(character: Character) -> Self {
+        Self {
+            character,
+            show: BUSY_SHOW,
+            intro: Intro::None,
+        }
+    }
+
+    pub fn with_intro(mut self, intro: Intro) -> Self {
+        self.intro = intro;
+        self
+    }
+
+    pub(crate) fn cycle_ticks(&self) -> i32 {
+        show_ticks(self.show)
+    }
+
+    pub(crate) fn intro_ticks(&self) -> i32 {
+        self.intro.ticks()
+    }
+
+    /// Compose the frame grid at tick `t`. Pure function of `t`, so frames
+    /// are deterministic and snapshot-testable.
+    pub(crate) fn compose(&self, t: i32) -> Grid {
+        let mut grid = Grid::new();
+
+        // Parallax clouds drift on their own clocks.
+        blit(&mut grid, CLOUD_BIG, wrap_x(30 - t / 6, 10), 0, Role::Sky);
+        blit(&mut grid, CLOUD_SMALL, wrap_x(8 - t / 9, 7), 2, Role::Sky);
+
+        let intro_ticks = self.intro.ticks();
+        if t < intro_ticks {
+            draw_dust(&mut grid, 0);
+            match self.intro {
+                Intro::Hatch => hatch_frame(t, &mut grid, &self.character),
+                _ => {
+                    // stroll in from off-screen
+                    let p = Pose {
+                        legs: LegsMode::Walk,
+                        ..Pose::default()
+                    };
+                    self.draw_mascot(&mut grid, p, t, -MASCOT_W + t);
+                }
+            }
+            return grid;
+        }
+
+        let u = t - intro_ticks;
+        let cycle = show_ticks(self.show);
+        let (loops, tt) = (u / cycle, u % cycle);
+        let (idx, k, walk_before) = locate(self.show, tt);
+        let sc = &self.show[idx];
+
+        let mut walked = loops * show_walk_ticks(self.show) + walk_before;
+        if sc.walking {
+            walked += k;
+        }
+        draw_dust(&mut grid, walked / 2);
+
+        let p = (sc.run)(k, t, &mut grid);
+        self.draw_mascot(&mut grid, p, t, MASCOT_HOME + p.dx);
+        grid
+    }
+
+    fn draw_mascot(&self, grid: &mut Grid, p: Pose, t: i32, mx: i32) {
+        let body = if p.charred { Role::Charred } else { Role::Body };
+        let rows = self.character.mascot_rows(p, t);
+        blit(grid, &rows, mx, CANVAS_H - 6 + p.dy, body);
+    }
+
+    /// Render the frame at tick `t` as terminal text; `color` toggles ANSI
+    /// color codes.
+    pub fn frame(&self, t: i32, color: bool) -> String {
+        crate::play::render(&self.compose(t), &self.character, color)
+    }
+}
+
+/// Keeps drifting background clouds cycling around the scene.
+fn wrap_x(x: i32, w: i32) -> i32 {
+    let span = CANVAS_W + w;
+    x.rem_euclid(span) - w
+}
+
+fn draw_dust(grid: &mut Grid, off: i32) {
+    for x in 0..CANVAS_W {
+        let wx = x + off;
+        if wx % 11 == 0 {
+            grid.set(x, GROUND_Y, "· ", Role::Dust);
+        } else if wx % 17 == 5 {
+            grid.set(x, GROUND_Y, " ·", Role::Dust);
+        }
+    }
+}

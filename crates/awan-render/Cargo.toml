@@ -1,0 +1,14 @@
+[package]
+name = "awan-render"
+description = "Terminal rendering backends for awan: half-block cell art, 256-color fallback, and graphics protocols"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+awan-core = { workspace = true }

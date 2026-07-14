@@ -1,0 +1,15 @@
+[package]
+name = "awan-core"
+description = "Scene engine, face system, and character spec for awan — a tiny living character for your terminal"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+toml = { workspace = true }

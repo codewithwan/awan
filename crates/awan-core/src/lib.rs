@@ -1,0 +1,46 @@
+//! # awan-core
+//!
+//! The scene engine and face system behind **awan** — a tiny living character
+//! for your terminal.
+//!
+//! Characters are **data**: a TOML spec ([`spec`]) resolves into a
+//! [`Character`], and a [`Stage`] composes it with a show (the full skit loop
+//! or the "busy" making-things loop) and an intro (walk-in, or hatching from
+//! an egg on first run) into deterministic frames.
+//!
+//! ```no_run
+//! use awan_core::{Character, Stage};
+//!
+//! let stage = Stage::show(Character::default());
+//! print!("{}", stage.frame(30, true));
+//! ```
+//!
+//! The engine began as a 1:1 port of a battle-tested Go implementation (the
+//! `idl pet` engine from the IDCloud CLI); its scene choreography is tuned
+//! and verified frame-by-frame.
+//!
+//! ## Module map
+//!
+//! | Module | Contents |
+//! |---|---|
+//! | [`spec`] | TOML character spec: loading + validation |
+//! | `character` | resolved art, palette, derived face variants |
+//! | `scene` | the skit library and show tables |
+//! | `stage`/`play` | frame composer, terminal renderer, play loop |
+
+mod character;
+mod grid;
+mod palette;
+mod play;
+pub mod pose;
+mod scene;
+pub mod spec;
+mod sprites;
+mod stage;
+
+pub use character::Character;
+pub use pose::Pose;
+pub use stage::{Intro, Stage};
+
+#[cfg(test)]
+mod tests;

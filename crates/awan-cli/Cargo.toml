@@ -1,0 +1,20 @@
+[package]
+name = "awan-cli"
+description = "The awan binary: demo, watch, idle, statusline"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "awan"
+path = "src/main.rs"
+
+[dependencies]
+awan-core = { workspace = true }
+awan-render = { workspace = true }
+ctrlc = { workspace = true }

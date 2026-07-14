@@ -1,0 +1,200 @@
+//! Character spec — characters are **data** (TOML + pixel maps), not code.
+//!
+//! Contributing a character requires zero Rust: a spec file binds art and
+//! personality onto the engine's shared scene library. See
+//! `characters/awan.toml` for the reference character.
+
+use std::collections::BTreeMap;
+use std::fmt;
+use std::path::Path;
+
+use serde::Deserialize;
+
+/// Supported spec revision; declared by every character so old specs never
+/// silently break. Version 1 pins the body to 10×6 shared-choreography pixels.
+pub const SPEC_VERSION: u32 = 1;
+
+const SPEC_W: usize = 10;
+const SPEC_H: usize = 6;
+
+/// A full character definition, loaded from a `*.toml` spec file.
+#[derive(Debug, Clone, Deserialize)]
+pub struct CharacterSpec {
+    /// Must equal [`SPEC_VERSION`].
+    pub spec_version: u32,
+    pub character: CharacterMeta,
+    pub sprite: SpriteSpec,
+    #[serde(default)]
+    pub personality: Personality,
+    /// Event name → scene name overrides (e.g. `"cmd.failed" = "charred"`).
+    #[serde(default)]
+    pub reactions: BTreeMap<String, String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CharacterMeta {
+    pub name: String,
+    #[serde(default)]
+    pub author: String,
+    #[serde(default)]
+    pub description: String,
+    /// Named colors, hex `#RRGGBB`: `body`, `eye`, and optionally
+    /// `eye_white` and `charred`.
+    pub palette: BTreeMap<String, String>,
+}
+
+/// Cell-art tier: a pixel map in the sprite glyph language.
+/// `'#'` solid · `'+'` dense · `'-'` light · `'@'` eye · `' '` empty.
+#[derive(Debug, Clone, Deserialize)]
+pub struct SpriteSpec {
+    /// Standing body, one string per pixel row (10×6).
+    pub rows: Vec<String>,
+    /// Sitting body (same size; face rows sit one row lower).
+    pub sit_rows: Vec<String>,
+    /// Walk-cycle variants for the legs row (4 frames).
+    pub leg_frames: Vec<String>,
+    /// Optional idle variant of row 0 (e.g. Awan's fluff shimmer).
+    #[serde(default)]
+    pub shimmer_row: Option<String>,
+    /// Row index (into `rows`) animated by the face engine.
+    pub eye_row: usize,
+    pub mouth_row: usize,
+    pub legs_row: usize,
+}
+
+/// Multipliers on engine defaults; `1.0` = neutral.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Personality {
+    #[serde(default = "one")]
+    pub blink_rate: f32,
+    #[serde(default = "one")]
+    pub walk_speed: f32,
+    /// Chance of mischief idle scenes (0.0–1.0).
+    #[serde(default)]
+    pub chaos: f32,
+}
+
+impl Default for Personality {
+    fn default() -> Self {
+        Self {
+            blink_rate: 1.0,
+            walk_speed: 1.0,
+            chaos: 0.0,
+        }
+    }
+}
+
+fn one() -> f32 {
+    1.0
+}
+
+/// Errors produced while loading or validating a character spec.
+#[derive(Debug)]
+pub enum SpecError {
+    Io(std::io::Error),
+    Parse(toml::de::Error),
+    /// Human-readable validation failure.
+    Invalid(String),
+}
+
+impl fmt::Display for SpecError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            SpecError::Io(e) => write!(f, "failed to read spec: {e}"),
+            SpecError::Parse(e) => write!(f, "failed to parse spec: {e}"),
+            SpecError::Invalid(msg) => write!(f, "invalid spec: {msg}"),
+        }
+    }
+}
+
+impl std::error::Error for SpecError {}
+
+/// Load and validate a character spec from a TOML file.
+pub fn load(path: &Path) -> Result<CharacterSpec, SpecError> {
+    let raw = std::fs::read_to_string(path).map_err(SpecError::Io)?;
+    let spec: CharacterSpec = toml::from_str(&raw).map_err(SpecError::Parse)?;
+    spec.validate()?;
+    Ok(spec)
+}
+
+impl CharacterSpec {
+    pub fn validate(&self) -> Result<(), SpecError> {
+        let fail = |msg: String| Err(SpecError::Invalid(msg));
+
+        if self.spec_version != SPEC_VERSION {
+            return fail(format!(
+                "spec_version {} is not supported (engine supports {SPEC_VERSION})",
+                self.spec_version
+            ));
+        }
+        let s = &self.sprite;
+        for (set, name, len) in [
+            (&s.rows, "rows", SPEC_H),
+            (&s.sit_rows, "sit_rows", SPEC_H),
+            (&s.leg_frames, "leg_frames", 4),
+        ] {
+            if set.len() != len {
+                return fail(format!("sprite.{name} must have exactly {len} rows"));
+            }
+            for (i, row) in set.iter().enumerate() {
+                if row.chars().count() != SPEC_W {
+                    return fail(format!("sprite.{name}[{i}] must be {SPEC_W} pixels wide"));
+                }
+            }
+        }
+        if let Some(row) = &s.shimmer_row {
+            if row.chars().count() != SPEC_W {
+                return fail(format!("sprite.shimmer_row must be {SPEC_W} pixels wide"));
+            }
+        }
+        // Face rows shift one row down when sitting, so they can't be last.
+        for (idx, name, max) in [
+            (s.eye_row, "eye_row", SPEC_H - 1),
+            (s.mouth_row, "mouth_row", SPEC_H - 1),
+            (s.legs_row, "legs_row", SPEC_H),
+        ] {
+            if idx >= max {
+                return fail(format!("sprite.{name} {idx} out of range (max {max})"));
+            }
+        }
+        if !s.rows[s.eye_row].contains('@') {
+            return fail(format!(
+                "sprite.rows[{}] (eye_row) must contain '@' eyes",
+                s.eye_row
+            ));
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    fn reference_spec_path() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../characters/awan.toml")
+    }
+
+    #[test]
+    fn reference_character_loads_and_validates() {
+        let spec = load(&reference_spec_path()).expect("characters/awan.toml must be valid");
+        assert_eq!(spec.character.name, "Awan");
+        assert_eq!(spec.sprite.rows.len(), 6);
+        assert!(spec.character.palette.contains_key("body"));
+    }
+
+    #[test]
+    fn version_mismatch_is_rejected() {
+        let mut spec = load(&reference_spec_path()).unwrap();
+        spec.spec_version = 999;
+        assert!(matches!(spec.validate(), Err(SpecError::Invalid(_))));
+    }
+
+    #[test]
+    fn eyeless_eye_row_is_rejected() {
+        let mut spec = load(&reference_spec_path()).unwrap();
+        spec.sprite.rows[spec.sprite.eye_row] = "##########".into();
+        assert!(matches!(spec.validate(), Err(SpecError::Invalid(_))));
+    }
+}
