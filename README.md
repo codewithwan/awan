@@ -44,6 +44,14 @@ cargo run -p awan-cli -- demo
 | `awan demo -c characters/oyen.toml` | Same show, different character |
 | `awan busy "compiling"` | The making-things loop with an animated caption — a living progress indicator |
 | `awan sing "line one" "line two" …` | Karaoke: he steps to a mic and sings your lyrics, lighting them up word by word |
+| `awan react cmd.failed` | Play the character's one-shot reaction to an event, then exit |
+| `awan watch` | Ambient companion that reacts to events read from stdin (or `--pipe`) |
+
+`awan watch` turns him into a companion that reacts to your shell in real
+time — source [shell/awan.zsh](shell/awan.zsh) and run `awan watch --pipe`
+in a spare pane; he goes busy while a command runs, celebrates when it passes,
+and chars when it fails. Which event maps to which scene is per-character data
+(`[reactions]` in the TOML).
 
 **Status: early development (v0.0.x).** The engine is ported 1:1 from a
 battle-tested Go implementation and verified frame-by-frame. Expect breaking

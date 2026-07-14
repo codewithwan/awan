@@ -22,6 +22,23 @@ jobs:
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+  size:
+    name: release binary size
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build release
+        run: cargo build --release -p awan-cli
+      - name: Report + guard size
+        run: |
+          bytes=$(stat -c%s target/release/awan)
+          mb=$(awk "BEGIN{printf \"%.2f\", $bytes/1048576}")
+          echo "### awan binary: ${mb} MB (${bytes} bytes)" >> "$GITHUB_STEP_SUMMARY"
+          echo "awan binary: ${mb} MB (${bytes} bytes)"
+          test "$bytes" -lt 3145728 # bloat guard: fail if over 3 MB
+
   test:
     name: test (${{ matrix.os }}, rust ${{ matrix.rust }})
     runs-on: ${{ matrix.os }}

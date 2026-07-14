@@ -66,15 +66,27 @@ fn react(stage: &Stage) {
     });
 }
 
-/// Ambient companion: render the show while reacting to events read, one per
-/// line, from stdin. Ctrl+C restores the cursor and exits.
-fn watch(character: Character) {
+/// Ambient companion: render the show while reacting to events read one per
+/// line, from stdin or a named pipe (`--pipe`). Ctrl+C restores the cursor.
+fn watch(character: Character, pipe: Option<std::path::PathBuf>) {
     let stop = stop_flag();
     let (tx, rx) = mpsc::channel::<String>();
-    std::thread::spawn(move || {
-        for line in std::io::stdin().lock().lines().map_while(Result::ok) {
-            if tx.send(line.trim().to_string()).is_err() {
-                break;
+    std::thread::spawn(move || match pipe {
+        // a fifo: reopen each time a writer (a shell hook) closes it
+        Some(path) => {
+            while let Ok(file) = std::fs::File::open(&path) {
+                for line in std::io::BufReader::new(file).lines().map_while(Result::ok) {
+                    if tx.send(line.trim().to_string()).is_err() {
+                        return;
+                    }
+                }
+            }
+        }
+        None => {
+            for line in std::io::stdin().lock().lines().map_while(Result::ok) {
+                if tx.send(line.trim().to_string()).is_err() {
+                    break;
+                }
             }
         }
     });
@@ -145,7 +157,7 @@ fn main() {
                 None => eprintln!("awan: {name} has no reaction to \"{event}\""),
             }
         }
-        "watch" => watch(load_character(args.character.as_deref())),
+        "watch" => watch(load_character(args.character.as_deref()), args.pipe),
         "--version" | "-V" => println!("awan {}", env!("CARGO_PKG_VERSION")),
         _ => {
             println!(

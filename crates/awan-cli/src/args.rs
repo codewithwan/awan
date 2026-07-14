@@ -8,6 +8,7 @@ use awan_core::Character;
 pub struct Args {
     pub cmd: String,
     pub character: Option<PathBuf>,
+    pub pipe: Option<PathBuf>,
     pub hatch: bool,
     pub rest: Vec<String>,
 }
@@ -17,12 +18,14 @@ pub fn parse_args() -> Args {
     let mut parsed = Args {
         cmd: args.next().unwrap_or_default(),
         character: None,
+        pipe: None,
         hatch: false,
         rest: Vec::new(),
     };
     while let Some(arg) = args.next() {
         match arg.as_str() {
             "-c" | "--character" => parsed.character = args.next().map(PathBuf::from),
+            "--pipe" => parsed.pipe = args.next().map(PathBuf::from),
             "--hatch" => parsed.hatch = true,
             _ => parsed.rest.push(arg),
         }
