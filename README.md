@@ -6,23 +6,11 @@
 > A tiny living character for your terminal — and a **personality layer** any
 > CLI can embed: `wait`, `ask`, `react`.
 
-```text
-  ██████████████████
-  ████████████████████
-  ██████████
-  ████████████
-                                              ██  ██
-                                              ██████
-                                                ██
-                          ████████████████
-                        ████████████████████          ████████████
-                        ████▀▀▀▀████▀▀▀▀████          ██████████████
-                        ████████████████████          ██████████████
-      ·                 ████████████████████      · ████████████████
-  ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
-```
+<p align="center">
+  <img src="assets/demo.gif" alt="awan strolling through his show in the terminal" width="700">
+</p>
 
-*He just baked a cake, ate the whole thing, and is very pleased about it.*
+*He strolls in, bumps into a box, and dozes off — one loop of the show.*
 
 He strolls, bonks into crates, dozes off mid-sit, chases butterflies, freezes
 at falling gems, fetches his little oven to bake (and devour) a cake, dances
