@@ -12,6 +12,7 @@ use crate::spec::{CharacterSpec, SpecError};
 /// The buddy's width in pixels (pinned by spec v1).
 pub(crate) const MASCOT_W: i32 = 10;
 
+#[derive(Clone)]
 pub(crate) struct Colors {
     pub body: String,
     pub eye: String,
@@ -21,6 +22,7 @@ pub(crate) struct Colors {
 
 /// A character ready to render: resolved palette plus precomputed row
 /// variants, so composing a mascot frame allocates nothing.
+#[derive(Clone)]
 pub struct Character {
     pub name: String,
     pub(crate) colors: Colors,
@@ -34,10 +36,8 @@ pub struct Character {
     eye_row: usize,
     mouth_row: usize,
     legs_row: usize,
-    /// Ticks between idle blinks, from `personality.blink_rate` (1.0 → 26).
-    blink_period: i32,
-    /// Event name → scene name (e.g. `"cmd.failed" → "charred"`).
-    reactions: BTreeMap<String, String>,
+    blink_period: i32, // idle-blink period from personality.blink_rate (1.0 → 26)
+    reactions: BTreeMap<String, String>, // event name → scene name
 }
 
 /// The built-in reference character (identical to `characters/awan.toml`).

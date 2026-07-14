@@ -3,16 +3,20 @@
 //! - `awan demo`       — play the show on a loop (hatches from an egg on first run)
 //! - `awan busy`       — the "working…" loop with an animated caption
 //! - `awan sing`       — karaoke: he steps to a mic and sings the lines you give
-//! - `awan watch`      — ambient companion for a tmux/zellij pane (planned)
+//! - `awan react`      — play the character's one-shot reaction to an event
+//! - `awan watch`      — ambient companion that reacts to events read from stdin
 //! - `awan statusline` — one-line output for Claude Code / starship / tmux (planned)
 
-use std::io::{IsTerminal, stdout};
-use std::path::{Path, PathBuf};
+use std::io::{BufRead, IsTerminal, Write, stdout};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc;
 use std::time::Duration;
 
-use awan_core::{Character, Intro, Karaoke, Stage};
+use awan_core::{Character, Companion, Intro, Karaoke, Stage};
+
+mod args;
+use args::{first_run, load_character, parse_args};
 
 /// Pause between frames.
 const FRAME_DELAY: Duration = Duration::from_millis(90);
@@ -24,68 +28,6 @@ const DEFAULT_LYRICS: &[&str] = &[
     "nothing to carry today",
     "just me and the wide open sky",
 ];
-
-/// Parsed command line: subcommand, `-c/--character` path, flags, free args.
-struct Args {
-    cmd: String,
-    character: Option<PathBuf>,
-    hatch: bool,
-    rest: Vec<String>,
-}
-
-fn parse_args() -> Args {
-    let mut args = std::env::args().skip(1);
-    let mut parsed = Args {
-        cmd: args.next().unwrap_or_default(),
-        character: None,
-        hatch: false,
-        rest: Vec::new(),
-    };
-    while let Some(arg) = args.next() {
-        match arg.as_str() {
-            "-c" | "--character" => parsed.character = args.next().map(PathBuf::from),
-            "--hatch" => parsed.hatch = true,
-            _ => parsed.rest.push(arg),
-        }
-    }
-    parsed
-}
-
-fn load_character(path: Option<&Path>) -> Character {
-    let Some(path) = path else {
-        return Character::default();
-    };
-    let spec = awan_core::spec::load(path).unwrap_or_else(|e| {
-        eprintln!("awan: {}: {e}", path.display());
-        std::process::exit(2);
-    });
-    Character::from_spec(&spec).unwrap_or_else(|e| {
-        eprintln!("awan: {}: {e}", path.display());
-        std::process::exit(2);
-    })
-}
-
-/// First-run marker: the buddy hatches once, then walks in ever after.
-fn hatch_marker() -> Option<PathBuf> {
-    let base = std::env::var_os("XDG_STATE_HOME")
-        .map(PathBuf::from)
-        .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local/state")))?;
-    Some(base.join("awan").join("hatched"))
-}
-
-fn first_run() -> bool {
-    let Some(marker) = hatch_marker() else {
-        return false;
-    };
-    if marker.exists() {
-        return false;
-    }
-    if let Some(dir) = marker.parent() {
-        let _ = std::fs::create_dir_all(dir);
-    }
-    let _ = std::fs::write(&marker, "");
-    true
-}
 
 /// A Ctrl+C flag, shared with the signal handler so the play loop can exit.
 fn stop_flag() -> Arc<AtomicBool> {
@@ -122,6 +64,44 @@ fn react(stage: &Stage) {
     stage.play(&mut out, color, 1, FRAME_DELAY, None, &|| {
         stop.load(Ordering::SeqCst)
     });
+}
+
+/// Ambient companion: render the show while reacting to events read, one per
+/// line, from stdin. Ctrl+C restores the cursor and exits.
+fn watch(character: Character) {
+    let stop = stop_flag();
+    let (tx, rx) = mpsc::channel::<String>();
+    std::thread::spawn(move || {
+        for line in std::io::stdin().lock().lines().map_while(Result::ok) {
+            if tx.send(line.trim().to_string()).is_err() {
+                break;
+            }
+        }
+    });
+
+    let mut companion = Companion::new(character);
+    let color = stdout().is_terminal();
+    let mut out = stdout().lock();
+    let _ = write!(out, "\x1b[?25l\x1b[2J");
+    let mut t = 0;
+    while !stop.load(Ordering::SeqCst) {
+        while let Ok(ev) = rx.try_recv() {
+            if !ev.is_empty() {
+                companion.feed(&ev, t);
+            }
+        }
+        let _ = write!(out, "\x1b[H");
+        for line in companion.frame(t, color).split('\n') {
+            let _ = writeln!(out, "{line}\x1b[K");
+        }
+        if let Some(cap) = companion.caption(t) {
+            let _ = writeln!(out, "  {}: {cap}\x1b[K", companion.name());
+        }
+        let _ = out.flush();
+        std::thread::sleep(FRAME_DELAY);
+        t += 1;
+    }
+    let _ = writeln!(out, "\x1b[?25h");
 }
 
 fn main() {
@@ -165,6 +145,7 @@ fn main() {
                 None => eprintln!("awan: {name} has no reaction to \"{event}\""),
             }
         }
+        "watch" => watch(load_character(args.character.as_deref())),
         "--version" | "-V" => println!("awan {}", env!("CARGO_PKG_VERSION")),
         _ => {
             println!(
@@ -176,12 +157,11 @@ fn main() {
             println!("  demo  [--hatch] [-c <spec.toml>]   play the show (Ctrl+C to stop)");
             println!("  busy  [label]   [-c <spec.toml>]   the working loop, with a caption");
             println!("  sing  [\"line\" \"line\" …]            karaoke: one quoted line per lyric");
-            println!(
-                "  react <event>   [-c <spec.toml>]   play the character's reaction to an event"
-            );
+            println!("  react <event>   [-c <spec.toml>]   play the character's reaction once");
+            println!("  watch           [-c <spec.toml>]   companion that reacts to stdin events");
             println!();
             println!("Characters are plain TOML — see the characters/ directory.");
-            println!("Planned: watch | idle | statusline | event");
+            println!("Feed watch: (echo cmd.start; sleep 2; echo cmd.failed) | awan watch");
         }
     }
 }

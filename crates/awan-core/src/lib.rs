@@ -29,6 +29,7 @@
 //! | `stage`/`play` | frame composer, terminal renderer, play loop |
 
 mod character;
+mod companion;
 mod grid;
 mod karaoke;
 mod palette;
@@ -40,6 +41,7 @@ mod sprites;
 mod stage;
 
 pub use character::Character;
+pub use companion::Companion;
 pub use karaoke::Karaoke;
 pub use pose::Pose;
 pub use stage::{Intro, Stage};
