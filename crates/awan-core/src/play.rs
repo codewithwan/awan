@@ -8,36 +8,36 @@ use std::io::Write;
 use std::time::Duration;
 
 use crate::character::Character;
-use crate::grid::{CANVAS_W, Grid};
+use crate::grid::{CANVAS_W, Cell, Grid};
 use crate::palette::Role;
 use crate::stage::Stage;
 
-pub(crate) fn render(grid: &Grid, ch: &Character, color: bool) -> String {
-    let mut b = String::with_capacity(2048);
-    for row in grid.rows() {
-        b.push_str("  ");
-        let mut active: Option<&str> = None;
-        for cell in row {
-            if cell.glyph.is_empty() {
-                b.push_str("  ");
-                continue;
-            }
-            if color {
-                let code = cell.color.sgr(ch);
-                if active != Some(code) {
-                    b.push_str("\x1b[");
-                    b.push_str(code);
-                    b.push('m');
-                    active = Some(code);
-                }
-            }
-            b.push_str(cell.glyph);
+/// Append a run of cells (empty → two spaces, else glyph) with run-length SGR.
+pub(crate) fn push_cells(b: &mut String, cells: &[Cell], ch: &Character, color: bool) {
+    let mut active: Option<&str> = None;
+    for cell in cells {
+        if cell.glyph.is_empty() {
+            b.push_str("  ");
+            continue;
         }
-        if active.is_some() {
-            b.push_str("\x1b[0m");
+        if color {
+            let code = cell.color.sgr(ch);
+            if active != Some(code) {
+                b.push_str("\x1b[");
+                b.push_str(code);
+                b.push('m');
+                active = Some(code);
+            }
         }
-        b.push('\n');
+        b.push_str(cell.glyph);
     }
+    if active.is_some() {
+        b.push_str("\x1b[0m");
+    }
+}
+
+/// Append the ground line under the canvas.
+pub(crate) fn push_baseline(b: &mut String, color: bool) {
     b.push_str("  ");
     if color {
         b.push_str("\x1b[38;5;242m");
@@ -48,6 +48,16 @@ pub(crate) fn render(grid: &Grid, ch: &Character, color: bool) -> String {
     if color {
         b.push_str("\x1b[0m");
     }
+}
+
+pub(crate) fn render(grid: &Grid, ch: &Character, color: bool) -> String {
+    let mut b = String::with_capacity(2048);
+    for row in grid.rows() {
+        b.push_str("  ");
+        push_cells(&mut b, row, ch, color);
+        b.push('\n');
+    }
+    push_baseline(&mut b, color);
     b
 }
 

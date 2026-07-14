@@ -53,5 +53,8 @@ pub(crate) const CAKE: &[&str] = &["-##-", "####", "+##+"];
 /// A little heart, floated up when the buddy is happy and full.
 pub(crate) const HEART: &[&str] = &["# #", "###", " # "];
 
+/// A handheld mic he holds up to his mouth: rounded grille head, short handle.
+pub(crate) const MIC: &[&str] = &["-#", "##", "+ "];
+
 /// The classic gag: a bit of shell worn as a hat after hatching.
 pub(crate) const SHELL_CAP: &[&str] = &[" ## ", "+##+"];

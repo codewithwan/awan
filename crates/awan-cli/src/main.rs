@@ -2,6 +2,7 @@
 //!
 //! - `awan demo`       — play the show on a loop (hatches from an egg on first run)
 //! - `awan busy`       — the "working…" loop with an animated caption
+//! - `awan sing`       — karaoke: he steps to a mic and sings the lines you give
 //! - `awan watch`      — ambient companion for a tmux/zellij pane (planned)
 //! - `awan statusline` — one-line output for Claude Code / starship / tmux (planned)
 
@@ -11,10 +12,18 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
-use awan_core::{Character, Intro, Stage};
+use awan_core::{Character, Intro, Karaoke, Stage};
 
 /// Pause between frames.
 const FRAME_DELAY: Duration = Duration::from_millis(90);
+
+/// Original placeholder song used when `awan sing` is given no lyrics.
+const DEFAULT_LYRICS: &[&str] = &[
+    "up where the little clouds play",
+    "i drift along on the breeze",
+    "nothing to carry today",
+    "just me and the wide open sky",
+];
 
 /// Parsed command line: subcommand, `-c/--character` path, flags, free args.
 struct Args {
@@ -78,15 +87,29 @@ fn first_run() -> bool {
     true
 }
 
-fn run(stage: &Stage, color_wanted: bool, caption: Option<&str>) {
+/// A Ctrl+C flag, shared with the signal handler so the play loop can exit.
+fn stop_flag() -> Arc<AtomicBool> {
     let stop = Arc::new(AtomicBool::new(false));
     let flag = Arc::clone(&stop);
     ctrlc::set_handler(move || flag.store(true, Ordering::SeqCst))
         .expect("failed to set the Ctrl+C handler");
+    stop
+}
 
+fn run(stage: &Stage, color_wanted: bool, caption: Option<&str>) {
+    let stop = stop_flag();
     let color = color_wanted && stdout().is_terminal();
     let mut out = stdout().lock();
     stage.play(&mut out, color, 0, FRAME_DELAY, caption, &|| {
+        stop.load(Ordering::SeqCst)
+    });
+}
+
+fn sing(karaoke: &Karaoke) {
+    let stop = stop_flag();
+    let color = stdout().is_terminal();
+    let mut out = stdout().lock();
+    karaoke.play(&mut out, color, FRAME_DELAY, &|| {
         stop.load(Ordering::SeqCst)
     });
 }
@@ -112,6 +135,17 @@ fn main() {
             let stage = Stage::busy(load_character(args.character.as_deref()));
             run(&stage, true, Some(&label));
         }
+        "sing" => {
+            let lines = if args.rest.is_empty() {
+                DEFAULT_LYRICS.iter().map(|s| s.to_string()).collect()
+            } else {
+                args.rest.clone()
+            };
+            sing(&Karaoke::new(
+                load_character(args.character.as_deref()),
+                lines,
+            ));
+        }
         "--version" | "-V" => println!("awan {}", env!("CARGO_PKG_VERSION")),
         _ => {
             println!(
@@ -122,6 +156,7 @@ fn main() {
             println!("Commands:");
             println!("  demo  [--hatch] [-c <spec.toml>]   play the show (Ctrl+C to stop)");
             println!("  busy  [label]   [-c <spec.toml>]   the working loop, with a caption");
+            println!("  sing  [\"line\" \"line\" …]            karaoke: one quoted line per lyric");
             println!();
             println!("Characters are plain TOML — see the characters/ directory.");
             println!("Planned: watch | idle | statusline | event");

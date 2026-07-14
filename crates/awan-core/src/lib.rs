@@ -30,6 +30,7 @@
 
 mod character;
 mod grid;
+mod karaoke;
 mod palette;
 mod play;
 pub mod pose;
@@ -39,6 +40,7 @@ mod sprites;
 mod stage;
 
 pub use character::Character;
+pub use karaoke::Karaoke;
 pub use pose::Pose;
 pub use stage::{Intro, Stage};
 

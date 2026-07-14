@@ -25,9 +25,9 @@
 *He just baked a cake, ate the whole thing, and is very pleased about it.*
 
 He strolls, bonks into crates, dozes off mid-sit, chases butterflies, freezes
-at falling gems, fetches his little oven to bake (and devour) a cake, builds
-a rocket, and watches it explode — then shakes off the soot and strolls on.
-On the very first run, he hatches out of an egg. 🥚
+at falling gems, fetches his little oven to bake (and devour) a cake, dances
+to a silent beat, builds a rocket, and watches it explode — then shakes off
+the soot and strolls on. On the very first run, he hatches out of an egg. 🥚
 
 ## Quick start
 
@@ -42,6 +42,7 @@ cargo run -p awan-cli -- demo
 | `awan demo --hatch` | Replay the first-run hatching intro |
 | `awan demo -c characters/oyen.toml` | Same show, different character |
 | `awan busy "compiling"` | The making-things loop with an animated caption — a living progress indicator |
+| `awan sing "line one" "line two" …` | Karaoke: he steps to a mic and sings your lyrics, lighting them up word by word |
 
 **Status: early development (v0.0.x).** The engine is ported 1:1 from a
 battle-tested Go implementation and verified frame-by-frame. Expect breaking
