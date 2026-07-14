@@ -56,8 +56,8 @@ pub(crate) const HEART: &[&str] = &["# #", "###", " # "];
 /// A handheld mic he holds up to his mouth: rounded grille head, short handle.
 pub(crate) const MIC: &[&str] = &["-#", "##", "+ "];
 
-/// A little soccer ball for the juggling skit: round, with a dark centre patch.
-pub(crate) const BALL: &[&str] = &["+#+", "#@#", "+#+"];
+/// A small soccer ball for the juggling skit: a 2×2 nub with a dark patch.
+pub(crate) const BALL: &[&str] = &["+#", "#@"];
 
 /// The classic gag: a bit of shell worn as a hat after hatching.
 pub(crate) const SHELL_CAP: &[&str] = &[" ## ", "+##+"];
