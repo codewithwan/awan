@@ -7,18 +7,18 @@
 > CLI can embed: `wait`, `ask`, `react`.
 
 ```text
-  ░░▓▓▓▓▓▓▓▓▓▓▓▓░░
-  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░
-  ▓▓▓▓▓▓░░
-  ▓▓▓▓▓▓▓▓░░
+  ██████████████████
+  ████████████████████
+  ██████████
+  ████████████
                                               ██  ██
                                               ██████
                                                 ██
-                          ░░▓▓████████▓▓░░
-                        ▓▓████████████████▓▓          ▓▓████████▓▓
-                        ████▀▀▀▀████▀▀▀▀████          ██░░████░░██
-                        ████████████████████          ██░░░░░░░░██
-      ·                 ▓▓████████████████▓▓      · ░░░░████████▓▓
+                          ████████████████
+                        ████████████████████          ████████████
+                        ████▀▀▀▀████▀▀▀▀████          ██████████████
+                        ████████████████████          ██████████████
+      ·                 ████████████████████      · ████████████████
   ▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
 ```
 
@@ -53,12 +53,13 @@ in a spare pane; he goes busy while a command runs, celebrates when it passes,
 and chars when it fails. Which event maps to which scene is per-character data
 (`[reactions]` in the TOML).
 
-Two seam-free looks are available for terminals that show gaps between rows
-(macOS Terminal.app among them), both painting each pixel as a coloured cell
-background so the font's line spacing is filled in:
+He renders **seam-free by default**: every pixel is painted as a coloured
+cell background, so the font's line spacing is filled in and there are no
+gaps between rows on any terminal (macOS Terminal.app included). Two other
+looks are a flag away:
 
-- `--size seamless` — normal proportions, just gap-free.
-- `--size compact` — packs two pixel rows per cell, so it's also half as tall.
+- `--size big` — the classic block-textured look (`░`/`▓` dither).
+- `--size compact` — seam-free *and* half as tall (two pixel rows per cell).
 
 **Status: early development (v0.0.x).** The engine is ported 1:1 from a
 battle-tested Go implementation and verified frame-by-frame. Expect breaking

@@ -155,7 +155,7 @@ fn main() {
             let ch = load_character(args.character.as_deref());
             let name = ch.name.clone();
             match Stage::react(ch, event) {
-                Some(stage) => react(&stage),
+                Some(stage) => react(&stage.with_size(args.size)),
                 None => eprintln!("awan: {name} has no reaction to \"{event}\""),
             }
         }
@@ -180,7 +180,7 @@ fn main() {
             println!();
             println!();
             println!(
-                "Seam-free looks: --size seamless (normal size) or --size compact (half height)."
+                "Renders seam-free by default. --size big = classic textured, compact = half height."
             );
             println!("Characters are plain TOML — see the characters/ directory.");
             println!("Feed watch: (echo cmd.start; sleep 2; echo cmd.failed) | awan watch");

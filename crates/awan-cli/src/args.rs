@@ -20,7 +20,7 @@ pub fn parse_args() -> Args {
         cmd: args.next().unwrap_or_default(),
         character: None,
         pipe: None,
-        size: Size::Big,
+        size: Size::Seamless,
         hatch: false,
         rest: Vec::new(),
     };
@@ -29,6 +29,7 @@ pub fn parse_args() -> Args {
             "-c" | "--character" => parsed.character = args.next().map(PathBuf::from),
             "--pipe" => parsed.pipe = args.next().map(PathBuf::from),
             "--size" => match args.next().as_deref() {
+                Some("big") => parsed.size = Size::Big,
                 Some("compact") => parsed.size = Size::Compact,
                 Some("seamless") => parsed.size = Size::Seamless,
                 _ => {}
