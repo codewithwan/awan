@@ -53,6 +53,11 @@ in a spare pane; he goes busy while a command runs, celebrates when it passes,
 and chars when it fails. Which event maps to which scene is per-character data
 (`[reactions]` in the TOML).
 
+Add `--size compact` to any command for a **smaller, seam-free** rendering:
+two pixels are packed per cell with background-coloured half-blocks, so the
+whole cell (including line spacing) is painted — no gaps between rows on any
+terminal, macOS Terminal.app included, at half the height.
+
 **Status: early development (v0.0.x).** The engine is ported 1:1 from a
 battle-tested Go implementation and verified frame-by-frame. Expect breaking
 changes until v0.1.

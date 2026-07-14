@@ -2,13 +2,14 @@
 
 use std::path::{Path, PathBuf};
 
-use awan_core::Character;
+use awan_core::{Character, Size};
 
 /// Parsed command line: subcommand, `-c/--character` path, flags, free args.
 pub struct Args {
     pub cmd: String,
     pub character: Option<PathBuf>,
     pub pipe: Option<PathBuf>,
+    pub size: Size,
     pub hatch: bool,
     pub rest: Vec<String>,
 }
@@ -19,6 +20,7 @@ pub fn parse_args() -> Args {
         cmd: args.next().unwrap_or_default(),
         character: None,
         pipe: None,
+        size: Size::Big,
         hatch: false,
         rest: Vec::new(),
     };
@@ -26,6 +28,11 @@ pub fn parse_args() -> Args {
         match arg.as_str() {
             "-c" | "--character" => parsed.character = args.next().map(PathBuf::from),
             "--pipe" => parsed.pipe = args.next().map(PathBuf::from),
+            "--size" => {
+                if args.next().as_deref() == Some("compact") {
+                    parsed.size = Size::Compact;
+                }
+            }
             "--hatch" => parsed.hatch = true,
             _ => parsed.rest.push(arg),
         }

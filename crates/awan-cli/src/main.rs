@@ -68,7 +68,7 @@ fn react(stage: &Stage) {
 
 /// Ambient companion: render the show while reacting to events read one per
 /// line, from stdin or a named pipe (`--pipe`). Ctrl+C restores the cursor.
-fn watch(character: Character, pipe: Option<std::path::PathBuf>) {
+fn watch(character: Character, pipe: Option<std::path::PathBuf>, size: awan_core::Size) {
     let stop = stop_flag();
     let (tx, rx) = mpsc::channel::<String>();
     std::thread::spawn(move || match pipe {
@@ -91,7 +91,7 @@ fn watch(character: Character, pipe: Option<std::path::PathBuf>) {
         }
     });
 
-    let mut companion = Companion::new(character);
+    let mut companion = Companion::new(character, size);
     let color = stdout().is_terminal();
     let mut out = stdout().lock();
     let _ = write!(out, "\x1b[?25l\x1b[2J");
@@ -125,7 +125,9 @@ fn main() {
             } else {
                 Intro::WalkIn
             };
-            let stage = Stage::show(load_character(args.character.as_deref())).with_intro(intro);
+            let stage = Stage::show(load_character(args.character.as_deref()))
+                .with_intro(intro)
+                .with_size(args.size);
             run(&stage, true, None);
         }
         "busy" => {
@@ -134,7 +136,7 @@ fn main() {
             } else {
                 args.rest.join(" ")
             };
-            let stage = Stage::busy(load_character(args.character.as_deref()));
+            let stage = Stage::busy(load_character(args.character.as_deref())).with_size(args.size);
             run(&stage, true, Some(&label));
         }
         "sing" => {
@@ -157,7 +159,11 @@ fn main() {
                 None => eprintln!("awan: {name} has no reaction to \"{event}\""),
             }
         }
-        "watch" => watch(load_character(args.character.as_deref()), args.pipe),
+        "watch" => watch(
+            load_character(args.character.as_deref()),
+            args.pipe,
+            args.size,
+        ),
         "--version" | "-V" => println!("awan {}", env!("CARGO_PKG_VERSION")),
         _ => {
             println!(
@@ -172,6 +178,8 @@ fn main() {
             println!("  react <event>   [-c <spec.toml>]   play the character's reaction once");
             println!("  watch           [-c <spec.toml>]   companion that reacts to stdin events");
             println!();
+            println!();
+            println!("Add --size compact for a smaller, seam-free look (great on macOS Terminal).");
             println!("Characters are plain TOML — see the characters/ directory.");
             println!("Feed watch: (echo cmd.start; sleep 2; echo cmd.failed) | awan watch");
         }

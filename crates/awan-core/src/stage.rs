@@ -34,11 +34,22 @@ impl Intro {
     }
 }
 
+/// How big the character is drawn.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Size {
+    /// Full-height block glyphs (the default look).
+    #[default]
+    Big,
+    /// Half-height, seam-free half-blocks — smaller and consistent everywhere.
+    Compact,
+}
+
 /// A character on a show, ready to render frames.
 pub struct Stage {
     pub character: Character,
     show: &'static [Scene],
     intro: Intro,
+    size: Size,
 }
 
 impl Stage {
@@ -48,6 +59,7 @@ impl Stage {
             character,
             show: FULL_SHOW,
             intro: Intro::WalkIn,
+            size: Size::Big,
         }
     }
 
@@ -57,6 +69,7 @@ impl Stage {
             character,
             show: BUSY_SHOW,
             intro: Intro::None,
+            size: Size::Big,
         }
     }
 
@@ -70,11 +83,17 @@ impl Stage {
             character,
             show,
             intro: Intro::None,
+            size: Size::Big,
         })
     }
 
     pub fn with_intro(mut self, intro: Intro) -> Self {
         self.intro = intro;
+        self
+    }
+
+    pub fn with_size(mut self, size: Size) -> Self {
+        self.size = size;
         self
     }
 
@@ -150,9 +169,14 @@ impl Stage {
     }
 
     /// Render the frame at tick `t` as terminal text; `color` toggles ANSI
-    /// color codes.
+    /// color codes. Compact size uses seam-free half-blocks (colour only).
     pub fn frame(&self, t: i32, color: bool) -> String {
-        crate::play::render(&self.compose(t), &self.character, color)
+        let grid = self.compose(t);
+        if color && self.size == Size::Compact {
+            crate::halfblock::render(&grid, &self.character)
+        } else {
+            crate::play::render(&grid, &self.character, color)
+        }
     }
 }
 

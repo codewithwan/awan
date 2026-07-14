@@ -6,20 +6,22 @@
 //! this only tracks *which* deterministic show to render at each tick.
 
 use crate::character::Character;
-use crate::stage::Stage;
+use crate::stage::{Size, Stage};
 
 /// A character that reacts to a stream of events over time.
 pub struct Companion {
     proto: Character,
+    size: Size,
     ambient: Stage,
     reaction: Option<(Stage, i32)>, // (one-shot reaction, tick it started)
 }
 
 impl Companion {
-    pub fn new(character: Character) -> Self {
+    pub fn new(character: Character, size: Size) -> Self {
         Self {
             proto: character.clone(),
-            ambient: Stage::show(character),
+            size,
+            ambient: Stage::show(character).with_size(size),
             reaction: None,
         }
     }
@@ -27,13 +29,14 @@ impl Companion {
     /// Feed an event at tick `t`. Command lifecycle switches the ambient loop;
     /// any event the character maps a reaction to overlays that reaction once.
     pub fn feed(&mut self, event: &str, t: i32) {
+        let sized = |s: Stage| s.with_size(self.size);
         match event {
-            "cmd.start" => self.ambient = Stage::busy(self.proto.clone()),
-            "cmd.ok" | "cmd.done" | "idle" => self.ambient = Stage::show(self.proto.clone()),
+            "cmd.start" => self.ambient = sized(Stage::busy(self.proto.clone())),
+            "cmd.ok" | "cmd.done" | "idle" => self.ambient = sized(Stage::show(self.proto.clone())),
             _ => {}
         }
         if let Some(react) = Stage::react(self.proto.clone(), event) {
-            self.reaction = Some((react, t));
+            self.reaction = Some((react.with_size(self.size), t));
         }
     }
 
@@ -74,7 +77,7 @@ mod tests {
 
     #[test]
     fn a_reaction_overlays_then_the_ambient_resumes() {
-        let mut c = Companion::new(Character::default());
+        let mut c = Companion::new(Character::default(), crate::stage::Size::Big);
         c.feed("task.done", 100); // celebrate for ~20 ticks from t=100
         assert_eq!(c.caption(102), Some("yay!"), "the reaction plays");
 
@@ -94,7 +97,7 @@ mod tests {
 
     #[test]
     fn cmd_start_switches_to_the_busy_loop() {
-        let mut c = Companion::new(Character::default());
+        let mut c = Companion::new(Character::default(), crate::stage::Size::Big);
         c.feed("cmd.start", 50);
         let busy = Stage::busy(Character::default());
         assert_eq!(

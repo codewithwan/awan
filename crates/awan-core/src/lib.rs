@@ -31,6 +31,7 @@
 mod character;
 mod companion;
 mod grid;
+mod halfblock;
 mod karaoke;
 mod palette;
 mod play;
@@ -44,7 +45,7 @@ pub use character::Character;
 pub use companion::Companion;
 pub use karaoke::Karaoke;
 pub use pose::Pose;
-pub use stage::{Intro, Stage};
+pub use stage::{Intro, Size, Stage};
 
 #[cfg(test)]
 mod tests;
