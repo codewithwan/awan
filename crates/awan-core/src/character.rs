@@ -1,10 +1,9 @@
-//! The runtime character: spec data resolved into render-ready art.
-//!
-//! Face variants are *derived* from the spec's base rows, so contributing a
-//! character stays zero-Rust: closed eyes replace `@` with `-`, happy with
-//! `^`, glances shift the eye row one pixel, the startled mouth opens two
-//! `@` cells in the middle of the mouth row, and the charred face swaps `@`
-//! for `%` (wide white eyes).
+//! The runtime character: spec data resolved into render-ready art. Face
+//! variants are *derived* from the base rows (blink `@`→`-`, happy `@`→`^`,
+//! glances shift a pixel, the startled mouth opens, charred `@`→`%`), so
+//! contributing a character stays zero-Rust.
+
+use std::collections::BTreeMap;
 
 use crate::palette::hex_to_sgr;
 use crate::pose::{EyeMode, LegsMode, Pose};
@@ -35,6 +34,10 @@ pub struct Character {
     eye_row: usize,
     mouth_row: usize,
     legs_row: usize,
+    /// Ticks between idle blinks, from `personality.blink_rate` (1.0 → 26).
+    blink_period: i32,
+    /// Event name → scene name (e.g. `"cmd.failed" → "charred"`).
+    reactions: BTreeMap<String, String>,
 }
 
 /// The built-in reference character (identical to `characters/awan.toml`).
@@ -94,6 +97,9 @@ impl Character {
             .map(|(i, c)| if i == mid - 1 || i == mid { '@' } else { c })
             .collect();
 
+        let bp = 26.0 / spec.personality.blink_rate;
+        let blink_period = bp.round().clamp(4.0, 60.0) as i32;
+
         Ok(Self {
             name: spec.character.name.clone(),
             colors,
@@ -107,7 +113,14 @@ impl Character {
             eye_row: spec.sprite.eye_row,
             mouth_row: spec.sprite.mouth_row,
             legs_row: spec.sprite.legs_row,
+            blink_period,
+            reactions: spec.reactions.clone(),
         })
+    }
+
+    /// The scene name this character reacts to `event` with, if any.
+    pub fn reaction(&self, event: &str) -> Option<&str> {
+        self.reactions.get(event).map(String::as_str)
     }
 
     /// Assemble the mascot rows for a pose at tick `t` — borrowed, zero-alloc.
@@ -134,8 +147,8 @@ impl Character {
         }
 
         let mut eyes = p.eyes;
-        if eyes == EyeMode::Auto && t % 26 < 2 {
-            eyes = EyeMode::Closed; // idle blink
+        if eyes == EyeMode::Auto && t % self.blink_period < 2 {
+            eyes = EyeMode::Closed; // idle blink, paced by personality.blink_rate
         }
         let variants = if p.charred {
             &self.eyes_charred

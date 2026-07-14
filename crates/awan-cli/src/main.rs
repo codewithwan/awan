@@ -114,6 +114,16 @@ fn sing(karaoke: &Karaoke) {
     });
 }
 
+/// Play a one-shot reaction once, then exit.
+fn react(stage: &Stage) {
+    let stop = stop_flag();
+    let color = stdout().is_terminal();
+    let mut out = stdout().lock();
+    stage.play(&mut out, color, 1, FRAME_DELAY, None, &|| {
+        stop.load(Ordering::SeqCst)
+    });
+}
+
 fn main() {
     let args = parse_args();
     match args.cmd.as_str() {
@@ -146,6 +156,15 @@ fn main() {
                 lines,
             ));
         }
+        "react" => {
+            let event = args.rest.first().map(String::as_str).unwrap_or("idle");
+            let ch = load_character(args.character.as_deref());
+            let name = ch.name.clone();
+            match Stage::react(ch, event) {
+                Some(stage) => react(&stage),
+                None => eprintln!("awan: {name} has no reaction to \"{event}\""),
+            }
+        }
         "--version" | "-V" => println!("awan {}", env!("CARGO_PKG_VERSION")),
         _ => {
             println!(
@@ -157,6 +176,9 @@ fn main() {
             println!("  demo  [--hatch] [-c <spec.toml>]   play the show (Ctrl+C to stop)");
             println!("  busy  [label]   [-c <spec.toml>]   the working loop, with a caption");
             println!("  sing  [\"line\" \"line\" …]            karaoke: one quoted line per lyric");
+            println!(
+                "  react <event>   [-c <spec.toml>]   play the character's reaction to an event"
+            );
             println!();
             println!("Characters are plain TOML — see the characters/ directory.");
             println!("Planned: watch | idle | statusline | event");

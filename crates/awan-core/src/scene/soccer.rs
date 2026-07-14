@@ -87,7 +87,7 @@ pub(super) fn soccer(k: i32, _t: i32, grid: &mut Grid) -> Pose {
             };
             const ORBIT: [(i32, i32); 4] = [(2, 3), (7, 2), (5, 4), (3, 3)];
             let (ox, oy) = ORBIT[((k - 42) % 4) as usize];
-            grid.set(HOME + ox, oy, "✦ ", Role::Spark);
+            grid.set(HOME + ox, oy, "* ", Role::Spark);
         }
         _ => (p.dx, p.mouth_open) = (2, k < 58), // boots it away, then watches it go
     }
