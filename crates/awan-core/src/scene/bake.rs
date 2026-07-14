@@ -5,14 +5,15 @@
 //! overworked oven overheats and blows itself up — a harmless pop, no soot —
 //! leaving him to stroll on. The heart of the "busy" show.
 
+use super::blink_out;
 use crate::grid::{Grid, blit};
 use crate::palette::Role;
 use crate::pose::{EyeMode, LegsMode, Pose};
 use crate::sprites::{BANG_SPRITE, BOWL, CAKE, HEART, OVEN};
 
-pub(crate) const BAKE_TICKS: i32 = 116;
+pub(crate) const BAKE_TICKS: i32 = 118;
 const OVEN_X: i32 = 26;
-const EXPLODE: i32 = 106;
+const EXPLODE: i32 = 110;
 
 /// Where the oven is while being pushed in from the left.
 fn oven_x(k: i32) -> i32 {
@@ -34,7 +35,7 @@ pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
     if (18..EXPLODE).contains(&k) {
         blit(grid, OVEN, ox, 8, Role::Rocket);
     }
-    if (103..EXPLODE).contains(&k) {
+    if (107..EXPLODE).contains(&k) {
         grid.set(27, 9, "██", Role::Flame); // overheating — glows an anxious hot
         grid.set(30, 9, "██", Role::Flame);
     }
@@ -78,8 +79,8 @@ pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
             grid.set(28, 5, "▒▒", Role::Spark);
             p.mouth_open = true;
         }
-        78..96 => feast(k, grid, &mut p),
-        96..EXPLODE => satisfied(k, grid, &mut p),
+        78..98 => feast(k, grid, &mut p),
+        98..EXPLODE => satisfied(k, grid, &mut p),
         _ => explode(k, grid, &mut p),
     }
     p
@@ -110,7 +111,7 @@ fn wait_for_bake(k: i32, grid: &mut Grid, p: &mut Pose) {
     }
 }
 
-/// The cake pops out on top, hops down, and gets eaten bite by bite.
+/// The cake pops out, glides down, and is eaten bite by bite.
 fn feast(k: i32, grid: &mut Grid, p: &mut Pose) {
     match k {
         78..82 => {
@@ -118,51 +119,51 @@ fn feast(k: i32, grid: &mut Grid, p: &mut Pose) {
             let (sx, sy) = if k % 4 < 2 { (28, 3) } else { (29, 4) };
             grid.set(sx, sy, "░░", Role::Dust); // steam
         }
-        82..86 => {
-            const HOP: [(i32, i32); 4] = [(27, 5), (25, 6), (23, 8), (21, 9)];
-            let (x, y) = HOP[(k - 82) as usize];
-            blit(grid, CAKE, x, y, Role::Crate);
+        82..90 => {
+            let d = k - 82; // glides down one pixel at a time
+            blit(grid, CAKE, (27 - d).max(21), 5 + (d + 1) / 2, Role::Crate);
         }
         _ => {
             // munch — the cake shrinks 3 → 2 → 1 rows as he eats
-            let n = (k < 90) as usize + (k < 93) as usize + 1;
+            let n = (k < 94) as usize + (k < 96) as usize + 1;
             blit(grid, &CAKE[3 - n..], 21, 9 + (3 - n) as i32, Role::Crate);
             p.dx = 1;
             p.mouth_open = (k / 2) % 2 == 0;
-            if k >= 90 {
+            if k >= 94 {
                 grid.set(22, 11, "░░", Role::Crate); // crumbs under the cake
             }
-            if k >= 93 {
+            if k >= 96 {
                 grid.set(24, 11, "░░", Role::Crate);
             }
         }
     }
 }
 
-/// Stuffed and delighted: plops down, a heart floats up — until the oven
-/// starts to overheat and he notices.
+/// Licks the crumbs clean, plops down with a heart, then eyes the hot oven.
 fn satisfied(k: i32, grid: &mut Grid, p: &mut Pose) {
-    grid.set(22, 11, "░░", Role::Crate);
-    grid.set(24, 11, "░░", Role::Crate);
-    if k < 98 {
+    blink_out(grid, &["-"], (22, 11), Role::Crate, k, 98, 6);
+    blink_out(grid, &["-"], (24, 11), Role::Crate, k, 100, 6);
+    if k < 104 {
+        p.dx = 1; // leans in to lick them up
+        p.mouth_open = (k / 2) % 2 == 0;
+        return;
+    }
+    if k < 106 {
         grid.set(10, 11, "░░", Role::Dust); // contented plop
         grid.set(21, 11, "░░", Role::Dust);
     }
     (p.legs, p.eyes) = (LegsMode::Sit, EyeMode::Happy);
-    if (98..104).contains(&k) {
-        blit(grid, HEART, 22, 6 - (k - 98) / 2, Role::Bang);
+    if (104..107).contains(&k) {
+        blit(grid, HEART, 22, 7 - (k - 104), Role::Bang);
     }
-    if k >= 103 {
-        p.eyes = EyeMode::Right; // uh — the oven?
-        p.mouth_open = k >= 104;
+    if k >= 107 {
+        p.eyes = EyeMode::Right; // the oven?!
+        p.mouth_open = k >= 108;
     }
 }
 
-/// The oven overheats and blows itself up — a harmless pop. He flinches back,
-/// but never gets charred; the smoke clears and he strolls on.
+/// The oven blows itself up — a harmless pop; he flinches but never chars.
 fn explode(k: i32, grid: &mut Grid, p: &mut Pose) {
-    grid.set(22, 11, "░░", Role::Crate); // crumbs linger
-    grid.set(24, 11, "░░", Role::Crate);
     match k - EXPLODE {
         0..3 => {
             oven_blast(grid, k - EXPLODE);
@@ -181,8 +182,7 @@ fn explode(k: i32, grid: &mut Grid, p: &mut Pose) {
     }
 }
 
-// A three-frame fireball where the oven stood (x≈26–31, y≈8–11); '#'→██,
-// '+'→▓▓, '-'→░░, with a couple of accent cells for colour.
+// A three-frame fireball where the oven stood; accent cells add colour.
 fn oven_blast(grid: &mut Grid, f: i32) {
     match f {
         0 => {

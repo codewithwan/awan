@@ -137,15 +137,15 @@ fn bake_tells_a_full_story() {
 
     let fetching = bake::bake(12, 0, &mut Grid::new());
     assert!(fetching.dx < -8, "he should scamper off to fetch the oven");
-    let munching = bake::bake(88, 0, &mut Grid::new());
-    assert!(munching.mouth_open, "he should be mid-bite at k=88");
-    let full = bake::bake(100, 0, &mut Grid::new());
+    let munching = bake::bake(92, 0, &mut Grid::new());
+    assert!(munching.mouth_open, "he should be mid-bite at k=92");
+    let full = bake::bake(106, 0, &mut Grid::new());
     assert_eq!(
         full.legs,
         crate::pose::LegsMode::Sit,
         "he should plop down, stuffed, after the cake"
     );
-    let boom = bake::bake(107, 0, &mut Grid::new());
+    let boom = bake::bake(112, 0, &mut Grid::new());
     assert!(
         !boom.charred && boom.mouth_open,
         "the oven blows up but he never gets charred"
