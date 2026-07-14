@@ -29,6 +29,7 @@
 //! | `stage`/`play` | frame composer, terminal renderer, play loop |
 
 mod character;
+mod color;
 mod companion;
 mod grid;
 mod halfblock;
@@ -37,6 +38,7 @@ mod palette;
 mod play;
 pub mod pose;
 mod scene;
+mod seamless;
 pub mod spec;
 mod sprites;
 mod stage;

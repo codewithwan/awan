@@ -28,11 +28,11 @@ pub fn parse_args() -> Args {
         match arg.as_str() {
             "-c" | "--character" => parsed.character = args.next().map(PathBuf::from),
             "--pipe" => parsed.pipe = args.next().map(PathBuf::from),
-            "--size" => {
-                if args.next().as_deref() == Some("compact") {
-                    parsed.size = Size::Compact;
-                }
-            }
+            "--size" => match args.next().as_deref() {
+                Some("compact") => parsed.size = Size::Compact,
+                Some("seamless") => parsed.size = Size::Seamless,
+                _ => {}
+            },
             "--hatch" => parsed.hatch = true,
             _ => parsed.rest.push(arg),
         }

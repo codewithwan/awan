@@ -179,7 +179,9 @@ fn main() {
             println!("  watch           [-c <spec.toml>]   companion that reacts to stdin events");
             println!();
             println!();
-            println!("Add --size compact for a smaller, seam-free look (great on macOS Terminal).");
+            println!(
+                "Seam-free looks: --size seamless (normal size) or --size compact (half height)."
+            );
             println!("Characters are plain TOML — see the characters/ directory.");
             println!("Feed watch: (echo cmd.start; sleep 2; echo cmd.failed) | awan watch");
         }

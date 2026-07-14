@@ -42,6 +42,8 @@ pub enum Size {
     Big,
     /// Half-height, seam-free half-blocks — smaller and consistent everywhere.
     Compact,
+    /// Full-height but seam-free — normal proportions, no gaps between rows.
+    Seamless,
 }
 
 /// A character on a show, ready to render frames.
@@ -168,14 +170,14 @@ impl Stage {
         blit(grid, &rows, mx, CANVAS_H - 6 + p.dy, body);
     }
 
-    /// Render the frame at tick `t` as terminal text; `color` toggles ANSI
-    /// color codes. Compact size uses seam-free half-blocks (colour only).
+    /// Render the frame at tick `t`; `color` toggles ANSI codes. Compact and
+    /// seamless are colour-only; mono keeps the full block render (Go parity).
     pub fn frame(&self, t: i32, color: bool) -> String {
         let grid = self.compose(t);
-        if color && self.size == Size::Compact {
-            crate::halfblock::render(&grid, &self.character)
-        } else {
-            crate::play::render(&grid, &self.character, color)
+        match self.size {
+            Size::Compact if color => crate::halfblock::render(&grid, &self.character),
+            Size::Seamless if color => crate::seamless::render(&grid, &self.character),
+            _ => crate::play::render(&grid, &self.character, color),
         }
     }
 }
