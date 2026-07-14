@@ -9,7 +9,7 @@
 Output assets/demo.gif
 
 Set FontSize 22
-Set Width 900
+Set Width 1050
 Set Height 540
 Set Padding 26
 Set Framerate 25
@@ -22,6 +22,6 @@ Sleep 4s
 Show
 
 Type "./target/release/awan demo" Enter
-Sleep 15s
+Sleep 60s
 Ctrl+C
 Sleep 400ms
