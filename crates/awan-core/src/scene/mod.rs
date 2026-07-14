@@ -24,38 +24,55 @@ pub(crate) struct Scene {
     pub dur: i32,
     pub walking: bool,
     pub run: SceneFn,
+    /// A cute one-liner shown under the canvas, like he's narrating himself.
+    pub cap: &'static str,
 }
 
-const fn scene(dur: i32, walking: bool, run: SceneFn) -> Scene {
-    Scene { dur, walking, run }
+const fn scene(dur: i32, walking: bool, run: SceneFn, cap: &'static str) -> Scene {
+    Scene {
+        dur,
+        walking,
+        run,
+        cap,
+    }
 }
 
 /// The full looping show.
 pub(crate) static FULL_SHOW: &[Scene] = &[
-    scene(36, true, street::crate_bonk), // crate rolls in → BONK → tumbles away
-    scene(40, false, street::sit),       // plops down, dozes off zZ, wakes blinking
-    scene(12, true, stroll),             // strolls on
-    scene(wander::CONFUSED_TICKS, false, wander::confused), // "?" — paces back and forth
-    scene(12, true, stroll),
-    scene(46, false, wander::butterfly), // a butterfly teases him into a chase
-    scene(12, true, stroll),
-    scene(42, false, gem::fall), // a gem drops; freeze… blink-blink… sparkle
-    scene(12, true, stroll),
-    scene(bake::BAKE_TICKS, false, bake::bake), // fetches his oven, bakes a cake, eats it all
-    scene(12, true, stroll),
-    scene(40, false, rocket::build), // hammers a little rocket together
-    scene(50, false, rocket::launch), // liftoff → BOOM → charred, blinking
-    scene(12, true, stroll),
-    scene(dance::DANCE_TICKS, false, dance::dance), // bounces to a silent beat
-    scene(12, true, stroll),
-    scene(soccer::SOCCER_TICKS, false, soccer::soccer), // juggles a ball, bonks his head
-    scene(12, true, stroll),
+    scene(36, true, street::crate_bonk, "ooh, a box!"),
+    scene(40, false, street::sit, "nap time~"),
+    scene(12, true, stroll, "da-da-da~"),
+    scene(
+        wander::CONFUSED_TICKS,
+        false,
+        wander::confused,
+        "hmm, where to?",
+    ),
+    scene(12, true, stroll, "da-da-da~"),
+    scene(46, false, wander::butterfly, "a butterfly!!"),
+    scene(12, true, stroll, "da-da-da~"),
+    scene(42, false, gem::fall, "so shiny!!"),
+    scene(12, true, stroll, "da-da-da~"),
+    scene(bake::BAKE_TICKS, false, bake::bake, "cake time~"),
+    scene(12, true, stroll, "da-da-da~"),
+    scene(40, false, rocket::build, "building a rocket!"),
+    scene(50, false, rocket::launch, "3.. 2.. 1..!"),
+    scene(12, true, stroll, "da-da-da~"),
+    scene(dance::DANCE_TICKS, false, dance::dance, "la la la~"),
+    scene(12, true, stroll, "da-da-da~"),
+    scene(
+        soccer::SOCCER_TICKS,
+        false,
+        soccer::soccer,
+        "juggle juggle~",
+    ),
+    scene(12, true, stroll, "da-da-da~"),
 ];
 
 /// The "working…" loop: just the making-things skits, for busy indicators.
 pub(crate) static BUSY_SHOW: &[Scene] = &[
-    scene(bake::BAKE_TICKS, false, bake::bake),
-    scene(40, false, rocket::build),
+    scene(bake::BAKE_TICKS, false, bake::bake, "cake time~"),
+    scene(40, false, rocket::build, "building a rocket!"),
 ];
 
 pub(crate) fn show_ticks(show: &[Scene]) -> i32 {

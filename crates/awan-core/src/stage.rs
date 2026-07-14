@@ -73,6 +73,20 @@ impl Stage {
         self.intro.ticks()
     }
 
+    /// The cute one-liner shown under the canvas at tick `t`.
+    pub(crate) fn caption(&self, t: i32) -> Option<&'static str> {
+        let intro = self.intro.ticks();
+        if t < intro {
+            return match self.intro {
+                Intro::Hatch => Some("hatching!"),
+                Intro::WalkIn => Some("here i come~"),
+                Intro::None => None,
+            };
+        }
+        let tt = (t - intro) % show_ticks(self.show);
+        Some(self.show[locate(self.show, tt).0].cap)
+    }
+
     /// Compose the frame grid at tick `t`. Pure function of `t`, so frames
     /// are deterministic and snapshot-testable.
     pub(crate) fn compose(&self, t: i32) -> Grid {

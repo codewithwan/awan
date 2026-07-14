@@ -88,12 +88,20 @@ impl Stage {
             for line in self.frame(t, color).split('\n') {
                 let _ = writeln!(w, "{line}\x1b[K");
             }
-            if let Some(label) = caption {
-                let dots = ".".repeat(((t / 6) % 4) as usize);
+            // A busy label wins; otherwise the scene narrates itself.
+            let line = caption
+                .map(|l| (l, true))
+                .or_else(|| self.caption(t).map(|c| (c, false)));
+            if let Some((text, busy)) = line {
                 if color {
                     let _ = write!(w, "\x1b[{}m", Role::Dust.sgr(&self.character));
                 }
-                let _ = write!(w, "  {} {label}{dots}", self.character.name);
+                let _ = write!(w, "  {}", self.character.name);
+                if busy {
+                    let _ = write!(w, " {text}{}", ".".repeat(((t / 6) % 4) as usize));
+                } else {
+                    let _ = write!(w, ": {text}");
+                }
                 if color {
                     let _ = write!(w, "\x1b[0m");
                 }

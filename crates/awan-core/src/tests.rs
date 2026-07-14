@@ -183,13 +183,16 @@ fn characters_recolor_but_share_choreography() {
 #[test]
 fn soccer_ball_rolls_in_juggles_then_is_booted_away() {
     use crate::scene::soccer::ball_at;
-    assert!(ball_at(2).2, "the ball should roll in early");
-    assert!(
-        ball_at(10).1 < 10,
-        "the ball should bounce up while juggling"
-    );
-    assert!(
-        !ball_at(64).2,
-        "the ball should be booted off-screen by the end"
-    );
+    assert!(ball_at(2).2, "ball rolls in early");
+    assert!(ball_at(10).1 < 10, "ball bounces up while juggling");
+    assert!(!ball_at(64).2, "ball booted off-screen by the end");
+}
+
+#[test]
+fn scenes_narrate_themselves_with_captions() {
+    let mut buf = Vec::new();
+    stage().play(&mut buf, false, 1, Duration::ZERO, None, &|| false);
+    let out = String::from_utf8(buf).unwrap();
+    // Each scene shows its own cute line, read like the character talking.
+    assert!(out.contains("Awan: juggle juggle~") && out.contains("Awan: cake time~"));
 }
