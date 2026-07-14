@@ -6,6 +6,7 @@
 //! frame-by-frame — keep every constant identical when touching choreography.
 
 pub(crate) mod bake;
+pub(crate) mod dance;
 pub(crate) mod gem;
 pub(crate) mod hatch;
 pub(crate) mod rocket;
@@ -43,6 +44,8 @@ pub(crate) static FULL_SHOW: &[Scene] = &[
     scene(12, true, stroll),
     scene(40, false, rocket::build), // hammers a little rocket together
     scene(50, false, rocket::launch), // liftoff → BOOM → charred, blinking
+    scene(12, true, stroll),
+    scene(dance::DANCE_TICKS, false, dance::dance), // bounces to a silent beat
     scene(12, true, stroll),
 ];
 
