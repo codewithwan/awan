@@ -1,9 +1,7 @@
-//! The baking story: an idea strikes mid-stroll, so the buddy scampers off
-//! and pushes his little oven in from the left — bowl riding on top — stirs
-//! the batter, pours it in, waits through the glow (and can't help sitting
-//! down)… DING! The cake hops down and gets eaten bite by bite. Then the
-//! overworked oven overheats and blows itself up — a harmless pop, no soot —
-//! leaving him to stroll on. The heart of the "busy" show.
+//! The baking story: an idea strikes mid-stroll, so the buddy pushes his oven
+//! in from the left (bowl riding on top), stirs, bakes, and eats the cake bite
+//! by bite. Then the overworked oven overheats and pops itself out of the
+//! scene — a harmless bang, no soot. The heart of the "busy" show.
 
 use super::blink_out;
 use crate::grid::{Grid, blit};
@@ -15,9 +13,9 @@ pub(crate) const BAKE_TICKS: i32 = 118;
 const OVEN_X: i32 = 26;
 const EXPLODE: i32 = 110;
 
-/// Where the oven is while being pushed in from the left.
+/// Where the oven is as it slides in from the left (early, so no empty screen).
 fn oven_x(k: i32) -> i32 {
-    (-8 + 2 * (k - 18)).min(OVEN_X)
+    (-8 + 2 * (k - 14)).min(OVEN_X)
 }
 
 pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
@@ -32,7 +30,7 @@ pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
     if (58..62).contains(&k) {
         blit(grid, BOWL, 21 + 2 * (k - 58), 10, Role::Crate);
     }
-    if (18..EXPLODE).contains(&k) {
+    if (14..EXPLODE).contains(&k) {
         blit(grid, OVEN, ox, 8, Role::Rocket);
     }
     if (107..EXPLODE).contains(&k) {
@@ -40,7 +38,7 @@ pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
         grid.set(30, 9, "██", Role::Flame);
     }
     match k {
-        18..40 => blit(grid, BOWL, ox, 6, Role::Crate), // supplies ride on top
+        14..40 => blit(grid, BOWL, ox, 6, Role::Crate), // supplies ride on top
         40..44 => {
             const HOP: [(i32, i32); 4] = [(25, 7), (23, 8), (21, 10), (21, 10)];
             let (x, y) = HOP[(k - 40) as usize];
@@ -56,8 +54,8 @@ pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
             blit(grid, BANG_SPRITE, 14, 1, Role::Spark); // an idea strikes!
             p.mouth_open = k >= 4;
         }
-        6..18 => (p.dx, p.legs, p.eyes) = (-2 * (k - 6), LegsMode::Walk, EyeMode::Left),
-        18..35 => {
+        6..14 => (p.dx, p.legs, p.eyes) = (-2 * (k - 6), LegsMode::Walk, EyeMode::Left),
+        14..35 => {
             (p.dx, p.legs) = (ox - 21, LegsMode::Walk); // pushes it in, bowl and all
             if k % 2 == 0 {
                 grid.set(ox - 12, 11, "░░", Role::Dust);
@@ -70,6 +68,7 @@ pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
                 grid.set(31, 11, "░░", Role::Dust);
             }
         }
+        40..44 => {} // stands watching the bowl hop down to the mixing spot
         44..58 => stir(k, grid, &mut p),
         58..62 => p.dx = 1, // pours the batter in
         62..76 => wait_for_bake(k, grid, &mut p),
@@ -81,8 +80,11 @@ pub(crate) fn bake(k: i32, _t: i32, grid: &mut Grid) -> Pose {
         }
         78..98 => feast(k, grid, &mut p),
         98..EXPLODE => satisfied(k, grid, &mut p),
-        _ => explode(k, grid, &mut p),
+        // explode only past EXPLODE; unhandled beats stay put (never fly off).
+        _ if k >= EXPLODE => explode(k, grid, &mut p),
+        _ => {}
     }
+    p.dx = p.dx.max(-11); // the fetch never carries him fully off-screen
     p
 }
 
@@ -124,8 +126,7 @@ fn feast(k: i32, grid: &mut Grid, p: &mut Pose) {
             blit(grid, CAKE, (27 - d).max(21), 5 + (d + 1) / 2, Role::Crate);
         }
         _ => {
-            // munch — the cake shrinks 3 → 2 → 1 rows as he eats
-            let n = (k < 94) as usize + (k < 96) as usize + 1;
+            let n = (k < 94) as usize + (k < 96) as usize + 1; // shrinks 3→2→1
             blit(grid, &CAKE[3 - n..], 21, 9 + (3 - n) as i32, Role::Crate);
             p.dx = 1;
             p.mouth_open = (k / 2) % 2 == 0;
@@ -182,7 +183,6 @@ fn explode(k: i32, grid: &mut Grid, p: &mut Pose) {
     }
 }
 
-// A three-frame fireball where the oven stood; accent cells add colour.
 fn oven_blast(grid: &mut Grid, f: i32) {
     match f {
         0 => {
