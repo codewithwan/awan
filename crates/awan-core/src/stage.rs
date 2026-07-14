@@ -60,6 +60,19 @@ impl Stage {
         }
     }
 
+    /// A one-shot reaction to `event`, or `None` if the character maps no
+    /// (known) reaction scene to it. Play the result with `cycles = 1`.
+    pub fn react(character: Character, event: &str) -> Option<Self> {
+        let show = character
+            .reaction(event)
+            .and_then(crate::scene::react::show_by_name)?;
+        Some(Self {
+            character,
+            show,
+            intro: Intro::None,
+        })
+    }
+
     pub fn with_intro(mut self, intro: Intro) -> Self {
         self.intro = intro;
         self

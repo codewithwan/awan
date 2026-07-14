@@ -9,6 +9,7 @@ pub(crate) mod bake;
 pub(crate) mod dance;
 pub(crate) mod gem;
 pub(crate) mod hatch;
+pub(crate) mod react;
 pub(crate) mod rocket;
 pub(crate) mod soccer;
 pub(crate) mod street;
