@@ -25,83 +25,72 @@ core personality-layer CLI is untouched.
 
 ## Config (`awan.json`)
 
-```json
+Identity fields, a streak, a song + lyrics, an `output` path, and a `scenes`
+array of `{ act, say }` beats. `say` supports `{name} {role} {location} {stack}
+{streak} {handle}`; the `sing` beat plays `lyrics` instead. See the full,
+copy-ready file in [`profile/sample/awan.json`](../profile/sample/awan.json):
+
+```jsonc
 {
   "handle": "codewithwan",
-  "character": "awan",
-  "size": "seamless",
-  "output": { "width": 1050, "height": 300, "fps": 12, "loop": true },
-  "badge": { "streak": true, "corner": "top-right" },
+  "name": "Muhammad Ridwan",
+  "role": "fullstack engineer",
+  "stack": "Rust, Go & TypeScript",
+  "streak": 1975,
+  "song": "your favourite song",
+  "artist": "the artist",
+  "lyrics": ["a line", "another line"],
+  "output": "assets/awan.gif",
   "scenes": [
-    { "type": "intro" },
-    { "type": "wave" },
-    { "type": "profile", "fields": [
-      { "icon": "briefcase", "text": "Fullstack Engineer" },
-      { "icon": "pin", "text": "Indonesia" },
-      { "icon": "code", "text": "Rust · Go · TS" }
-    ] },
-    { "type": "typing", "text": "console.log('hi 👋')" },
-    { "type": "streak" },
-    { "type": "outro" }
+    { "act": "wave",     "say": "hi there! i'm {name}" },
+    { "act": "rocket",   "say": "i build with {stack}" },
+    { "act": "campfire", "say": "{streak}-day streak" },
+    { "act": "sing" },
+    { "act": "sleep",    "say": "okay... nap time, zzz" }
   ]
 }
 ```
 
-- `scenes` is an ordered array — that is how the order is customised.
-- `output.width` defaults to **1050** (safe under VHS too).
-- `intro`/`outro` are auto-added when omitted, to keep the loop seamless.
+`scenes` is an ordered array — that is how the order is customised. Omit it for
+a default story.
 
-## Scenes
+## Scenes (acts)
 
-`intro`, `outro`, `wave`, `typing`, `card`, `profile` (icon + text rows),
-`streak` (campfire → number → embers), plus the existing skits (dance, soccer,
-bake…). Karaoke (`sing`) drops the mic — the character just sings/talks.
-
-Profile rows carry a small **pixel icon** (pin, briefcase, code, fire, star,
-link, coffee), never plain text.
+`wave`, `present`, `stroll`, `rocket`, `launch`, `bake`, `campfire`, `sing`,
+`soccer`, `sleep`, `dance`. Each `say` is drawn with a small **pixel icon**
+chosen by the act (pin, briefcase, code, fire, star, heart). Karaoke (`sing`)
+has no mic — he steps to the right and the lyrics play on the left, one line at
+a time. The campfire is built (haul wood → toss a spark → it catches → pops).
+The ground scrolls only during walking beats; only the clouds always drift.
 
 ## Dynamic data & the badge
 
-- A `🔥N` streak badge is pinned top-right on every frame (trivial in the
-  rendered pipeline).
-- The streak number is fetched by the **Action** (GitHub GraphQL contributions)
-  and passed in as `--streak N`, so the binary stays deterministic.
+A `🔥N` streak badge is pinned top-right every frame. The number is `streak` in
+the config; a CI job can fetch the real value (GitHub contributions) and write
+it into `awan.json` before rendering, keeping the binary deterministic.
 
 ## Rendering to GIF
 
-Built-in encoder behind a `gif` cargo feature: in seamless mode the character
-is solid coloured cells → rasterise as rectangles (no font); only captions need
-a small embedded bitmap font. Encodes with the `gif` crate, `loop = 0`. VHS
-remains a fallback.
+The generator lives in the `publish = false` `profile/` crate, so the `image` /
+`font8x8` deps never touch the core packages. In seamless mode the character is
+solid coloured cells → rasterise as rectangles; only the captions need the
+bitmap font. Encodes with the `gif` crate, `loop = 0`.
 
-`awan whoami "<handle>" [--config awan.json] [--gif out.gif]` — terminal preview
-plays one loop and exits (no Ctrl+C); `--gif` writes the file.
+`awan-profile whoami --config awan.json` — previews one loop and exits (no
+Ctrl+C); with an `output` (or `--gif`) it writes the file.
 
 ## CI
 
-`profile/action/` is a composite Action. A user's repo needs two files:
-
-```yaml
-on:
-  push: { branches: [main], paths: ["awan.json"] }
-  schedule: [{ cron: "0 0 * * *" }]   # refresh the streak daily
-jobs:
-  awan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: codewithwan/awan-action@v1
-        with: { config: awan.json, output: assets/awan.gif }
-```
-
-The Action installs the gif-enabled binary, computes the streak, renders, and
-commits the GIF. A template repo ships alongside.
+The reader copies [`profile/sample/`](../profile/sample) into their profile
+repo — an `awan.json`, a starter README, and a workflow that carries **no
+personal data**, just `awan-profile whoami --config awan.json`, then commits the
+GIF back.
 
 ## Build phases
 
-1. **Loop core** — `outro`, progress background, finite auto-exit reel. ✅
-2. **Config** — `awan.json` → scene sequence (in `profile/`).
-3. **GIF encoder** — `gif` feature, rasteriser, bitmap font.
-4. **Scenes** — wave, typing, card, profile+icons, campfire; drop the mic.
-5. **Badge + streak input.**
-6. **Action + template + docs.**
+1. **Loop core** — walk-out, progress background, walking ground, auto-exit. ✅
+2. **Config** — `awan.json` → scene order + narration. ✅
+3. **GIF encoder** — rasteriser, bitmap font, streak badge. ✅
+4. **Scenes** — wave, rocket, bake, campfire, sing (karaoke), soccer, sleep. ✅
+5. **Sample + docs** — `profile/sample/` template + workflow. ✅
+6. **Next** — a packaged `awan-action`, and live streak fetching in CI.

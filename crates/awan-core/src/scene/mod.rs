@@ -13,6 +13,7 @@ pub(crate) mod greet;
 pub(crate) mod hatch;
 pub(crate) mod react;
 pub(crate) mod rocket;
+pub(crate) mod sleep;
 pub(crate) mod soccer;
 pub(crate) mod song;
 pub(crate) mod street;
@@ -86,6 +87,7 @@ pub(crate) fn scene_for(act: crate::reel::Act) -> Scene {
         Bake => scene(bake::BAKE_TICKS, false, bake::bake, ""),
         Sing => scene(song::DUR, false, song::sing, ""),
         Campfire => scene(campfire::DUR, false, campfire::campfire, ""),
+        Sleep => scene(sleep::DUR, false, sleep::sleep, ""),
         Dance => scene(dance::DANCE_TICKS, false, dance::dance, ""),
         Soccer => scene(soccer::SOCCER_TICKS, false, soccer::soccer, ""),
     }

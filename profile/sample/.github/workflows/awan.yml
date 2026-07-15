@@ -1,0 +1,26 @@
+name: awan profile
+
+# Regenerates assets/awan.gif from awan.json. Runs when you edit awan.json.
+on:
+  push:
+    branches: [main]
+    paths: ["awan.json"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  awan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo install --git https://github.com/codewithwan/awan awan-profile
+      - run: awan-profile whoami --config awan.json
+      - run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/awan.gif
+          git commit -m "chore: refresh awan profile" || echo "no changes"
+          git push

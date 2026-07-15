@@ -1,25 +1,36 @@
 # awan profile generator
 
 Turn awan into a **seam-free looping banner for your GitHub profile** — he walks
-in, tells your story, sings, warms up by a campfire, and loops (~60s). A
-separate, opt-in tool: it never ships with the core `awan`.
+in and tells your story, then loops (~60s). A separate, opt-in tool: it never
+ships with the core `awan`.
 
 <p align="center">
   <img src="../assets/profile-sample.gif" alt="awan profile banner sample" width="640">
 </p>
 
-Everything is driven by one file — [`awan.json`](awan.json). You control the
-words *and* the order of scenes; no long command lines.
+Everything is driven by one file, [`awan.json`](sample/awan.json) — you control
+the words **and** the order of the scenes.
 
-## Try it locally
+## Get started
 
-```sh
-cp profile/awan.json awan.json     # then edit it
-cargo run -p awan-profile -- whoami --config awan.json
+The [`sample/`](sample) folder is a ready-to-copy profile setup:
+
+```
+sample/
+├── awan.json                     # ← edit this: your bio, streak, song, scenes
+├── README.md                     # a starter profile README (shows the GIF)
+└── .github/workflows/awan.yml    # regenerates the GIF on every push
 ```
 
-Add nothing else to preview one loop in the terminal (it exits on its own). The
-`output` path in the JSON is where the GIF is written when run in CI.
+Copy it into your profile repo (`<you>/<you>`), edit `awan.json`, and push:
+
+```sh
+cp -r profile/sample/. my-profile/
+cargo run -p awan-profile -- whoami --config my-profile/awan.json   # preview locally
+```
+
+Without `--gif` (or `output`) it previews one loop in the terminal and exits on
+its own — no Ctrl+C.
 
 ## The `awan.json` format
 
@@ -31,8 +42,10 @@ Add nothing else to preview one loop in the terminal (it exits on its own). The
   "location": "Indonesia",
   "stack": "Rust, Go & TypeScript",
   "streak": 1975,                       // 🔥 badge, top-right
+  "song": "your favourite song",        // shown as: my fav song "…" - artist
+  "artist": "the artist",
   "lyrics": ["your", "favourite", "song lines"],
-  "output": "assets/awan.gif",
+  "output": "assets/awan.gif",          // where the GIF is written
   "scenes": [                            // ← reorder / add / remove freely
     { "act": "wave",     "say": "hi there! i'm {name}" },
     { "act": "present",  "say": "{role}" },
@@ -40,54 +53,47 @@ Add nothing else to preview one loop in the terminal (it exits on its own). The
     { "act": "rocket",   "say": "i build with {stack}" },
     { "act": "launch",   "say": "...then watch 'em take off!" },
     { "act": "bake",     "say": "and i love to eat" },
-    { "act": "sing",     "say": "" },
     { "act": "campfire", "say": "{streak}-day streak" },
-    { "act": "dance",    "say": "@{handle}" }
+    { "act": "sing" },
+    { "act": "soccer",   "say": "then a bit of football" },
+    { "act": "sleep",    "say": "okay... nap time, zzz" }
   ]
 }
 ```
 
-- **Acts** you can order: `wave`, `present`, `stroll`, `rocket`, `launch`,
-  `bake`, `sing`, `campfire`, `dance`, `soccer`. Put `stroll` between beats so
-  he walks (the ground only scrolls while he does).
+| Act | What he does |
+|---|---|
+| `wave` | bounces in an excited hello |
+| `present` | stands and introduces himself |
+| `stroll` | walks along (the ground scrolls only here) |
+| `rocket` / `launch` | builds a rocket, then launches it |
+| `bake` | fetches an oven and bakes |
+| `campfire` | drags in wood, throws a spark, the fire catches, then pops |
+| `sing` | steps aside; lyrics play karaoke-style on the left |
+| `soccer` | juggles a ball |
+| `sleep` | yawns, dozes (`zzz`), wakes up |
+| `dance` | a little dance |
+
 - **`say`** is the caption; `{name} {role} {location} {stack} {streak} {handle}`
-  are filled in. The `sing` beat shows your **`lyrics`** karaoke-style instead.
-- Omit `scenes` entirely and a sensible default story is used.
+  are filled in. The `sing` beat needs no `say` — it plays your `lyrics`.
+- Omit `scenes` entirely for a sensible default story.
 
-## Put it on your GitHub profile (auto-updating)
+## Auto-update on GitHub
 
-In your profile repo (`<you>/<you>`), add **one file** `awan.json` (as above),
-then this workflow — **no personal data in the workflow itself**:
+The workflow in [`sample/.github/`](sample/.github) carries **no personal data**
+— it just reads your `awan.json`, so you only ever edit that one file:
 
 ```yaml
-# .github/workflows/awan.yml
-name: awan profile
-on:
-  push: { branches: [main], paths: ["awan.json"] }
-  workflow_dispatch:
-permissions:
-  contents: write
-jobs:
-  awan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - run: cargo install --git https://github.com/codewithwan/awan awan-profile
-      - run: awan-profile whoami --config awan.json
-      - run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "$(python3 -c "import json;print(json.load(open('awan.json'))['output'])")"
-          git commit -m "chore: refresh awan profile" || echo "no changes"
-          git push
+- run: cargo install --git https://github.com/codewithwan/awan awan-profile
+- run: awan-profile whoami --config awan.json
+# …then commit the generated GIF back
 ```
 
-Then reference it in your profile `README.md`: `![awan](assets/awan.gif)`.
+Reference the GIF in your profile `README.md`: `![awan](assets/awan.gif)`.
 
 ## Notes
 
 - **Lyrics are yours** — put a couple of lines of your own favourite song in
-  `lyrics`. The sample uses original placeholder lines.
+  `lyrics`. The sample ships original placeholder lines.
 - The GIF is a few MB raw; shrink it with
   `gifsicle -O3 --lossy=80 --colors 64 assets/awan.gif -o assets/awan.gif`.

@@ -9,7 +9,7 @@ const HOME: i32 = 11; // == MASCOT_HOME
 const FX: i32 = HOME + 11; // the fire, clear of his body
 const GY: i32 = 11; // == GROUND_Y
 
-pub(super) const DUR: i32 = 110;
+pub(super) const DUR: i32 = 90;
 const FETCH: i32 = 22; // wood slides in
 const THROW: i32 = 34; // spark thrown by here
 const BLOW: i32 = DUR - 14; // it pops at the end

@@ -19,11 +19,10 @@
     { "act": "stroll", "say": "based in {location}" },
     { "act": "rocket", "say": "i build things, with {stack}" },
     { "act": "launch", "say": "...then watch 'em take off!" },
-    { "act": "stroll", "say": "always shipping something" },
     { "act": "bake", "say": "and when i'm hungry, i bake" },
-    { "act": "stroll", "say": "gotta refuel, right?" },
-    { "act": "sing", "say": "" },
     { "act": "campfire", "say": "{streak}-day streak, still going" },
-    { "act": "dance", "say": "@{handle}" }
+    { "act": "sing" },
+    { "act": "soccer", "say": "then a bit of football" },
+    { "act": "sleep", "say": "okay... nap time, zzz" }
   ]
 }

@@ -7,7 +7,7 @@ use crate::palette::Role;
 use crate::pose::{EyeMode, LegsMode, Pose};
 
 const HOME: i32 = 11; // == MASCOT_HOME
-pub(super) const DUR: i32 = 180;
+pub(super) const DUR: i32 = 150;
 /// How far right he stands while singing, and how long the walk on/off takes.
 const SHIFT: i32 = 8;
 const WALK: i32 = 16;

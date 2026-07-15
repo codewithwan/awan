@@ -26,6 +26,7 @@ pub enum Act {
     Bake,
     Sing,
     Campfire,
+    Sleep,
     Dance,
     Soccer,
 }
@@ -41,7 +42,7 @@ impl Reel {
     /// A reel over a default story (the profile generator supplies its own).
     pub fn new(character: Character) -> Self {
         use Act::*;
-        Self::story(character, &[Wave, Present, Stroll, Sing, Campfire, Dance])
+        Self::story(character, &[Wave, Present, Sing, Soccer, Sleep, Dance])
     }
 
     pub fn story(character: Character, acts: &[Act]) -> Self {

@@ -109,29 +109,25 @@ From your code it's just `awan.react("task.done")`; you never spawn anything.
 
 ## Profile GIF
 
-Turn awan into a **seam-free looping banner for your GitHub profile** — walks
-in, does his thing, walks out, and loops perfectly. Drop it straight into a
-README:
+Turn awan into a **seam-free looping banner for your GitHub profile** — he walks
+in and tells your story (builds a rocket, bakes, warms up by a campfire, sings
+your favourite song karaoke-style, kicks a ball, naps), then loops. It's all
+driven by one editable `awan.json`, scene order included.
 
 <p align="center">
-  <img src="assets/profile-sample.gif" alt="awan profile banner sample" width="620">
+  <img src="assets/profile-sample.gif" alt="awan profile banner sample" width="700">
 </p>
 
-He walks in, narrates your bio line by line with little pixel icons — greeting,
-name, role, location, stack, links — then walks out and loops. The sample above
-was generated with:
+Copy the ready-made setup and edit one file:
 
 ```sh
-cp profile/awan.json awan.json     # edit it — your bio, streak, lyrics, scene order
-cargo run -p awan-profile -- whoami --config awan.json
+cp -r profile/sample/. my-profile/   # awan.json + a GitHub Action + a profile README
+cargo run -p awan-profile -- whoami --config my-profile/awan.json
 ```
 
-Everything (including the scene *order*) lives in one editable `awan.json`.
-
-**Set it up on your own profile** — including a copy-paste GitHub Action that
-regenerates it automatically — in [`profile/`](profile). Work in progress
-([design](docs/PROFILE.md)); a coding-streak campfire badge is coming next.
-Built as a separate, opt-in crate, so the core `awan` stays untouched.
+Full walkthrough, the `awan.json` format, and how to auto-regenerate it on every
+push: **[`profile/`](profile)**. Built as a separate, opt-in crate, so the core
+`awan` stays untouched.
 
 ## Characters
 

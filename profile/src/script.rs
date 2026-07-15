@@ -111,6 +111,7 @@ fn act_of(name: &str) -> Act {
         "bake" => Act::Bake,
         "sing" => Act::Sing,
         "campfire" => Act::Campfire,
+        "sleep" => Act::Sleep,
         "dance" => Act::Dance,
         "soccer" => Act::Soccer,
         _ => Act::Present,
@@ -123,7 +124,7 @@ fn icon_of(act: &str) -> &'static Icon {
         "stroll" => &icons::PIN,
         "rocket" => &icons::CODE,
         "launch" | "dance" | "soccer" => &icons::STAR,
-        "bake" => &icons::HEART,
+        "bake" | "sleep" => &icons::HEART,
         "campfire" => &icons::FIRE,
         "present" => &icons::BRIEFCASE,
         _ => &icons::DIAMOND,
@@ -137,12 +138,11 @@ fn default_story() -> Vec<SceneSpec> {
         ("stroll", "based in {location}"),
         ("rocket", "i build things, with {stack}"),
         ("launch", "...then watch 'em take off!"),
-        ("stroll", "always shipping something"),
         ("bake", "and when i'm hungry, i bake"),
-        ("stroll", "gotta refuel, right?"),
-        ("sing", ""),
         ("campfire", "{streak}-day streak, still going"),
-        ("dance", "@{handle}"),
+        ("sing", ""),
+        ("soccer", "then a bit of football"),
+        ("sleep", "okay... nap time, zzz"),
     ]
     .iter()
     .map(|(a, s)| SceneSpec {
