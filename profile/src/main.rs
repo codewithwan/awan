@@ -1,10 +1,11 @@
 //! The awan profile generator (separate, opt-in — never shipped with the core
 //! binary). Plays a seamless reel narrating a profile, and can write it to a
-//! looping GIF for a README. Upcoming: JSON config, streak scenes.
+//! looping GIF for a README.
 //!
+//! - `awan-profile whoami --config awan.json` — the recommended way: edit one
+//!   JSON file, no long command lines.
 //! - `awan-profile whoami <handle>` with optional `--name`, `--role`,
-//!   `--location`, `--stack`, `--streak N`, `--lyrics "one|two|three"`.
-//! - add `--gif out.gif` to write a looping GIF instead of previewing.
+//!   `--location`, `--stack`, `--streak N`, `--lyrics "one|two|three"`, `--gif`.
 
 use std::io::{IsTerminal, Write, stdout};
 use std::time::Duration;
@@ -22,38 +23,53 @@ const FRAME_DELAY: Duration = Duration::from_millis(90);
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    match args.first().map(String::as_str) {
-        Some("whoami") => {
-            let handle = args.get(1).cloned().unwrap_or_default();
-            let profile = Profile {
-                name: flag(&args, "--name").unwrap_or_default(),
-                role: flag(&args, "--role").unwrap_or_default(),
-                location: flag(&args, "--location").unwrap_or_default(),
-                stack: flag(&args, "--stack").unwrap_or_default(),
-                streak: flag(&args, "--streak")
-                    .and_then(|s| s.parse().ok())
-                    .unwrap_or(0),
-                lyrics: flag(&args, "--lyrics")
-                    .map(|s| s.split('|').map(str::trim).map(str::to_string).collect())
-                    .unwrap_or_default(),
-                handle,
-            };
-            let reel = Reel::new(Character::default()).with_size(Size::Seamless);
-            match flag(&args, "--gif") {
-                Some(path) => match gif::render_gif(&reel, &profile, &path) {
-                    Ok(()) => eprintln!("wrote {path} ({} frames)", reel.ticks()),
-                    Err(e) => {
-                        eprintln!("awan-profile: {e}");
-                        std::process::exit(1);
-                    }
-                },
-                None => play(&reel, &profile),
-            }
+    if args.first().map(String::as_str) != Some("whoami") {
+        eprintln!("usage: awan-profile whoami --config awan.json");
+        eprintln!("   or: awan-profile whoami <handle> [--name ..] [--gif out.gif]");
+        std::process::exit(2);
+    }
+
+    let (profile, output) = match flag(&args, "--config") {
+        Some(path) => {
+            let p = load(&path);
+            let out = flag(&args, "--gif").or_else(|| non_empty(&p.output));
+            (p, out)
         }
-        _ => {
-            eprintln!("usage: awan-profile whoami <handle> [--name ..] [--gif out.gif]");
-            std::process::exit(2);
-        }
+        None => (from_flags(&args), flag(&args, "--gif")),
+    };
+
+    let reel = Reel::story(Character::default(), &profile.acts()).with_size(Size::Seamless);
+    match output {
+        Some(path) => match gif::render_gif(&reel, &profile, &path) {
+            Ok(()) => eprintln!("wrote {path} ({} frames)", reel.ticks()),
+            Err(e) => fail(&e.to_string()),
+        },
+        None => play(&reel, &profile),
+    }
+}
+
+/// Load and parse an `awan.json` profile, exiting with a message on error.
+fn load(path: &str) -> Profile {
+    let text = std::fs::read_to_string(path).unwrap_or_else(|e| fail(&format!("{path}: {e}")));
+    serde_json::from_str(&text).unwrap_or_else(|e| fail(&format!("{path}: {e}")))
+}
+
+/// Build a profile from command-line flags.
+fn from_flags(args: &[String]) -> Profile {
+    Profile {
+        handle: args.get(1).cloned().unwrap_or_default(),
+        name: flag(args, "--name").unwrap_or_default(),
+        role: flag(args, "--role").unwrap_or_default(),
+        location: flag(args, "--location").unwrap_or_default(),
+        stack: flag(args, "--stack").unwrap_or_default(),
+        streak: flag(args, "--streak")
+            .and_then(|s| s.parse().ok())
+            .unwrap_or(0),
+        lyrics: flag(args, "--lyrics")
+            .map(|s| s.split('|').map(str::trim).map(str::to_string).collect())
+            .unwrap_or_default(),
+        output: String::new(),
+        scenes: Vec::new(),
     }
 }
 
@@ -61,6 +77,15 @@ fn main() {
 fn flag(args: &[String], name: &str) -> Option<String> {
     let i = args.iter().position(|a| a == name)?;
     args.get(i + 1).cloned()
+}
+
+fn non_empty(s: &str) -> Option<String> {
+    (!s.is_empty()).then(|| s.to_string())
+}
+
+fn fail(msg: &str) -> ! {
+    eprintln!("awan-profile: {msg}");
+    std::process::exit(1)
 }
 
 /// Play exactly one loop in the terminal, then exit — no signal handler.

@@ -1,18 +1,25 @@
-//! The narration script: a person's profile turned into a per-scene sequence of
-//! captioned lines (icon + text). Each line is tied to a story beat so it lasts
-//! the whole scene — no rushing — and the singing beat cycles the lyrics.
+//! The narration script. A profile is a list of scene beats (`act` + what he
+//! `say`s), loaded from `awan.json` — so the reader controls the *order* and
+//! the *words*, not just the text. Identity fields fill in `{placeholders}`.
 
-use awan_core::Reel;
+use awan_core::{Act, Reel};
 
 use crate::icons::{self, Icon};
 
-/// The Sing beat's index in the default story (see awan_core's `STORY`).
-const SING_BEAT: usize = 8;
-/// Ticks each lyric line holds during the singing beat.
-const LYRIC_HOLD: i32 = 30;
+/// Ticks each lyric line holds during a singing beat.
+pub const LYRIC_HOLD: i32 = 30;
 
-/// A person's profile. Empty fields fall back to friendly defaults.
-#[derive(Default)]
+/// One story beat: which scene to play and what he narrates over it.
+#[derive(Clone, serde::Deserialize)]
+pub struct SceneSpec {
+    pub act: String,
+    #[serde(default)]
+    pub say: String,
+}
+
+/// A profile, as loaded from `awan.json` (or built from flags).
+#[derive(Default, serde::Deserialize)]
+#[serde(default)]
 pub struct Profile {
     pub handle: String,
     pub name: String,
@@ -21,6 +28,8 @@ pub struct Profile {
     pub stack: String,
     pub streak: u32,
     pub lyrics: Vec<String>,
+    pub output: String,
+    pub scenes: Vec<SceneSpec>,
 }
 
 /// One narration line: an optional icon and its text.
@@ -30,66 +39,109 @@ pub struct Line {
 }
 
 impl Profile {
-    /// The line to show at tick `t` of the reel.
+    /// The effective beats — the reader's, or a friendly default story.
+    pub fn story(&self) -> Vec<SceneSpec> {
+        if self.scenes.is_empty() {
+            default_story()
+        } else {
+            self.scenes.clone()
+        }
+    }
+
+    /// The reel acts for these beats.
+    pub fn acts(&self) -> Vec<Act> {
+        self.story().iter().map(|s| act_of(&s.act)).collect()
+    }
+
+    /// If the beat at tick `t` is a singing beat, its tick-within-scene.
+    pub fn sing_at(&self, reel: &Reel, t: i32) -> Option<i32> {
+        let (i, k) = reel.act_at(t)?;
+        (self.story().get(i).map(|s| s.act.as_str()) == Some("sing")).then_some(k)
+    }
+
+    /// The bottom caption at tick `t` (used off the singing beats).
     pub fn line(&self, reel: &Reel, t: i32) -> Line {
         if reel.is_leaving(t) {
             return line(&icons::HEART, "thanks for stopping by ~");
         }
-        match reel.act_at(t) {
-            None => self.beat(0),
-            Some((SING_BEAT, k)) => self.lyric(k),
-            Some((i, _)) => self.beat(i),
-        }
+        let story = self.story();
+        let i = reel.act_at(t).map_or(0, |(i, _)| i).min(story.len() - 1);
+        line(icon_of(&story[i].act), &self.fill(&story[i].say))
     }
 
-    /// The narration for story beat `i`.
-    fn beat(&self, i: usize) -> Line {
-        let name = pick(&self.name, &self.handle);
-        match i {
-            0 => line(&icons::DIAMOND, &format!("hi there! i'm {name}")),
-            1 => line(&icons::BRIEFCASE, pick(&self.role, "a developer")),
-            2 => line(&icons::PIN, &located(&self.location)),
-            3 => line(
-                &icons::CODE,
-                &format!("i build things, with {}", pick(&self.stack, "code")),
-            ),
-            4 => line(&icons::STAR, "…then watch 'em take off!"),
-            5 => line(&icons::STAR, "always shipping something"),
-            6 => line(&icons::HEART, "and when i'm hungry, i bake"),
-            7 => line(&icons::HEART, "gotta refuel, right?"),
-            9 => line(&icons::FIRE, &self.streak_line()),
-            _ => line(&icons::GLOBE, &format!("@{}", self.handle)),
-        }
-    }
-
-    /// During the singing beat: an intro, then the lyrics, line by line.
-    fn lyric(&self, k: i32) -> Line {
+    /// The lyric line to show at tick `k` of a singing beat.
+    pub fn lyric(&self, k: i32) -> Line {
         let step = (k / LYRIC_HOLD) as usize;
         if step == 0 || self.lyrics.is_empty() {
-            return line(&icons::STAR, "i love music — my fav:");
+            return line(&icons::GLOBE, "i love music — my fav:");
         }
-        line(&icons::GLOBE, &self.lyrics[(step - 1) % self.lyrics.len()])
+        line(&icons::STAR, &self.lyrics[(step - 1) % self.lyrics.len()])
     }
 
-    fn streak_line(&self) -> String {
-        if self.streak > 0 {
-            format!("{}-day streak, still going", self.streak)
+    /// Substitute `{name} {role} {location} {stack} {streak} {handle}`.
+    fn fill(&self, s: &str) -> String {
+        let name = if self.name.is_empty() {
+            &self.handle
         } else {
-            "still shipping, day after day".to_string()
-        }
+            &self.name
+        };
+        s.replace("{name}", name)
+            .replace("{role}", &self.role)
+            .replace("{location}", &self.location)
+            .replace("{stack}", &self.stack)
+            .replace("{streak}", &self.streak.to_string())
+            .replace("{handle}", &self.handle)
     }
 }
 
-fn located(loc: &str) -> String {
-    if loc.is_empty() {
-        "somewhere on earth".to_string()
-    } else {
-        format!("based in {loc}")
+fn act_of(name: &str) -> Act {
+    match name {
+        "wave" => Act::Wave,
+        "stroll" => Act::Stroll,
+        "rocket" => Act::RocketBuild,
+        "launch" => Act::RocketLaunch,
+        "bake" => Act::Bake,
+        "sing" => Act::Sing,
+        "campfire" => Act::Campfire,
+        "dance" => Act::Dance,
+        "soccer" => Act::Soccer,
+        _ => Act::Present,
     }
 }
 
-fn pick<'a>(value: &'a str, fallback: &'a str) -> &'a str {
-    if value.is_empty() { fallback } else { value }
+fn icon_of(act: &str) -> &'static Icon {
+    match act {
+        "wave" => &icons::HEART,
+        "stroll" => &icons::PIN,
+        "rocket" => &icons::CODE,
+        "launch" | "dance" | "soccer" => &icons::STAR,
+        "bake" => &icons::HEART,
+        "campfire" => &icons::FIRE,
+        "present" => &icons::BRIEFCASE,
+        _ => &icons::DIAMOND,
+    }
+}
+
+fn default_story() -> Vec<SceneSpec> {
+    [
+        ("wave", "hi there! i'm {name}"),
+        ("present", "{role}"),
+        ("stroll", "based in {location}"),
+        ("rocket", "i build things, with {stack}"),
+        ("launch", "...then watch 'em take off!"),
+        ("stroll", "always shipping something"),
+        ("bake", "and when i'm hungry, i bake"),
+        ("stroll", "gotta refuel, right?"),
+        ("sing", ""),
+        ("campfire", "{streak}-day streak, still going"),
+        ("dance", "@{handle}"),
+    ]
+    .iter()
+    .map(|(a, s)| SceneSpec {
+        act: a.to_string(),
+        say: s.to_string(),
+    })
+    .collect()
 }
 
 fn line(icon: &'static Icon, text: &str) -> Line {

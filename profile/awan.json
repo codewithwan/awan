@@ -1,0 +1,27 @@
+{
+  "handle": "codewithwan",
+  "name": "Muhammad Ridwan",
+  "role": "fullstack engineer, crafting smooth UX",
+  "location": "Indonesia",
+  "stack": "Rust, Go & TypeScript",
+  "streak": 1975,
+  "lyrics": [
+    "humming a tune only i can hear",
+    "la-la, off we go again",
+    "the melody walks me home"
+  ],
+  "output": "assets/awan.gif",
+  "scenes": [
+    { "act": "wave", "say": "hi there! i'm {name}" },
+    { "act": "present", "say": "{role}" },
+    { "act": "stroll", "say": "based in {location}" },
+    { "act": "rocket", "say": "i build things, with {stack}" },
+    { "act": "launch", "say": "...then watch 'em take off!" },
+    { "act": "stroll", "say": "always shipping something" },
+    { "act": "bake", "say": "and when i'm hungry, i bake" },
+    { "act": "stroll", "say": "gotta refuel, right?" },
+    { "act": "sing", "say": "" },
+    { "act": "campfire", "say": "{streak}-day streak, still going" },
+    { "act": "dance", "say": "@{handle}" }
+  ]
+}

@@ -28,12 +28,13 @@ pub(super) fn wave(k: i32, _t: i32, grid: &mut Grid) -> Pose {
     }
 }
 
-/// A relaxed stroll-in-place while the narration introduces him — legs keep
-/// moving with a gentle bob, so he never freezes mid-story.
+/// A calm idle while the narration introduces him — he stands and breathes
+/// (a slow bob and the odd blink), so the ground stays still under him. The
+/// travelling happens in the `stroll` beats between scenes.
 pub(super) fn present(k: i32, _t: i32, _grid: &mut Grid) -> Pose {
     Pose {
-        legs: LegsMode::Walk,
-        dy: if (k / 4) % 3 == 0 { -1 } else { 0 },
+        legs: LegsMode::Still,
+        dy: if (k / 6) % 4 == 0 { -1 } else { 0 },
         ..Pose::default()
     }
 }

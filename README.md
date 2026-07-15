@@ -122,12 +122,11 @@ name, role, location, stack, links — then walks out and loops. The sample abov
 was generated with:
 
 ```sh
-cargo run -p awan-profile -- whoami codewithwan \
-  --name "Muhammad Ridwan" --role "fullstack engineer" \
-  --location "Indonesia" --stack "Rust, Go & TypeScript" \
-  --streak 1975 --lyrics "your|favourite|song lines" \
-  --gif awan.gif
+cp profile/awan.json awan.json     # edit it — your bio, streak, lyrics, scene order
+cargo run -p awan-profile -- whoami --config awan.json
 ```
+
+Everything (including the scene *order*) lives in one editable `awan.json`.
 
 **Set it up on your own profile** — including a copy-paste GitHub Action that
 regenerates it automatically — in [`profile/`](profile). Work in progress

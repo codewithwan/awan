@@ -11,7 +11,7 @@ use image::codecs::gif::{GifEncoder, Repeat};
 use image::{Delay, Frame, Rgba, RgbaImage};
 
 use crate::icons;
-use crate::script::Profile;
+use crate::script::{LYRIC_HOLD, Line, Profile};
 
 /// Pixels per canvas cell (32 cols × this ≈ 1050 px wide — safe in VHS too).
 const CELL_W: u32 = 33;
@@ -24,6 +24,7 @@ const SCALE: u32 = 3;
 const BG: [u8; 4] = [13, 17, 23, 255];
 const GROUND: [u8; 3] = [80, 84, 96];
 const INK: [u8; 3] = [150, 150, 160];
+const DIM: [u8; 3] = [90, 90, 100];
 const ACCENT: [u8; 3] = [230, 180, 100];
 /// Frame time in milliseconds (~11 fps, matching the terminal cadence).
 const FRAME_MS: u32 = 90;
@@ -58,18 +59,42 @@ fn rasterize(reel: &Reel, profile: &Profile, t: i32) -> RgbaImage {
     fill(&mut img, 0, ground, w, 2, GROUND);
     streak_badge(&mut img, profile.streak, w);
 
-    let line = profile.line(reel, t);
+    match profile.sing_at(reel, t) {
+        Some(k) => karaoke(&mut img, profile, k, ground),
+        None => caption(&mut img, &profile.line(reel, t), w, ground),
+    }
+    img
+}
+
+/// A centred narration line (icon + text) below the ground.
+fn caption(img: &mut RgbaImage, line: &Line, w: u32, ground: u32) {
     let gap = SCALE * 3;
     let icon_w = line.icon.map_or(0, |_| 8 * SCALE + gap);
     let text_w = line.text.chars().count() as u32 * 8 * SCALE;
     let mut x = w.saturating_sub(icon_w + text_w) / 2;
     let y = ground + 20;
     if let Some(icon) = line.icon {
-        draw_bits(&mut img, &icon.0, x, y, ACCENT);
+        draw_bits(img, &icon.0, x, y, ACCENT);
         x += icon_w;
     }
-    draw_text(&mut img, &line.text, x, y, INK);
-    img
+    draw_text(img, &line.text, x, y, INK);
+}
+
+/// A karaoke panel down the left side while he sings on the right: current line
+/// bright, the next line dim.
+fn karaoke(img: &mut RgbaImage, profile: &Profile, k: i32, ground: u32) {
+    let x = 30;
+    let mid = ground / 2;
+    draw_bits(img, &icons::STAR.0, x, mid - 64, ACCENT);
+    draw_text(
+        img,
+        "now playing",
+        x + 8 * SCALE + SCALE * 2,
+        mid - 64,
+        ACCENT,
+    );
+    draw_text(img, &profile.lyric(k).text, x, mid - 12, INK);
+    draw_text(img, &profile.lyric(k + LYRIC_HOLD).text, x, mid + 40, DIM);
 }
 
 /// A pinned `🔥 N` streak badge in the top-right corner.

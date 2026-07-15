@@ -1,23 +1,21 @@
-//! A finite, seam-free reel: the buddy walks in from the left, plays a scripted
-//! sequence of acts, and walks out to the right — sized so the last frame flows
-//! back into the first for a perfect GIF loop. The background is a function of
-//! loop *progress*, so every drifting layer
-//! completes a whole number of cycles and `frame(0)` matches `frame(ticks())`.
-//! Kept separate from [`crate::Stage`] so the live show's Go parity is intact.
+//! A finite, seam-free reel: the buddy walks in, plays a scripted sequence of
+//! acts, and walks out. Clouds drift on loop *progress* (always moving); the
+//! ground only scrolls while he is actually walking, and by exactly a whole
+//! number of pebble-spacings, so `frame(0)` still matches `frame(ticks())`.
+//! Separate from [`crate::Stage`] so the live show's Go parity is intact.
 
 use crate::character::{Character, MASCOT_W};
 use crate::grid::{CANVAS_H, CANVAS_W, GROUND_Y, Grid, blit};
 use crate::palette::Role;
 use crate::pose::{LegsMode, Pose};
-use crate::scene::{Scene, locate, scene_for, show_ticks};
+use crate::scene::{Scene, locate, scene_for, show_ticks, show_walk_ticks};
 use crate::sprites::{CLOUD_BIG, CLOUD_SMALL};
 use crate::stage::{MASCOT_HOME, Size, WALK_IN_TICKS};
 
-/// The walk-out ends one tick past the edge so the *last* played frame is
-/// already fully off-screen — no leftover sliver at the loop point.
 const WALK_OUT_TICKS: i32 = WALK_IN_TICKS + 1;
+const PEBBLE_SPACING: i32 = 9;
 
-/// One beat of the reel's story. Each maps to a scene with a tuned duration.
+/// One beat of the reel's story; each maps to a scene with a tuned duration.
 #[derive(Clone, Copy)]
 pub enum Act {
     Wave,
@@ -27,24 +25,10 @@ pub enum Act {
     RocketLaunch,
     Bake,
     Sing,
+    Campfire,
     Dance,
     Soccer,
 }
-
-/// The default profile story: hello, about-me, build & launch, eat, sing, dance
-/// — strolling between beats so he never stands still.
-const STORY: &[Act] = &[
-    Act::Wave,
-    Act::Present,
-    Act::Stroll,
-    Act::RocketBuild,
-    Act::RocketLaunch,
-    Act::Stroll,
-    Act::Bake,
-    Act::Stroll,
-    Act::Sing,
-    Act::Dance,
-];
 
 /// A finite, looping reel of scenes.
 pub struct Reel {
@@ -54,12 +38,12 @@ pub struct Reel {
 }
 
 impl Reel {
-    /// A reel over the default profile story, rendered seam-free.
+    /// A reel over a default story (the profile generator supplies its own).
     pub fn new(character: Character) -> Self {
-        Self::story(character, STORY)
+        use Act::*;
+        Self::story(character, &[Wave, Present, Stroll, Sing, Campfire, Dance])
     }
 
-    /// A reel over an explicit list of acts.
     pub fn story(character: Character, acts: &[Act]) -> Self {
         Self {
             character,
@@ -73,13 +57,11 @@ impl Reel {
         self
     }
 
-    /// Total ticks in one loop: walk-in, the scenes, then walk-out.
     pub fn ticks(&self) -> i32 {
         WALK_IN_TICKS + show_ticks(&self.scenes) + WALK_OUT_TICKS
     }
 
-    /// The scene index and tick-within-scene at `t`, or `None` during the
-    /// walk-in / walk-out.
+    /// The scene index and tick-within-scene at `t` (None while walking in/out).
     pub fn act_at(&self, t: i32) -> Option<(usize, i32)> {
         let show = show_ticks(&self.scenes);
         if t < WALK_IN_TICKS || t >= WALK_IN_TICKS + show {
@@ -89,12 +71,10 @@ impl Reel {
         Some((idx, k))
     }
 
-    /// True once the character is walking out at the end.
     pub fn is_leaving(&self, t: i32) -> bool {
         t >= WALK_IN_TICKS + show_ticks(&self.scenes)
     }
 
-    /// Render frame `t` (`0..ticks()`) as terminal text.
     pub fn frame(&self, t: i32, color: bool) -> String {
         let grid = self.compose(t);
         match self.size {
@@ -104,13 +84,11 @@ impl Reel {
         }
     }
 
-    /// This reel's character name.
     pub fn name(&self) -> &str {
         &self.character.name
     }
 
-    /// The frame at tick `t` as canvas pixel colours (row-major, `None` =
-    /// empty). Returns `(cols, rows, cells)` for rasterising to an image.
+    /// The frame at tick `t` as canvas pixel colours (row-major, `None` = empty).
     pub fn pixel_grid(&self, t: i32) -> (usize, usize, Vec<Option<[u8; 3]>>) {
         let grid = self.compose(t);
         let cells = grid
@@ -121,10 +99,29 @@ impl Reel {
         (CANVAS_W as usize, CANVAS_H as usize, cells)
     }
 
+    /// How far he has walked by tick `t` — only walk-in, strolls, and walk-out
+    /// count, so idle scenes leave the ground still.
+    fn walked(&self, t: i32) -> i32 {
+        let show = show_ticks(&self.scenes);
+        let scene_walk = show_walk_ticks(&self.scenes);
+        if t < WALK_IN_TICKS {
+            t
+        } else if t >= WALK_IN_TICKS + show {
+            WALK_IN_TICKS + scene_walk + (t - WALK_IN_TICKS - show)
+        } else {
+            let (idx, k, before) = locate(&self.scenes, t - WALK_IN_TICKS);
+            WALK_IN_TICKS + before + if self.scenes[idx].walking { k } else { 0 }
+        }
+    }
+
+    fn total_walk(&self) -> i32 {
+        WALK_IN_TICKS + show_walk_ticks(&self.scenes) + WALK_OUT_TICKS
+    }
+
     fn compose(&self, t: i32) -> Grid {
         let mut grid = Grid::new();
         clouds(&mut grid, t, self.ticks());
-        dust(&mut grid);
+        ground(&mut grid, self.walked(t), self.total_walk());
 
         let show = show_ticks(&self.scenes);
         if t < WALK_IN_TICKS {
@@ -154,8 +151,7 @@ fn draw_mascot(grid: &mut Grid, ch: &Character, p: Pose, t: i32, mx: i32) {
     blit(grid, &rows, mx, CANVAS_H - 6 + p.dy, body);
 }
 
-/// Parallax clouds as a function of loop progress: each completes exactly one
-/// drift over `len`, so their positions at `t = 0` and `t = len` coincide.
+/// Parallax clouds as a function of loop progress — always drifting.
 fn clouds(grid: &mut Grid, t: i32, len: i32) {
     let bx = wrap_x(30 - (CANVAS_W + 10) * t / len, 10);
     let sx = wrap_x(8 - (CANVAS_W + 7) * t / len, 7);
@@ -168,13 +164,14 @@ fn wrap_x(x: i32, w: i32) -> i32 {
     x.rem_euclid(span) - w
 }
 
-/// A fixed scatter of ground specks — static so it never breaks the loop.
-fn dust(grid: &mut Grid) {
+/// Sparse ground pebbles, scrolled by how far he has walked. The total shift
+/// over the loop is a whole number of spacings, so they line up at the seam.
+fn ground(grid: &mut Grid, walked: i32, total: i32) {
+    let target = (total / PEBBLE_SPACING).max(1) * PEBBLE_SPACING;
+    let shift = walked * target / total.max(1);
     for x in 0..CANVAS_W {
-        if x % 11 == 0 {
+        if (x + shift) % PEBBLE_SPACING == 0 {
             grid.set(x, GROUND_Y, "· ", Role::Dust);
-        } else if x % 17 == 5 {
-            grid.set(x, GROUND_Y, " ·", Role::Dust);
         }
     }
 }
@@ -187,8 +184,6 @@ mod tests {
 
     #[test]
     fn frame_zero_matches_the_seam() {
-        // The character is off-screen at both ends, so the whole composed grid
-        // at t=0 must equal the grid at t=ticks() — a perfectly seamless loop.
         let r = Reel::new(Character::default());
         let (a, b) = (r.compose(0), r.compose(r.ticks()));
         for y in 0..CANVAS_H {
