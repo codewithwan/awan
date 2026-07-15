@@ -65,6 +65,8 @@ fn from_flags(args: &[String]) -> Profile {
         streak: flag(args, "--streak")
             .and_then(|s| s.parse().ok())
             .unwrap_or(0),
+        song: flag(args, "--song").unwrap_or_default(),
+        artist: flag(args, "--artist").unwrap_or_default(),
         lyrics: flag(args, "--lyrics")
             .map(|s| s.split('|').map(str::trim).map(str::to_string).collect())
             .unwrap_or_default(),

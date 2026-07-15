@@ -27,6 +27,8 @@ pub struct Profile {
     pub location: String,
     pub stack: String,
     pub streak: u32,
+    pub song: String,
+    pub artist: String,
     pub lyrics: Vec<String>,
     pub output: String,
     pub scenes: Vec<SceneSpec>,
@@ -69,13 +71,19 @@ impl Profile {
         line(icon_of(&story[i].act), &self.fill(&story[i].say))
     }
 
-    /// The lyric line to show at tick `k` of a singing beat.
+    /// One karaoke line at tick `k` of a singing beat: an intro that names the
+    /// song, then the reader's lyrics, one line at a time.
     pub fn lyric(&self, k: i32) -> Line {
         let step = (k / LYRIC_HOLD) as usize;
-        if step == 0 || self.lyrics.is_empty() {
-            return line(&icons::GLOBE, "i love music — my fav:");
+        if step == 0 {
+            let song = pick(&self.song, "an old favourite");
+            let artist = pick(&self.artist, "someone great");
+            return line(&icons::STAR, &format!("my fav song \"{song}\" - {artist}"));
         }
-        line(&icons::STAR, &self.lyrics[(step - 1) % self.lyrics.len()])
+        if self.lyrics.is_empty() {
+            return line(&icons::GLOBE, "la la la ~");
+        }
+        line(&icons::GLOBE, &self.lyrics[(step - 1) % self.lyrics.len()])
     }
 
     /// Substitute `{name} {role} {location} {stack} {streak} {handle}`.
@@ -142,6 +150,10 @@ fn default_story() -> Vec<SceneSpec> {
         say: s.to_string(),
     })
     .collect()
+}
+
+fn pick<'a>(value: &'a str, fallback: &'a str) -> &'a str {
+    if value.is_empty() { fallback } else { value }
 }
 
 fn line(icon: &'static Icon, text: &str) -> Line {

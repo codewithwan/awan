@@ -11,20 +11,22 @@ use image::codecs::gif::{GifEncoder, Repeat};
 use image::{Delay, Frame, Rgba, RgbaImage};
 
 use crate::icons;
-use crate::script::{LYRIC_HOLD, Line, Profile};
+use crate::script::{Line, Profile};
 
 /// Pixels per canvas cell (32 cols × this ≈ 1050 px wide — safe in VHS too).
 const CELL_W: u32 = 33;
 const CELL_H: u32 = 30;
 /// The caption strip below the ground line.
 const CAPTION_H: u32 = 56;
-/// Bitmap-font / icon pixel size for the caption.
+/// Bitmap-font / icon pixel size for the caption, and the smaller lyric size.
 const SCALE: u32 = 3;
+const LYRIC_SCALE: u32 = 2;
+/// Rightmost x the lyric panel may reach, before the character.
+const LYRIC_LIMIT: u32 = 18 * CELL_W;
 /// Backdrop, ground line, caption ink, and icon accent.
 const BG: [u8; 4] = [13, 17, 23, 255];
 const GROUND: [u8; 3] = [80, 84, 96];
 const INK: [u8; 3] = [150, 150, 160];
-const DIM: [u8; 3] = [90, 90, 100];
 const ACCENT: [u8; 3] = [230, 180, 100];
 /// Frame time in milliseconds (~11 fps, matching the terminal cadence).
 const FRAME_MS: u32 = 90;
@@ -74,27 +76,23 @@ fn caption(img: &mut RgbaImage, line: &Line, w: u32, ground: u32) {
     let mut x = w.saturating_sub(icon_w + text_w) / 2;
     let y = ground + 20;
     if let Some(icon) = line.icon {
-        draw_bits(img, &icon.0, x, y, ACCENT);
+        draw_bits(img, &icon.0, x, y, SCALE, ACCENT);
         x += icon_w;
     }
-    draw_text(img, &line.text, x, y, INK);
+    draw_text(img, &line.text, x, y, SCALE, INK);
 }
 
-/// A karaoke panel down the left side while he sings on the right: current line
-/// bright, the next line dim.
+/// One karaoke line down the left while he sings on the right — small type,
+/// clipped so it never runs under him.
 fn karaoke(img: &mut RgbaImage, profile: &Profile, k: i32, ground: u32) {
-    let x = 30;
-    let mid = ground / 2;
-    draw_bits(img, &icons::STAR.0, x, mid - 64, ACCENT);
-    draw_text(
-        img,
-        "now playing",
-        x + 8 * SCALE + SCALE * 2,
-        mid - 64,
-        ACCENT,
-    );
-    draw_text(img, &profile.lyric(k).text, x, mid - 12, INK);
-    draw_text(img, &profile.lyric(k + LYRIC_HOLD).text, x, mid + 40, DIM);
+    let line = profile.lyric(k);
+    let fit = (LYRIC_LIMIT.saturating_sub(24) / (8 * LYRIC_SCALE)) as usize;
+    let text: String = line.text.chars().take(fit).collect();
+    let y = ground / 2 - 4 * LYRIC_SCALE;
+    if let Some(icon) = line.icon {
+        draw_bits(img, &icon.0, 24, y, LYRIC_SCALE, ACCENT);
+    }
+    draw_text(img, &text, 24 + 8 * LYRIC_SCALE + 6, y, LYRIC_SCALE, INK);
 }
 
 /// A pinned `🔥 N` streak badge in the top-right corner.
@@ -106,8 +104,8 @@ fn streak_badge(img: &mut RgbaImage, streak: u32, w: u32) {
     let text_w = num.chars().count() as u32 * 8 * SCALE;
     let x = w.saturating_sub(8 * SCALE + SCALE * 2 + text_w + 14);
     let y = 12;
-    draw_bits(img, &icons::FIRE.0, x, y, ACCENT);
-    draw_text(img, &num, x + 8 * SCALE + SCALE * 2, y, ACCENT);
+    draw_bits(img, &icons::FIRE.0, x, y, SCALE, ACCENT);
+    draw_text(img, &num, x + 8 * SCALE + SCALE * 2, y, SCALE, ACCENT);
 }
 
 /// Fill a `w`×`h` rectangle at `(x0, y0)`, clipped to the image.
@@ -120,17 +118,17 @@ fn fill(img: &mut RgbaImage, x0: u32, y0: u32, w: u32, h: u32, c: [u8; 3]) {
     }
 }
 
-/// Draw an 8-row bitmap (font glyph or icon) at `(x, y)` in colour `c`.
-fn draw_bits(img: &mut RgbaImage, bits: &[u8; 8], x: u32, y: u32, c: [u8; 3]) {
+/// Draw an 8-row bitmap (font glyph or icon) at `(x, y)`, `scale` px per pixel.
+fn draw_bits(img: &mut RgbaImage, bits: &[u8; 8], x: u32, y: u32, scale: u32, c: [u8; 3]) {
     for (row, byte) in bits.iter().enumerate() {
         for col in 0..8u32 {
             if byte & (1 << col) != 0 {
                 fill(
                     img,
-                    x + col * SCALE,
-                    y + row as u32 * SCALE,
-                    SCALE,
-                    SCALE,
+                    x + col * scale,
+                    y + row as u32 * scale,
+                    scale,
+                    scale,
                     c,
                 );
             }
@@ -138,13 +136,13 @@ fn draw_bits(img: &mut RgbaImage, bits: &[u8; 8], x: u32, y: u32, c: [u8; 3]) {
     }
 }
 
-/// Draw `text` starting at `(x, y)` in colour `c`.
-fn draw_text(img: &mut RgbaImage, text: &str, x: u32, y: u32, c: [u8; 3]) {
+/// Draw `text` starting at `(x, y)` at `scale`, in colour `c`.
+fn draw_text(img: &mut RgbaImage, text: &str, x: u32, y: u32, scale: u32, c: [u8; 3]) {
     let mut cx = x;
     for chr in text.chars() {
         if let Some(glyph) = BASIC_FONTS.get(chr) {
-            draw_bits(img, &glyph, cx, y, c);
+            draw_bits(img, &glyph, cx, y, scale, c);
         }
-        cx += 8 * SCALE;
+        cx += 8 * scale;
     }
 }

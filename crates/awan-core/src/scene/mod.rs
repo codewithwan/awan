@@ -84,8 +84,8 @@ pub(crate) fn scene_for(act: crate::reel::Act) -> Scene {
         RocketBuild => scene(40, false, rocket::build, ""),
         RocketLaunch => scene(50, false, rocket::launch, ""),
         Bake => scene(bake::BAKE_TICKS, false, bake::bake, ""),
-        Sing => scene(180, false, song::sing, ""),
-        Campfire => scene(90, false, campfire::campfire, ""),
+        Sing => scene(song::DUR, false, song::sing, ""),
+        Campfire => scene(campfire::DUR, false, campfire::campfire, ""),
         Dance => scene(dance::DANCE_TICKS, false, dance::dance, ""),
         Soccer => scene(soccer::SOCCER_TICKS, false, soccer::soccer, ""),
     }
