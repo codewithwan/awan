@@ -1,0 +1,18 @@
+[package]
+name = "awan-profile"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Profile GIF generator for awan — a separate, opt-in layer."
+# Never published: this is the "for fun" profile generator, kept out of the
+# core crates so releasing awan stays clean.
+publish = false
+
+[[bin]]
+name = "awan-profile"
+path = "src/main.rs"
+
+[dependencies]
+awan-core = { workspace = true }

@@ -28,6 +28,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "awan-profile"
+version = "0.1.0"
+dependencies = [
+ "awan-core",
+]
+
+[[package]]
 name = "awan-render"
 version = "0.0.4"
 dependencies = [

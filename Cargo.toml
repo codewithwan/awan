@@ -5,6 +5,7 @@ members = [
     "crates/awan-render",
     "crates/awan",
     "crates/awan-cli",
+    "profile",
 ]
 
 [workspace.package]
