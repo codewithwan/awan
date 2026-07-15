@@ -5,7 +5,7 @@
 //! - `awan sing`       — karaoke: he steps to a mic and sings the lines you give
 //! - `awan react`      — play the character's one-shot reaction to an event
 //! - `awan watch`      — ambient companion that reacts to events read from stdin
-//! - `awan statusline` — one-line output for Claude Code / starship / tmux (planned)
+//! - `awan statusline` — one-line badge for Claude Code / starship / tmux
 
 use std::io::{BufRead, IsTerminal, Write, stdout};
 use std::sync::Arc;
@@ -164,6 +164,12 @@ fn main() {
             args.pipe,
             args.size,
         ),
+        "statusline" => {
+            let label = (!args.rest.is_empty()).then(|| args.rest.join(" "));
+            let ch = load_character(args.character.as_deref());
+            let color = std::env::var_os("NO_COLOR").is_none();
+            println!("{}", awan_core::statusline(&ch, label.as_deref(), color));
+        }
         "--version" | "-V" => println!("awan {}", env!("CARGO_PKG_VERSION")),
         _ => {
             println!(
@@ -177,7 +183,7 @@ fn main() {
             println!("  sing  [\"line\" \"line\" …]            karaoke: one quoted line per lyric");
             println!("  react <event>   [-c <spec.toml>]   play the character's reaction once");
             println!("  watch           [-c <spec.toml>]   companion that reacts to stdin events");
-            println!();
+            println!("  statusline [text] [-c <spec.toml>]   one-line badge for prompts / tmux");
             println!();
             println!(
                 "Renders seam-free by default. --size big = classic textured, compact = half height."

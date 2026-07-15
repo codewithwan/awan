@@ -42,12 +42,14 @@ mod seamless;
 pub mod spec;
 mod sprites;
 mod stage;
+mod statusline;
 
 pub use character::Character;
 pub use companion::Companion;
 pub use karaoke::Karaoke;
 pub use pose::Pose;
 pub use stage::{Intro, Size, Stage};
+pub use statusline::statusline;
 
 #[cfg(test)]
 mod tests;

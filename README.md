@@ -39,6 +39,7 @@ Then:
 | `awan sing "line one" "line two" …` | Karaoke: he steps to a mic and sings your lyrics, lighting them up word by word |
 | `awan react cmd.failed` | Play the character's one-shot reaction to an event, then exit |
 | `awan watch` | Ambient companion that reacts to events read from stdin (or `--pipe`) |
+| `awan statusline "deploying"` | One static line — a tiny face, name and status — for prompts, tmux, or a Claude Code statusline |
 
 `awan watch` turns him into a companion that reacts to your shell in real
 time — source [shell/awan.zsh](shell/awan.zsh) and run `awan watch --pipe`

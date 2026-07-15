@@ -48,6 +48,28 @@ printf 'cmd.start\n' >> events   # he goes busy
 printf 'cmd.ok\n'    >> events   # he celebrates
 ```
 
+### 4. Prompt / statusline — `awan statusline [text]`
+
+Prints one static line — a tiny face, the character's name, and optional status
+text — then exits. Re-render it on every prompt. It colours output unless
+`NO_COLOR` is set, so it works even when the prompt captures its output.
+
+```sh
+# bash/zsh prompt
+PROMPT_COMMAND='awan statusline "$(git branch --show-current 2>/dev/null)"'
+
+# tmux status line (~/.tmux.conf)
+set -g status-right '#(awan statusline)'
+
+# Claude Code — .claude/settings.json
+# { "statusLine": { "type": "command", "command": "awan statusline" } }
+
+# starship custom command
+# [custom.awan]
+# command = "awan statusline"
+# when = true
+```
+
 ## The event vocabulary
 
 Events are plain lowercase lines. The character's TOML `[reactions]` table maps
