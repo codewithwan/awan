@@ -51,3 +51,23 @@ jobs:
           tar: unix
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Also publish the npm wrapper to GitHub Packages so it shows in the repo's
+  # Packages sidebar. Uses the built-in token — no OTP, no extra secret. The
+  # primary registry stays npmjs.org (published manually with your 2FA code).
+  publish-gpr:
+    needs: upload
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://npm.pkg.github.com
+      - run: npm publish
+        working-directory: packages/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
