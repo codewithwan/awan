@@ -1,9 +1,10 @@
 name: awan profile
 
-# Regenerates assets/awan.gif from awan.json. Runs when you edit awan.json.
+# Regenerates assets/awan.gif from awan.json. Triggers when you edit awan.json,
+# or run it by hand: Actions tab → "awan profile" → Run workflow.
 on:
   push:
-    branches: [main]
+    branches: [main, master] # profile repos use either
     paths: ["awan.json"]
   workflow_dispatch:
 
@@ -18,7 +19,12 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo install --git https://github.com/codewithwan/awan awan-profile
       - run: awan-profile whoami --config awan.json
-      - run: |
+      - name: Shrink the GIF
+        run: |
+          sudo apt-get update && sudo apt-get install -y gifsicle
+          gifsicle -O3 --lossy=80 --colors 64 assets/awan.gif -o assets/awan.gif
+      - name: Commit the result
+        run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add assets/awan.gif
