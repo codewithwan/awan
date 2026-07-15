@@ -1,12 +1,14 @@
 #!/usr/bin/env node
-// CLI entry: exec the downloaded `awan` binary, forwarding args, stdio, and
-// the exit code so `npx awan demo` behaves exactly like the native binary.
-const { spawnSync } = require("child_process");
-const { binPath } = require("./index.js");
+// CLI entry: exec the `awan` binary, forwarding args, stdio, and the exit code
+// so `npx @codewithwan/awan demo` behaves exactly like the native binary. The
+// binary is fetched on first run if npm skipped the postinstall hook.
 const fs = require("fs");
+const { spawnSync } = require("child_process");
+const { binPath, ensureSync } = require("./index.js");
 
+ensureSync();
 if (!fs.existsSync(binPath)) {
-  console.error("awan: binary not found. Try `npm rebuild awan`, or build from source:");
+  console.error("awan: could not obtain the binary. Build from source instead:");
   console.error("      cargo install awan-cli");
   process.exit(1);
 }

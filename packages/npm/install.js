@@ -1,14 +1,15 @@
-// Postinstall: fetch the prebuilt `awan` binary for this platform from the
-// matching GitHub Release (asset names come from .github/workflows/release.yml)
-// and drop it in ./bin. Failure is non-fatal — run.js prints how to recover.
+// Fetch the prebuilt `awan` binary for this platform from the GitHub Release
+// and drop it in ./bin. Runs as a postinstall hook, but modern npm blocks
+// install scripts by default — so run.js/index.js also invoke this lazily on
+// first use (see ensureSync in index.js). Safe to run repeatedly.
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 const https = require("https");
 const { execFileSync } = require("child_process");
 
-const { version, repository } = require("./package.json");
-const REPO = repository.url.replace(/^github:/, "");
+const { binaryVersion } = require("./package.json");
+const REPO = "codewithwan/awan";
+const TAG = `v${binaryVersion}`;
 
 // Node platform/arch -> Rust target triple (must match the release matrix).
 const TARGETS = {
@@ -19,15 +20,17 @@ const TARGETS = {
   "win32-x64": "x86_64-pc-windows-msvc",
 };
 
-function main() {
-  const key = `${process.platform}-${process.arch}`;
-  const target = TARGETS[key];
-  if (!target) return bail(`no prebuilt binary for ${key}`);
+const win = process.platform === "win32";
+const binDir = path.join(__dirname, "bin");
+const binPath = path.join(binDir, win ? "awan.exe" : "awan");
 
-  const win = process.platform === "win32";
+function main() {
+  if (fs.existsSync(binPath)) return; // already installed
+  const target = TARGETS[`${process.platform}-${process.arch}`];
+  if (!target) return bail(`no prebuilt binary for ${process.platform}-${process.arch}`);
+
   const ext = win ? "zip" : "tar.gz";
-  const url = `https://github.com/${REPO}/releases/download/v${version}/awan-${target}.${ext}`;
-  const binDir = path.join(__dirname, "bin");
+  const url = `https://github.com/${REPO}/releases/download/${TAG}/awan-${target}.${ext}`;
   fs.mkdirSync(binDir, { recursive: true });
   const archive = path.join(binDir, `awan.${ext}`);
 
@@ -37,10 +40,10 @@ function main() {
         execFileSync("powershell", ["-command", `Expand-Archive -Force '${archive}' '${binDir}'`]);
       } else {
         execFileSync("tar", ["-xzf", archive, "-C", binDir]);
-        fs.chmodSync(path.join(binDir, "awan"), 0o755);
+        fs.chmodSync(binPath, 0o755);
       }
       fs.unlinkSync(archive);
-      console.log(`awan ${version} installed (${target}).`);
+      console.log(`awan ${binaryVersion} installed (${target}).`);
     } catch (e) {
       bail(`could not unpack the binary: ${e.message}`);
     }
@@ -63,11 +66,10 @@ function download(url, dest, done, hops = 0) {
     .on("error", (e) => bail(e.message));
 }
 
-// Never hard-fail the install; leave a breadcrumb for run.js to surface.
+// Never hard-fail the install; run.js surfaces a missing binary at call time.
 function bail(msg) {
   console.warn(`awan: ${msg}`);
-  console.warn("      the binary will be fetched on first run, or build from source:");
-  console.warn("      cargo install awan-cli");
+  console.warn("      build from source instead: cargo install awan-cli");
   process.exit(0);
 }
 
