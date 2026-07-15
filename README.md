@@ -93,6 +93,20 @@ Events are plain lines (`cmd.start`, `cmd.ok`, `cmd.failed`, `task.done`,
 wrappers for Node, Python, Go and shell live in [`clients/`](clients); the
 full guide is [**docs/INTEGRATE.md**](docs/INTEGRATE.md).
 
+## Use it for
+
+- **A build/deploy companion** — he works while the job runs, celebrates when
+  it passes, chars when it fails.
+- **A friendlier CI / pre-commit gate** — a reaction at the end instead of a
+  wall of green text.
+- **A live prompt or tmux badge** — `awan statusline` in your `PROMPT_COMMAND`.
+- **An ambient desk buddy** — `awan watch` reacts to your shell in real time.
+- **Your own CLI's personality** — call the same API from inside your tool.
+
+Runnable, self-contained examples for each language are in
+[**`usage/`**](usage) — `cd usage/node && npm install && npm start`, and so on.
+From your code it's just `awan.react("task.done")`; you never spawn anything.
+
 ## Characters
 
 Characters are plain TOML — pixel rows plus a palette, **zero Rust**:

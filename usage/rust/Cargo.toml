@@ -1,0 +1,10 @@
+[package]
+name = "awan-rust-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+awan-core = "0.0.4"
+
+# Stand alone from the parent repo's workspace.
+[workspace]

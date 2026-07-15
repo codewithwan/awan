@@ -1,0 +1,10 @@
+{
+  "name": "awan-node-example",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Give a long task a companion, in Node.",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "@codewithwan/awan": "^0.0.4"
+  }
+}

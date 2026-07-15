@@ -1,0 +1,6 @@
+# Build artifacts from running the examples
+**/target/
+**/Cargo.lock
+**/node_modules/
+**/__pycache__/
+awan-go-example
