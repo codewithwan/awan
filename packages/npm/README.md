@@ -4,9 +4,9 @@ A tiny living character for your terminal — and a **personality layer** any
 CLI can embed. This package ships the `awan` binary to Node projects.
 
 ```sh
-npx awan demo               # try it, no install
-npm i -g awan && awan demo  # or install the command
-npm i awan                  # or use it from your project
+npx @codewithwan/awan demo               # try it, no install
+npm i -g @codewithwan/awan && awan demo  # or install the command
+npm i @codewithwan/awan                  # or use it from your project
 ```
 
 On install it downloads the prebuilt binary for your platform from the
@@ -15,7 +15,7 @@ project's GitHub Releases. No Rust toolchain required.
 ## Use it from Node
 
 ```js
-const awan = require("awan");
+const awan = require("@codewithwan/awan");
 
 awan.react("task.done"); // one-shot celebration, then returns
 

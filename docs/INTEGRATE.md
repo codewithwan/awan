@@ -11,7 +11,7 @@ Node, Python, Go, shell, anything. There is no SDK to depend on.
 ## Install the binary
 
 ```sh
-npm i -g awan          # prebuilt, no toolchain
+npm i -g @codewithwan/awan          # prebuilt, no toolchain
 cargo install awan-cli # from source
 # or grab a binary from https://github.com/codewithwan/awan/releases
 ```
@@ -68,7 +68,7 @@ Unknown events are ignored, so you can emit your own without breaking anything.
 
 Ready-made thin wrappers live in [`clients/`](../clients):
 
-- **Node** — `npm i awan`, then `require("awan")` ([API](../packages/npm/README.md))
+- **Node** — `npm i @codewithwan/awan`, then `require("@codewithwan/awan")` ([API](../packages/npm/README.md))
 - **Python** — [`clients/python/awan.py`](../clients/python/awan.py)
 - **Go** — [`clients/go/awan.go`](../clients/go/awan.go)
 - **Shell** — [`clients/bash/awan.sh`](../clients/bash/awan.sh)
@@ -81,7 +81,7 @@ with awan.Watch() as buddy:
 ```
 
 ```js
-const awan = require("awan");
+const awan = require("@codewithwan/awan");
 const job = awan.busy("deploying");
 await deploy();
 job.stop();

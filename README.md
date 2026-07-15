@@ -21,9 +21,9 @@ first run, he hatches out of an egg. 🥚
 ## Quick start
 
 ```sh
-npx awan demo              # try it, no install (needs Node)
+npx @codewithwan/awan demo              # try it, no install (needs Node)
 # or:
-npm i -g awan             # prebuilt binary, no Rust toolchain
+npm i -g @codewithwan/awan             # prebuilt binary, no Rust toolchain
 cargo install awan-cli    # from source
 # or grab a binary from the Releases page
 ```
@@ -64,8 +64,8 @@ awan is a **binary plus a text protocol**, not a library you link. Anything
 that can spawn a process and write a line of text can embed it — no SDK.
 
 ```js
-// Node — npm i awan
-const awan = require("awan");
+// Node — npm i @codewithwan/awan
+const awan = require("@codewithwan/awan");
 const job = awan.busy("deploying");
 await deploy();
 job.stop();
