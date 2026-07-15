@@ -91,7 +91,7 @@ Unknown events are ignored, so you can emit your own without breaking anything.
 Ready-made thin wrappers live in [`clients/`](../clients):
 
 - **Node** — `npm i @codewithwan/awan`, then `require("@codewithwan/awan")` ([API](../packages/npm/README.md))
-- **Python** — [`clients/python/awan.py`](../clients/python/awan.py)
+- **Python** — `pip install awan-cli` ([client](../clients/python/awan.py))
 - **Go** — [`clients/go/awan.go`](../clients/go/awan.go)
 - **Shell** — [`clients/bash/awan.sh`](../clients/bash/awan.sh)
 

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "awan-cli"
+version = "0.0.2"
+description = "A tiny living character for your terminal — a personality layer any CLI can embed."
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "codewithwan" }]
+keywords = ["cli", "terminal", "mascot", "ascii", "ansi", "companion"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+    "Topic :: Terminals",
+]
+
+[project.urls]
+Homepage = "https://github.com/codewithwan/awan"
+Documentation = "https://github.com/codewithwan/awan/blob/main/docs/INTEGRATE.md"
+
+[project.scripts]
+awan = "awan.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/awan"]

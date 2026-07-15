@@ -7,7 +7,7 @@ few lines each — the real integration surface is the binary and its
 | Language | File | Install the binary with |
 |---|---|---|
 | Node    | [`packages/npm`](../packages/npm) | `npm i @codewithwan/awan` |
-| Python  | [`python/awan.py`](python/awan.py) | `npm i -g @codewithwan/awan` or `cargo install awan-cli` |
+| Python  | [`python/awan.py`](python/awan.py) | `pip install awan-cli` |
 | Go      | [`go/awan.go`](go/awan.go) | same |
 | Shell   | [`bash/awan.sh`](bash/awan.sh) | same |
 

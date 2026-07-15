@@ -73,7 +73,7 @@ job.stop();
 ```
 
 ```python
-# Python — clients/python/awan.py
+# Python — pip install awan-cli
 import awan
 awan.react("task.done")
 ```
