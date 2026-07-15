@@ -107,6 +107,25 @@ Runnable, self-contained examples for each language are in
 [**`usage/`**](usage) — `cd usage/node && npm install && npm start`, and so on.
 From your code it's just `awan.react("task.done")`; you never spawn anything.
 
+## Profile GIF
+
+Turn awan into a **seam-free looping banner for your GitHub profile** — walks
+in, does his thing, walks out, and loops perfectly. Drop it straight into a
+README:
+
+<p align="center">
+  <img src="assets/profile-sample.gif" alt="awan profile banner sample" width="620">
+</p>
+
+```sh
+cargo run -p awan-profile -- whoami codewithwan --gif awan.gif
+```
+
+Work in progress ([design](docs/PROFILE.md)) — coming next: a JSON config, your
+bio rendered with pixel icons, a coding-streak campfire, and a GitHub Action
+that regenerates the GIF on every push. Built as a separate, opt-in crate, so
+the core `awan` stays untouched.
+
 ## Characters
 
 Characters are plain TOML — pixel rows plus a palette, **zero Rust**:
