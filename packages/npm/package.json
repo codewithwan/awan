@@ -1,0 +1,17 @@
+{
+  "name": "awan",
+  "version": "0.0.1",
+  "description": "A tiny living character for your terminal — a personality layer any CLI can embed.",
+  "keywords": ["cli", "terminal", "mascot", "ascii", "ansi", "companion", "fun"],
+  "homepage": "https://github.com/codewithwan/awan#readme",
+  "repository": { "type": "git", "url": "github:codewithwan/awan" },
+  "license": "(MIT OR Apache-2.0)",
+  "bin": { "awan": "run.js" },
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": { "postinstall": "node install.js" },
+  "files": ["run.js", "install.js", "index.js", "index.d.ts"],
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"],
+  "engines": { "node": ">=16" }
+}
