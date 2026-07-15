@@ -70,6 +70,18 @@ pub(crate) static FULL_SHOW: &[Scene] = &[
     scene(12, true, stroll, "da-da-da~"),
 ];
 
+/// A short, snappy loop for the profile reel (kept brief for a GIF banner).
+pub(crate) static REEL_SHOW: &[Scene] = &[
+    scene(36, false, street::crate_bonk, "ooh, a box!"),
+    scene(dance::DANCE_TICKS, false, dance::dance, "la la la~"),
+    scene(
+        soccer::SOCCER_TICKS,
+        false,
+        soccer::soccer,
+        "juggle juggle~",
+    ),
+];
+
 /// The "working…" loop: just the making-things skits, for busy indicators.
 pub(crate) static BUSY_SHOW: &[Scene] = &[
     scene(bake::BAKE_TICKS, false, bake::bake, "cake time~"),

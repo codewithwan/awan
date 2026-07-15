@@ -11,7 +11,7 @@ use crate::character::{Character, MASCOT_W};
 use crate::grid::{CANVAS_H, CANVAS_W, GROUND_Y, Grid, blit};
 use crate::palette::Role;
 use crate::pose::{LegsMode, Pose};
-use crate::scene::{FULL_SHOW, Scene, locate, show_ticks};
+use crate::scene::{REEL_SHOW, Scene, locate, show_ticks};
 use crate::sprites::{CLOUD_BIG, CLOUD_SMALL};
 use crate::stage::{MASCOT_HOME, Size, WALK_IN_TICKS};
 
@@ -27,11 +27,11 @@ pub struct Reel {
 }
 
 impl Reel {
-    /// A reel over the full show, rendered seam-free.
+    /// A short seam-free reel (walk-in, a few skits, walk-out).
     pub fn new(character: Character) -> Self {
         Self {
             character,
-            scenes: FULL_SHOW,
+            scenes: REEL_SHOW,
             size: Size::Seamless,
         }
     }
@@ -72,6 +72,18 @@ impl Reel {
     /// This reel's character name (for the dialogue prefix).
     pub fn name(&self) -> &str {
         &self.character.name
+    }
+
+    /// The frame at tick `t` as canvas pixel colours (row-major, `None` =
+    /// empty). Returns `(cols, rows, cells)` for rasterising to an image.
+    pub fn pixel_grid(&self, t: i32) -> (usize, usize, Vec<Option<[u8; 3]>>) {
+        let grid = self.compose(t);
+        let cells = grid
+            .rows()
+            .flatten()
+            .map(|c| crate::color::cell_rgb(c, &self.character).map(|(r, g, b)| [r, g, b]))
+            .collect();
+        (CANVAS_W as usize, CANVAS_H as usize, cells)
     }
 
     fn compose(&self, t: i32) -> Grid {
