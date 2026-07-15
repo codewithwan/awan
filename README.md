@@ -21,12 +21,16 @@ first run, he hatches out of an egg. 🥚
 ## Quick start
 
 ```sh
-npx @codewithwan/awan demo              # try it, no install (needs Node)
-# or:
-npm i -g @codewithwan/awan             # prebuilt binary, no Rust toolchain
-cargo install awan-cli    # from source
-# or grab a binary from the Releases page
+npx @codewithwan/awan demo         # try it, no install (needs Node)
+npm i -g @codewithwan/awan         # npm      → prebuilt binary
+pip install awan-cli               # PyPI     → prebuilt binary
+brew install codewithwan/awan/awan # Homebrew → prebuilt binary
+cargo install awan-cli             # Cargo    → from source
+# …or grab a binary straight from the Releases page
 ```
+
+Every route installs the same `awan` command. The npm/PyPI/Homebrew packages
+just fetch the prebuilt binary — no Rust toolchain needed.
 
 Then:
 
@@ -127,8 +131,8 @@ library — no Rust, no rebuild of the engine.
 | Crate | Purpose |
 |---|---|
 | `awan-core` | Scene engine: deterministic frames from `(tick, character)` — no wall-clock, no RNG, snapshot-testable |
-| `awan-render` | Terminal backends: color-depth detection now; seam-free half-block rendering next |
-| `awan` | Public embed API for CLI authors: `wait` / `ask` / `react` (planned) |
+| `awan-render` | Terminal backends and color-depth detection |
+| `awan` | Public embed API for Rust CLI authors: `wait` / `ask` / `react` (planned) |
 | `awan-cli` | The `awan` binary |
 
 ## Roadmap
