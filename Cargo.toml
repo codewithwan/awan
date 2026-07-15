@@ -8,7 +8,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.0.2"
+version = "0.0.4"
 edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
@@ -24,8 +24,8 @@ codegen-units = 1 # smaller + faster at the cost of build time
 panic = "abort"   # no unwinding tables
 
 [workspace.dependencies]
-awan-core = { path = "crates/awan-core", version = "0.0.2" }
-awan-render = { path = "crates/awan-render", version = "0.0.2" }
+awan-core = { path = "crates/awan-core", version = "0.0.4" }
+awan-render = { path = "crates/awan-render", version = "0.0.4" }
 ctrlc = "3"
 serde = { version = "1", features = ["derive"] }
 toml = "0.8"

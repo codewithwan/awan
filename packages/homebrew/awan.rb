@@ -9,7 +9,7 @@
 class Awan < Formula
   desc "Tiny living character for your terminal — a personality layer any CLI can embed"
   homepage "https://github.com/codewithwan/awan"
-  version "0.0.2"
+  version "0.0.4"
   license any_of: ["MIT", "Apache-2.0"]
 
   base = "https://github.com/codewithwan/awan/releases/download/v#{version}"

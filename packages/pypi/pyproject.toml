@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awan-cli"
-version = "0.0.2"
+version = "0.0.4"
 description = "A tiny living character for your terminal — a personality layer any CLI can embed."
 readme = "README.md"
 requires-python = ">=3.8"
