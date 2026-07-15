@@ -11,7 +11,6 @@
   "bin": { "awan": "run.js" },
   "main": "index.js",
   "types": "index.d.ts",
-  "scripts": { "postinstall": "node install.js" },
   "files": ["run.js", "install.js", "index.js", "index.d.ts"],
   "os": ["darwin", "linux", "win32"],
   "cpu": ["x64", "arm64"],
