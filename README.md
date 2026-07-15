@@ -21,9 +21,14 @@ first run, he hatches out of an egg. 🥚
 ## Quick start
 
 ```sh
-git clone https://github.com/codewithwan/awan && cd awan
-cargo run -p awan-cli -- demo
+npx awan demo              # try it, no install (needs Node)
+# or:
+npm i -g awan             # prebuilt binary, no Rust toolchain
+cargo install awan-cli    # from source
+# or grab a binary from the Releases page
 ```
+
+Then:
 
 | Command | What it does |
 |---|---|
@@ -52,6 +57,36 @@ looks are a flag away:
 **Status: early development (v0.0.x).** The engine is ported 1:1 from a
 battle-tested Go implementation and verified frame-by-frame. Expect breaking
 changes until v0.1.
+
+## Works with any language
+
+awan is a **binary plus a text protocol**, not a library you link. Anything
+that can spawn a process and write a line of text can embed it — no SDK.
+
+```js
+// Node — npm i awan
+const awan = require("awan");
+const job = awan.busy("deploying");
+await deploy();
+job.stop();
+```
+
+```python
+# Python — clients/python/awan.py
+import awan
+awan.react("task.done")
+```
+
+```sh
+# Any shell — feed events to an ambient companion
+printf 'cmd.start\n' >> events   # he goes busy
+printf 'cmd.ok\n'    >> events   # he celebrates
+```
+
+Events are plain lines (`cmd.start`, `cmd.ok`, `cmd.failed`, `task.done`,
+`idle`) and each character's `[reactions]` decides what they do. Ready-made
+wrappers for Node, Python, Go and shell live in [`clients/`](clients); the
+full guide is [**docs/INTEGRATE.md**](docs/INTEGRATE.md).
 
 ## Characters
 
@@ -97,9 +132,10 @@ library — no Rust, no rebuild of the engine.
 
 ## Roadmap
 
-- **v0.1** — seam-free half-block rendering, polished `awan` binary
-- **v0.2** — embed API for CLI authors, ambient daemon, cross-language event
-  protocol (any language, zero SDK)
+- **Shipping** — seam-free rendering, ambient `watch` companion, cross-language
+  event protocol with Node/Python/Go/shell clients ([docs](docs/INTEGRATE.md))
+- **v0.1** — prebuilt binaries on every release, polished `awan` binary
+- **v0.2** — in-process embed API for Rust CLI authors (`wait` / `ask` / `react`)
 - **Later** — more characters and skits, graphics-protocol backends,
   community roster
 
