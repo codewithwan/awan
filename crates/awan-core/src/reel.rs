@@ -1,17 +1,15 @@
-//! A finite, seam-free reel: the buddy walks in from the left, plays a
-//! sequence of self-contained scenes, and walks out to the right — sized so
-//! the last frame flows back into the first for a perfect GIF loop.
-//!
-//! Unlike [`crate::Stage`], the background here is a function of loop
-//! *progress*, so every drifting layer completes a whole number of cycles and
-//! `frame(0)` matches `frame(ticks())`. Kept separate from Stage so the Go
-//! parity of the live show is untouched.
+//! A finite, seam-free reel: the buddy walks in from the left, plays a scripted
+//! sequence of acts, and walks out to the right — sized so the last frame flows
+//! back into the first for a perfect GIF loop. The background is a function of
+//! loop *progress*, so every drifting layer
+//! completes a whole number of cycles and `frame(0)` matches `frame(ticks())`.
+//! Kept separate from [`crate::Stage`] so the live show's Go parity is intact.
 
 use crate::character::{Character, MASCOT_W};
 use crate::grid::{CANVAS_H, CANVAS_W, GROUND_Y, Grid, blit};
 use crate::palette::Role;
 use crate::pose::{LegsMode, Pose};
-use crate::scene::{REEL_SHOW, Scene, locate, show_ticks};
+use crate::scene::{Scene, locate, scene_for, show_ticks};
 use crate::sprites::{CLOUD_BIG, CLOUD_SMALL};
 use crate::stage::{MASCOT_HOME, Size, WALK_IN_TICKS};
 
@@ -19,19 +17,53 @@ use crate::stage::{MASCOT_HOME, Size, WALK_IN_TICKS};
 /// already fully off-screen — no leftover sliver at the loop point.
 const WALK_OUT_TICKS: i32 = WALK_IN_TICKS + 1;
 
+/// One beat of the reel's story. Each maps to a scene with a tuned duration.
+#[derive(Clone, Copy)]
+pub enum Act {
+    Wave,
+    Present,
+    Stroll,
+    RocketBuild,
+    RocketLaunch,
+    Bake,
+    Sing,
+    Dance,
+    Soccer,
+}
+
+/// The default profile story: hello, about-me, build & launch, eat, sing, dance
+/// — strolling between beats so he never stands still.
+const STORY: &[Act] = &[
+    Act::Wave,
+    Act::Present,
+    Act::Stroll,
+    Act::RocketBuild,
+    Act::RocketLaunch,
+    Act::Stroll,
+    Act::Bake,
+    Act::Stroll,
+    Act::Sing,
+    Act::Dance,
+];
+
 /// A finite, looping reel of scenes.
 pub struct Reel {
     character: Character,
-    scenes: &'static [Scene],
+    scenes: Vec<Scene>,
     size: Size,
 }
 
 impl Reel {
-    /// A short seam-free reel (walk-in, a few skits, walk-out).
+    /// A reel over the default profile story, rendered seam-free.
     pub fn new(character: Character) -> Self {
+        Self::story(character, STORY)
+    }
+
+    /// A reel over an explicit list of acts.
+    pub fn story(character: Character, acts: &[Act]) -> Self {
         Self {
             character,
-            scenes: REEL_SHOW,
+            scenes: acts.iter().map(|a| scene_for(*a)).collect(),
             size: Size::Seamless,
         }
     }
@@ -43,7 +75,23 @@ impl Reel {
 
     /// Total ticks in one loop: walk-in, the scenes, then walk-out.
     pub fn ticks(&self) -> i32 {
-        WALK_IN_TICKS + show_ticks(self.scenes) + WALK_OUT_TICKS
+        WALK_IN_TICKS + show_ticks(&self.scenes) + WALK_OUT_TICKS
+    }
+
+    /// The scene index and tick-within-scene at `t`, or `None` during the
+    /// walk-in / walk-out.
+    pub fn act_at(&self, t: i32) -> Option<(usize, i32)> {
+        let show = show_ticks(&self.scenes);
+        if t < WALK_IN_TICKS || t >= WALK_IN_TICKS + show {
+            return None;
+        }
+        let (idx, k, _) = locate(&self.scenes, t - WALK_IN_TICKS);
+        Some((idx, k))
+    }
+
+    /// True once the character is walking out at the end.
+    pub fn is_leaving(&self, t: i32) -> bool {
+        t >= WALK_IN_TICKS + show_ticks(&self.scenes)
     }
 
     /// Render frame `t` (`0..ticks()`) as terminal text.
@@ -56,20 +104,7 @@ impl Reel {
         }
     }
 
-    /// A dialogue caption under the reel at tick `t`, if any.
-    pub fn caption(&self, t: i32) -> Option<&'static str> {
-        let show = show_ticks(self.scenes);
-        if t < WALK_IN_TICKS {
-            return Some("here i come~");
-        }
-        if t >= WALK_IN_TICKS + show {
-            return Some("see ya~");
-        }
-        let u = t - WALK_IN_TICKS;
-        Some(self.scenes[locate(self.scenes, u).0].cap)
-    }
-
-    /// This reel's character name (for the dialogue prefix).
+    /// This reel's character name.
     pub fn name(&self) -> &str {
         &self.character.name
     }
@@ -91,17 +126,14 @@ impl Reel {
         clouds(&mut grid, t, self.ticks());
         dust(&mut grid);
 
-        let show = show_ticks(self.scenes);
+        let show = show_ticks(&self.scenes);
         if t < WALK_IN_TICKS {
-            // striding in from off the left edge
             draw_mascot(&mut grid, &self.character, walking(), t, -MASCOT_W + t);
         } else if t < WALK_IN_TICKS + show {
-            let u = t - WALK_IN_TICKS;
-            let (idx, k, _) = locate(self.scenes, u);
+            let (idx, k, _) = locate(&self.scenes, t - WALK_IN_TICKS);
             let p = (self.scenes[idx].run)(k, t, &mut grid);
             draw_mascot(&mut grid, &self.character, p, t, MASCOT_HOME + p.dx);
         } else {
-            // striding out toward the right edge, and off it
             let f = t - WALK_IN_TICKS - show;
             draw_mascot(&mut grid, &self.character, walking(), t, MASCOT_HOME + f);
         }
@@ -125,22 +157,10 @@ fn draw_mascot(grid: &mut Grid, ch: &Character, p: Pose, t: i32, mx: i32) {
 /// Parallax clouds as a function of loop progress: each completes exactly one
 /// drift over `len`, so their positions at `t = 0` and `t = len` coincide.
 fn clouds(grid: &mut Grid, t: i32, len: i32) {
-    let big = CANVAS_W + 10;
-    let small = CANVAS_W + 7;
-    blit(
-        grid,
-        CLOUD_BIG,
-        wrap_x(30 - big * t / len, 10),
-        0,
-        Role::Sky,
-    );
-    blit(
-        grid,
-        CLOUD_SMALL,
-        wrap_x(8 - small * t / len, 7),
-        2,
-        Role::Sky,
-    );
+    let bx = wrap_x(30 - (CANVAS_W + 10) * t / len, 10);
+    let sx = wrap_x(8 - (CANVAS_W + 7) * t / len, 7);
+    blit(grid, CLOUD_BIG, bx, 0, Role::Sky);
+    blit(grid, CLOUD_SMALL, sx, 2, Role::Sky);
 }
 
 fn wrap_x(x: i32, w: i32) -> i32 {

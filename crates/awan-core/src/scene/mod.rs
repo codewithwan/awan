@@ -13,6 +13,7 @@ pub(crate) mod hatch;
 pub(crate) mod react;
 pub(crate) mod rocket;
 pub(crate) mod soccer;
+pub(crate) mod song;
 pub(crate) mod street;
 pub(crate) mod wander;
 
@@ -71,21 +72,22 @@ pub(crate) static FULL_SHOW: &[Scene] = &[
     scene(12, true, stroll, "da-da-da~"),
 ];
 
-/// The profile reel: a little story — waves hello, stands to introduce
-/// himself, shows off a hobby (juggling), has a dance, then a calm beat before
-/// walking out. The profile generator narrates over the top.
-pub(crate) static REEL_SHOW: &[Scene] = &[
-    scene(28, false, greet::wave, "hi!"),
-    scene(44, false, greet::present, "so, about me…"),
-    scene(
-        soccer::SOCCER_TICKS,
-        false,
-        soccer::soccer,
-        "juggle juggle~",
-    ),
-    scene(dance::DANCE_TICKS, false, dance::dance, "la la la~"),
-    scene(24, false, greet::present, "~"),
-];
+/// Build the scene for one reel act. Durations are tuned so each story beat has
+/// room to breathe (and the whole reel runs a comfortable ~60s).
+pub(crate) fn scene_for(act: crate::reel::Act) -> Scene {
+    use crate::reel::Act::*;
+    match act {
+        Wave => scene(30, false, greet::wave, ""),
+        Present => scene(60, false, greet::present, ""),
+        Stroll => scene(30, true, stroll, ""),
+        RocketBuild => scene(40, false, rocket::build, ""),
+        RocketLaunch => scene(50, false, rocket::launch, ""),
+        Bake => scene(bake::BAKE_TICKS, false, bake::bake, ""),
+        Sing => scene(180, false, song::sing, ""),
+        Dance => scene(dance::DANCE_TICKS, false, dance::dance, ""),
+        Soccer => scene(soccer::SOCCER_TICKS, false, soccer::soccer, ""),
+    }
+}
 
 /// The "working…" loop: just the making-things skits, for busy indicators.
 pub(crate) static BUSY_SHOW: &[Scene] = &[

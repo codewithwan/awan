@@ -16,22 +16,25 @@ cargo run -p awan-profile -- whoami <your-handle> \
   --role "Fullstack Engineer" \
   --location "Indonesia" \
   --stack "Rust / Go / TypeScript" \
-  --hobby "football & coffee" \
+  --streak 365 \
+  --lyrics "a line from|your favourite song|goes here" \
   --gif awan.gif
 ```
 
-Without `--gif` it previews one loop in the terminal and exits (no Ctrl+C).
+Without `--gif` it previews one loop (~60s) in the terminal and exits (no
+Ctrl+C). It's a little story: waves hello, introduces himself, builds & launches
+a rocket, bakes, **sings** (mic-free — mouth and notes only), then dances out.
 
-| Flag | Shows as |
+| Flag | Does |
 |---|---|
-| `--name` | `♦ i'm <name>` |
-| `--role` | `💼 <role>` |
-| `--location` | `📍 <location>` |
-| `--stack` | `>_ <stack>` |
-| `--hobby` | `✦ off the clock: <hobby>` |
+| `--name` / `--role` / `--location` / `--stack` | your intro lines, each with an icon |
+| `--streak N` | pins a `🔥 N` badge in the top-right corner |
+| `--lyrics "a\|b\|c"` | lines he sings during the music beat (`\|`-separated) |
 | `--gif <path>` | write a looping GIF instead of previewing |
 
-Empty fields are skipped. The greeting and sign-off are always there.
+Empty fields fall back to friendly defaults. **Lyrics are yours to provide** —
+put in a couple of lines from your own favourite song. The GIF is ~4 MB raw;
+optimise it with `gifsicle -O3 --lossy=80 --colors 64 awan.gif -o awan.gif`.
 
 ## Put it on your GitHub profile (auto-updating)
 
@@ -58,7 +61,8 @@ Empty fields are skipped. The greeting and sign-off are always there.
                --role "Fullstack Engineer" \
                --location "Indonesia" \
                --stack "Rust / Go / TypeScript" \
-               --hobby "football & coffee" \
+               --streak 365 \
+               --lyrics "a line from|your favourite song" \
                --gif assets/awan.gif
          - run: |
              git config user.name  "github-actions[bot]"

@@ -49,7 +49,7 @@ pub use character::Character;
 pub use companion::Companion;
 pub use karaoke::Karaoke;
 pub use pose::Pose;
-pub use reel::Reel;
+pub use reel::{Act, Reel};
 pub use stage::{Intro, Size, Stage};
 pub use statusline::statusline;
 

@@ -2,7 +2,8 @@
 //! binary). Plays a seamless reel narrating a profile, and can write it to a
 //! looping GIF for a README. Upcoming: JSON config, streak scenes.
 //!
-//! - `awan-profile whoami <handle> [--name .. --role .. --location .. --stack .. --site ..]`
+//! - `awan-profile whoami <handle>` with optional `--name`, `--role`,
+//!   `--location`, `--stack`, `--streak N`, `--lyrics "one|two|three"`.
 //! - add `--gif out.gif` to write a looping GIF instead of previewing.
 
 use std::io::{IsTerminal, Write, stdout};
@@ -29,8 +30,12 @@ fn main() {
                 role: flag(&args, "--role").unwrap_or_default(),
                 location: flag(&args, "--location").unwrap_or_default(),
                 stack: flag(&args, "--stack").unwrap_or_default(),
-                hobby: flag(&args, "--hobby").unwrap_or_default(),
-                site: flag(&args, "--site").unwrap_or_default(),
+                streak: flag(&args, "--streak")
+                    .and_then(|s| s.parse().ok())
+                    .unwrap_or(0),
+                lyrics: flag(&args, "--lyrics")
+                    .map(|s| s.split('|').map(str::trim).map(str::to_string).collect())
+                    .unwrap_or_default(),
                 handle,
             };
             let reel = Reel::new(Character::default()).with_size(Size::Seamless);
@@ -68,7 +73,7 @@ fn play(reel: &Reel, profile: &Profile) {
         for line in reel.frame(t, color).split('\n') {
             let _ = writeln!(out, "{line}\x1b[K");
         }
-        let _ = writeln!(out, "  {}\x1b[K", profile.line(t, reel.ticks()).text);
+        let _ = writeln!(out, "  {}\x1b[K", profile.line(reel, t).text);
         let _ = out.flush();
         std::thread::sleep(FRAME_DELAY);
     }

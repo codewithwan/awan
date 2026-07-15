@@ -28,12 +28,12 @@ pub(super) fn wave(k: i32, _t: i32, grid: &mut Grid) -> Pose {
     }
 }
 
-/// A calm idle: stands with a slow breathing bob and the odd blink, keeping the
-/// stage quiet while the narration introduces him.
+/// A relaxed stroll-in-place while the narration introduces him — legs keep
+/// moving with a gentle bob, so he never freezes mid-story.
 pub(super) fn present(k: i32, _t: i32, _grid: &mut Grid) -> Pose {
     Pose {
-        legs: LegsMode::Still,
-        dy: if (k / 10) % 5 == 0 { -1 } else { 0 },
+        legs: LegsMode::Walk,
+        dy: if (k / 4) % 3 == 0 { -1 } else { 0 },
         ..Pose::default()
     }
 }

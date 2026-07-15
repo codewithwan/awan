@@ -10,6 +10,7 @@ use font8x8::{BASIC_FONTS, UnicodeFonts};
 use image::codecs::gif::{GifEncoder, Repeat};
 use image::{Delay, Frame, Rgba, RgbaImage};
 
+use crate::icons;
 use crate::script::Profile;
 
 /// Pixels per canvas cell (32 cols × this ≈ 1050 px wide — safe in VHS too).
@@ -55,8 +56,9 @@ fn rasterize(reel: &Reel, profile: &Profile, t: i32) -> RgbaImage {
         fill(&mut img, x0, y0, CELL_W, CELL_H, [r, g, b]);
     }
     fill(&mut img, 0, ground, w, 2, GROUND);
+    streak_badge(&mut img, profile.streak, w);
 
-    let line = profile.line(t, reel.ticks());
+    let line = profile.line(reel, t);
     let gap = SCALE * 3;
     let icon_w = line.icon.map_or(0, |_| 8 * SCALE + gap);
     let text_w = line.text.chars().count() as u32 * 8 * SCALE;
@@ -66,8 +68,21 @@ fn rasterize(reel: &Reel, profile: &Profile, t: i32) -> RgbaImage {
         draw_bits(&mut img, &icon.0, x, y, ACCENT);
         x += icon_w;
     }
-    draw_text(&mut img, &line.text, x, y);
+    draw_text(&mut img, &line.text, x, y, INK);
     img
+}
+
+/// A pinned `🔥 N` streak badge in the top-right corner.
+fn streak_badge(img: &mut RgbaImage, streak: u32, w: u32) {
+    if streak == 0 {
+        return;
+    }
+    let num = streak.to_string();
+    let text_w = num.chars().count() as u32 * 8 * SCALE;
+    let x = w.saturating_sub(8 * SCALE + SCALE * 2 + text_w + 14);
+    let y = 12;
+    draw_bits(img, &icons::FIRE.0, x, y, ACCENT);
+    draw_text(img, &num, x + 8 * SCALE + SCALE * 2, y, ACCENT);
 }
 
 /// Fill a `w`×`h` rectangle at `(x0, y0)`, clipped to the image.
@@ -98,12 +113,12 @@ fn draw_bits(img: &mut RgbaImage, bits: &[u8; 8], x: u32, y: u32, c: [u8; 3]) {
     }
 }
 
-/// Draw `text` starting at `(x, y)` in the ink colour.
-fn draw_text(img: &mut RgbaImage, text: &str, x: u32, y: u32) {
+/// Draw `text` starting at `(x, y)` in colour `c`.
+fn draw_text(img: &mut RgbaImage, text: &str, x: u32, y: u32, c: [u8; 3]) {
     let mut cx = x;
     for chr in text.chars() {
         if let Some(glyph) = BASIC_FONTS.get(chr) {
-            draw_bits(img, &glyph, cx, y, INK);
+            draw_bits(img, &glyph, cx, y, c);
         }
         cx += 8 * SCALE;
     }

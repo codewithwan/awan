@@ -1,10 +1,17 @@
-//! The narration script: a person's profile turned into a timed sequence of
-//! captioned lines (icon + text) that plays under the reel from "hi" to a
-//! sign-off, spread evenly across the loop.
+//! The narration script: a person's profile turned into a per-scene sequence of
+//! captioned lines (icon + text). Each line is tied to a story beat so it lasts
+//! the whole scene — no rushing — and the singing beat cycles the lyrics.
+
+use awan_core::Reel;
 
 use crate::icons::{self, Icon};
 
-/// A person's profile. Empty fields are skipped.
+/// The Sing beat's index in the default story (see awan_core's `STORY`).
+const SING_BEAT: usize = 8;
+/// Ticks each lyric line holds during the singing beat.
+const LYRIC_HOLD: i32 = 30;
+
+/// A person's profile. Empty fields fall back to friendly defaults.
 #[derive(Default)]
 pub struct Profile {
     pub handle: String,
@@ -12,8 +19,8 @@ pub struct Profile {
     pub role: String,
     pub location: String,
     pub stack: String,
-    pub hobby: String,
-    pub site: String,
+    pub streak: u32,
+    pub lyrics: Vec<String>,
 }
 
 /// One narration line: an optional icon and its text.
@@ -23,43 +30,66 @@ pub struct Line {
 }
 
 impl Profile {
-    fn lines(&self) -> Vec<Line> {
-        let mut v = vec![line(&icons::HEART, "hi there!")];
-        if !self.name.is_empty() {
-            v.push(line(&icons::DIAMOND, &format!("i'm {}", self.name)));
+    /// The line to show at tick `t` of the reel.
+    pub fn line(&self, reel: &Reel, t: i32) -> Line {
+        if reel.is_leaving(t) {
+            return line(&icons::HEART, "thanks for stopping by ~");
         }
-        if !self.role.is_empty() {
-            v.push(line(&icons::BRIEFCASE, &self.role));
+        match reel.act_at(t) {
+            None => self.beat(0),
+            Some((SING_BEAT, k)) => self.lyric(k),
+            Some((i, _)) => self.beat(i),
         }
-        if !self.location.is_empty() {
-            v.push(line(&icons::PIN, &self.location));
-        }
-        if !self.stack.is_empty() {
-            v.push(line(&icons::CODE, &self.stack));
-        }
-        if !self.hobby.is_empty() {
-            v.push(line(
-                &icons::STAR,
-                &format!("off the clock: {}", self.hobby),
-            ));
-        }
-        let contact = if self.site.is_empty() {
-            format!("@{}", self.handle)
-        } else {
-            self.site.clone()
-        };
-        v.push(line(&icons::GLOBE, &contact));
-        v.push(line(&icons::HEART, "thanks for stopping by ~"));
-        v
     }
 
-    /// The line to show at tick `t` of a `ticks`-long loop.
-    pub fn line(&self, t: i32, ticks: i32) -> Line {
-        let lines = self.lines();
-        let n = lines.len();
-        let idx = (t.max(0) as i64 * n as i64 / ticks.max(1) as i64) as usize;
-        lines.into_iter().nth(idx.min(n - 1)).unwrap()
+    /// The narration for story beat `i`.
+    fn beat(&self, i: usize) -> Line {
+        let name = pick(&self.name, &self.handle);
+        match i {
+            0 => line(&icons::DIAMOND, &format!("hi there! i'm {name}")),
+            1 => line(&icons::BRIEFCASE, pick(&self.role, "a developer")),
+            2 => line(&icons::PIN, &located(&self.location)),
+            3 => line(
+                &icons::CODE,
+                &format!("i build things, with {}", pick(&self.stack, "code")),
+            ),
+            4 => line(&icons::STAR, "…then watch 'em take off!"),
+            5 => line(&icons::STAR, "always shipping something"),
+            6 => line(&icons::HEART, "and when i'm hungry, i bake"),
+            7 => line(&icons::HEART, "gotta refuel, right?"),
+            9 => line(&icons::FIRE, &self.streak_line()),
+            _ => line(&icons::GLOBE, &format!("@{}", self.handle)),
+        }
     }
+
+    /// During the singing beat: an intro, then the lyrics, line by line.
+    fn lyric(&self, k: i32) -> Line {
+        let step = (k / LYRIC_HOLD) as usize;
+        if step == 0 || self.lyrics.is_empty() {
+            return line(&icons::STAR, "i love music — my fav:");
+        }
+        line(&icons::GLOBE, &self.lyrics[(step - 1) % self.lyrics.len()])
+    }
+
+    fn streak_line(&self) -> String {
+        if self.streak > 0 {
+            format!("{}-day streak, still going", self.streak)
+        } else {
+            "still shipping, day after day".to_string()
+        }
+    }
+}
+
+fn located(loc: &str) -> String {
+    if loc.is_empty() {
+        "somewhere on earth".to_string()
+    } else {
+        format!("based in {loc}")
+    }
+}
+
+fn pick<'a>(value: &'a str, fallback: &'a str) -> &'a str {
+    if value.is_empty() { fallback } else { value }
 }
 
 fn line(icon: &'static Icon, text: &str) -> Line {
