@@ -37,6 +37,7 @@ mod karaoke;
 mod palette;
 mod play;
 pub mod pose;
+mod reel;
 mod scene;
 mod seamless;
 pub mod spec;
@@ -48,6 +49,7 @@ pub use character::Character;
 pub use companion::Companion;
 pub use karaoke::Karaoke;
 pub use pose::Pose;
+pub use reel::Reel;
 pub use stage::{Intro, Size, Stage};
 pub use statusline::statusline;
 
