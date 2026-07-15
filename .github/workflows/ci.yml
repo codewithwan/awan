@@ -54,4 +54,6 @@ jobs:
           toolchain: ${{ matrix.rust }}
       - uses: Swatinem/rust-cache@v2
       - name: Test
-        run: cargo test --workspace
+        # awan-profile is an opt-in, publish=false tool; its deps (image, …)
+        # need newer Rust than the core MSRV, so it's excluded from the matrix.
+        run: cargo test --workspace --exclude awan-profile
