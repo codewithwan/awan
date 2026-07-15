@@ -17,22 +17,22 @@ class Awan < Formula
   on_macos do
     on_arm do
       url "#{base}/awan-aarch64-apple-darwin.tar.gz"
-      sha256 "3323f0ed8378d3911410c9793b527c069511f6a6792cc2eecc3869fd20eee1a9"
+      sha256 "396df28c118aeb08550e7640eb870f896bc7afd0e6f7981c22bbf4d9f6d3a273"
     end
     on_intel do
       url "#{base}/awan-x86_64-apple-darwin.tar.gz"
-      sha256 "a72d21268918a8ce46f750af81a3201d9535db1ea6784fd1f580b5ff1182af7a"
+      sha256 "51c53baf37af00623ade97130b2fb165f846740bc3296ee41f9678ecd3a8504b"
     end
   end
 
   on_linux do
     on_arm do
       url "#{base}/awan-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "12940243e4953e8f47046c4a220eba68c9b42241ffcca22b48b610fced40f518"
+      sha256 "fa4dca8de101a1e3335337cba430001a1f7503fa8606971eab2e621e8f355738"
     end
     on_intel do
       url "#{base}/awan-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "3338fcd115de3cbba390d60daabb562dfc9379a0ffcc8089468558cbfc6a1853"
+      sha256 "f8cfee0d9f5df37950a983d5243024ea081f03ec27cd5ffae652a552e67f70ba"
     end
   end
 
