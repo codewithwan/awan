@@ -1,0 +1,18 @@
+//! Tiny 8×8 pixel icons drawn beside profile lines. Each `u8` is a row; bit
+//! `1 << col` is the pixel at column `col` (0 = left), matching the font byte
+//! order so they rasterise with the same routine.
+
+pub struct Icon(pub [u8; 8]);
+
+/// A gem/marker for the name line.
+pub const DIAMOND: Icon = Icon([0x08, 0x1C, 0x3E, 0x7F, 0x3E, 0x1C, 0x08, 0x00]);
+/// A briefcase for the role.
+pub const BRIEFCASE: Icon = Icon([0x3C, 0x7E, 0xFF, 0xFF, 0xC3, 0xFF, 0xFF, 0x00]);
+/// A map pin for the location.
+pub const PIN: Icon = Icon([0x3C, 0x7E, 0xC3, 0xC3, 0x7E, 0x3C, 0x18, 0x10]);
+/// A `>_` prompt for the tech stack.
+pub const CODE: Icon = Icon([0x00, 0x01, 0x02, 0x04, 0x02, 0x01, 0x7C, 0x00]);
+/// A globe for the site/handle.
+pub const GLOBE: Icon = Icon([0x3C, 0x42, 0x99, 0xA5, 0xA5, 0x99, 0x42, 0x3C]);
+/// A heart for the greeting and sign-off.
+pub const HEART: Icon = Icon([0x36, 0x7F, 0x7F, 0x3E, 0x1C, 0x08, 0x00, 0x00]);

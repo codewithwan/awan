@@ -117,14 +117,21 @@ README:
   <img src="assets/profile-sample.gif" alt="awan profile banner sample" width="620">
 </p>
 
+He walks in, narrates your bio line by line with little pixel icons — greeting,
+name, role, location, stack, links — then walks out and loops. The sample above
+was generated with:
+
 ```sh
-cargo run -p awan-profile -- whoami codewithwan --gif awan.gif
+cargo run -p awan-profile -- whoami codewithwan \
+  --name "Muhammad Ridwan" --role "Fullstack Engineer" \
+  --location "Indonesia" --stack "Rust / Go / TypeScript" \
+  --site "codewithwan.tech" --gif awan.gif
 ```
 
-Work in progress ([design](docs/PROFILE.md)) — coming next: a JSON config, your
-bio rendered with pixel icons, a coding-streak campfire, and a GitHub Action
-that regenerates the GIF on every push. Built as a separate, opt-in crate, so
-the core `awan` stays untouched.
+Work in progress ([design](docs/PROFILE.md)) — coming next: a JSON config, a
+coding-streak campfire badge, and a GitHub Action that regenerates the GIF on
+every push. Built as a separate, opt-in crate, so the core `awan` stays
+untouched.
 
 ## Characters
 
