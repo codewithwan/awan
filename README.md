@@ -125,13 +125,13 @@ was generated with:
 cargo run -p awan-profile -- whoami codewithwan \
   --name "Muhammad Ridwan" --role "Fullstack Engineer" \
   --location "Indonesia" --stack "Rust / Go / TypeScript" \
-  --site "codewithwan.tech" --gif awan.gif
+  --hobby "football & coffee" --gif awan.gif
 ```
 
-Work in progress ([design](docs/PROFILE.md)) — coming next: a JSON config, a
-coding-streak campfire badge, and a GitHub Action that regenerates the GIF on
-every push. Built as a separate, opt-in crate, so the core `awan` stays
-untouched.
+**Set it up on your own profile** — including a copy-paste GitHub Action that
+regenerates it automatically — in [`profile/`](profile). Work in progress
+([design](docs/PROFILE.md)); a coding-streak campfire badge is coming next.
+Built as a separate, opt-in crate, so the core `awan` stays untouched.
 
 ## Characters
 

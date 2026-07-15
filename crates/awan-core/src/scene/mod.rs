@@ -8,6 +8,7 @@
 pub(crate) mod bake;
 pub(crate) mod dance;
 pub(crate) mod gem;
+pub(crate) mod greet;
 pub(crate) mod hatch;
 pub(crate) mod react;
 pub(crate) mod rocket;
@@ -70,16 +71,20 @@ pub(crate) static FULL_SHOW: &[Scene] = &[
     scene(12, true, stroll, "da-da-da~"),
 ];
 
-/// A short, snappy loop for the profile reel (kept brief for a GIF banner).
+/// The profile reel: a little story — waves hello, stands to introduce
+/// himself, shows off a hobby (juggling), has a dance, then a calm beat before
+/// walking out. The profile generator narrates over the top.
 pub(crate) static REEL_SHOW: &[Scene] = &[
-    scene(36, false, street::crate_bonk, "ooh, a box!"),
-    scene(dance::DANCE_TICKS, false, dance::dance, "la la la~"),
+    scene(28, false, greet::wave, "hi!"),
+    scene(44, false, greet::present, "so, about me…"),
     scene(
         soccer::SOCCER_TICKS,
         false,
         soccer::soccer,
         "juggle juggle~",
     ),
+    scene(dance::DANCE_TICKS, false, dance::dance, "la la la~"),
+    scene(24, false, greet::present, "~"),
 ];
 
 /// The "working…" loop: just the making-things skits, for busy indicators.

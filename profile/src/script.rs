@@ -12,6 +12,7 @@ pub struct Profile {
     pub role: String,
     pub location: String,
     pub stack: String,
+    pub hobby: String,
     pub site: String,
 }
 
@@ -35,6 +36,12 @@ impl Profile {
         }
         if !self.stack.is_empty() {
             v.push(line(&icons::CODE, &self.stack));
+        }
+        if !self.hobby.is_empty() {
+            v.push(line(
+                &icons::STAR,
+                &format!("off the clock: {}", self.hobby),
+            ));
         }
         let contact = if self.site.is_empty() {
             format!("@{}", self.handle)

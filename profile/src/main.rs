@@ -29,6 +29,7 @@ fn main() {
                 role: flag(&args, "--role").unwrap_or_default(),
                 location: flag(&args, "--location").unwrap_or_default(),
                 stack: flag(&args, "--stack").unwrap_or_default(),
+                hobby: flag(&args, "--hobby").unwrap_or_default(),
                 site: flag(&args, "--site").unwrap_or_default(),
                 handle,
             };
