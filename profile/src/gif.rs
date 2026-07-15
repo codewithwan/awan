@@ -33,6 +33,9 @@ const FRAME_MS: u32 = 90;
 
 /// Render one seamless loop of `reel`, narrating `profile`, to a GIF at `path`.
 pub fn render_gif(reel: &Reel, profile: &Profile, path: &str) -> std::io::Result<()> {
+    if let Some(dir) = std::path::Path::new(path).parent() {
+        std::fs::create_dir_all(dir)?; // e.g. create assets/ on first run
+    }
     let mut encoder = GifEncoder::new(File::create(path)?);
     let _ = encoder.set_repeat(Repeat::Infinite);
     for t in 0..reel.ticks() {
