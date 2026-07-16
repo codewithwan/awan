@@ -1,6 +1,6 @@
 import type { Scene } from "../lib/acts";
 import type { Tokens } from "../lib/sample";
-import { CAST, castOf } from "../lib/characters";
+import { CAST, castOf, type Cast } from "../lib/characters";
 import { Reel } from "../stage/Reel";
 import { Meter } from "../stage/Meter";
 import { SceneList } from "../story/SceneList";
@@ -13,15 +13,17 @@ type Props = {
   cast: string;
   solo: number;
   id: Tokens;
+  drawn?: Cast;
   onStory: (s: Scene[]) => void;
   onBeat: (i: number) => void;
   onCast: (id: string) => void;
   onSolo: (i: number) => void;
+  onDraw: () => void;
 };
 
 /** The reel, and everything that changes it. The preview leads: it's the only
  *  thing here that tells you whether any of this was a good idea. */
-export function StepStory({ story, beat, cast, solo, id, onStory, onBeat, onCast, onSolo }: Props) {
+export function StepStory({ story, beat, cast, solo, id, drawn, onStory, onBeat, onCast, onSolo, onDraw }: Props) {
   // solo plays one beat on its own — deleting the rest to see a scene means
   // rebuilding the story afterwards, which is a rotten way to look at anything
   const shown = solo >= 0 && story[solo] ? [story[solo]] : story;
@@ -29,14 +31,14 @@ export function StepStory({ story, beat, cast, solo, id, onStory, onBeat, onCast
   return (
     <div className="grid min-w-0 gap-4 xl:grid-cols-[1.4fr_1fr]">
       <div className="flex min-w-0 flex-col gap-4">
-        <Reel story={shown} toml={castOf(cast).toml} id={id} onBeat={(i) => onBeat(solo >= 0 ? solo : i)} />
+        <Reel story={shown} toml={castOf(cast, drawn).toml} id={id} onBeat={(i) => onBeat(solo >= 0 ? solo : i)} />
         <Meter story={story} at={beat} solo={solo} onPick={(i) => onSolo(i === solo ? -1 : i)} />
       </div>
 
       <div className="flex min-w-0 flex-col gap-4">
         <Card title="Who plays him" tone="text-grape-ink">
           <div className="flex flex-wrap gap-2">
-            {CAST.map((c) => (
+            {[...CAST, ...(drawn ? [drawn] : [])].map((c) => (
               <button
                 key={c.id}
                 onClick={() => onCast(c.id)}
@@ -47,10 +49,15 @@ export function StepStory({ story, beat, cast, solo, id, onStory, onBeat, onCast
               </button>
             ))}
           </div>
-          <p className="mt-2 text-[10px] text-mute">
-            Every scene works with every character. Pick one and the whole reel restyles — adding to
-            the cast is TOML only.
-          </p>
+          <div className="mt-3 border-t-3 border-line pt-3">
+            <button onClick={onDraw} className="nb-btn w-full bg-sky px-3 py-2 text-[10px] uppercase text-line">
+              ✎ {drawn ? "keep drawing yours" : "draw your own"}
+            </button>
+            <p className="mt-2 text-[10px] leading-relaxed text-faint">
+              Every scene works with every character — bake, sing, juggle, nap. A character is ten
+              by six pixels and two colours; the engine derives the rest. Yours travels in the zip.
+            </p>
+          </div>
         </Card>
 
         <Card title="Running order" hint="drag to reorder" tone="text-lime-ink">

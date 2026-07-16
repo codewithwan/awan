@@ -23,4 +23,7 @@ export const CAST: Cast[] = [
   },
 ];
 
-export const castOf = (id: string): Cast => CAST.find((c) => c.id === id) ?? CAST[0];
+/** The cast, plus whoever you've drawn. A drawn character isn't a special case
+ *  in the preview — it's a spec like any other, which is the point of specs. */
+export const castOf = (id: string, mine?: Cast): Cast =>
+  (mine && mine.id === id ? mine : CAST.find((c) => c.id === id)) ?? CAST[0];

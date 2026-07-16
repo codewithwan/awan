@@ -10,6 +10,9 @@ import { GithubMark } from "./ui/GithubMark";
 import { StepIdentity } from "./steps/StepIdentity";
 import { StepStory } from "./steps/StepStory";
 import { StepExport } from "./steps/StepExport";
+import { Studio, slug } from "./character/Studio";
+import { starter, } from "./character/starters";
+import { toToml, type Character } from "./lib/spec";
 
 /** The shell: which step you're on, and the two pieces of state the steps
  *  share. Everything that draws lives somewhere else. */
@@ -22,6 +25,15 @@ export function App() {
   const [cast, setCast] = useDraft<string>("cast", "awan");
   const [beat, setBeat] = useState(-1);
   const [solo, setSolo] = useState(-1);
+  // a character you drew, kept with the draft — nobody should lose a drawing to
+  // a reload either
+  const [mine, setMine] = useDraft<Character | null>("mine", null);
+  const [drawing, setDrawing] = useState(false);
+
+  const drawn = mine
+    ? { id: "mine", label: mine.name || "Yours", blurb: mine.description || "drawn by you",
+        toml: toToml(mine), path: `characters/${slug(mine.name)}.toml` }
+    : undefined;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8">
@@ -29,6 +41,10 @@ export function App() {
       <Stepper at={at} onGo={setAt} />
 
       <main className="min-w-0 flex-1">
+        {drawing && mine ? (
+          <Studio char={mine} onChange={setMine} onClose={() => setDrawing(false)} />
+        ) : (
+          <>
         {at === 0 && <StepIdentity id={id} onChange={setId} />}
         {at === 1 && (
           <StepStory
@@ -37,19 +53,27 @@ export function App() {
             cast={cast}
             solo={solo}
             id={id}
+            drawn={drawn}
             onStory={setStory}
             onBeat={setBeat}
             onCast={setCast}
             onSolo={setSolo}
+            onDraw={() => {
+              if (!mine) setMine(starter("blob"));
+              setCast("mine");
+              setDrawing(true);
+            }}
           />
         )}
-        {at === 2 && <StepExport id={id} story={story} cast={cast} />}
+        {at === 2 && <StepExport id={id} story={story} cast={cast} drawn={drawn} />}
+          </>
+        )}
       </main>
 
       {/* Neither arrow appears where it has nowhere to go. A button whose only
           job is to be greyed out is furniture, and the last step's Next was
           worse than furniture: it implied a fourth step that doesn't exist. */}
-      <nav className="flex gap-2">
+      <nav className={`flex gap-2 ${drawing ? "hidden" : ""}`}>
         {at > 0 && <Button onClick={() => setAt((i) => i - 1)}>‹ back</Button>}
         {at < STEPS.length - 1 && (
           <Button tone="lime" onClick={() => setAt((i) => i + 1)} className="ml-auto">
