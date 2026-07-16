@@ -1,6 +1,6 @@
 [package]
 name = "awan-core"
-description = "Scene engine, face system, and character spec for awan — a tiny living character for your terminal"
+description = "The engine behind awan: deterministic pixel frames from (tick, character), with characters as TOML"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

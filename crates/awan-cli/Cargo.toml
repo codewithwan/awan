@@ -1,6 +1,6 @@
 [package]
 name = "awan-cli"
-description = "The awan binary: demo, watch, idle, statusline"
+description = "The awan command — the pixel character from your profile README, running in your terminal"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

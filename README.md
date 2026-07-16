@@ -215,12 +215,17 @@ library — no Rust, no rebuild of the engine.
 
 ## Roadmap
 
-- **Shipping** — seam-free rendering, ambient `watch` companion, cross-language
-  event protocol with Node/Python/Go/shell clients ([docs](docs/INTEGRATE.md))
-- **v0.1** — prebuilt binaries on every release, polished `awan` binary
-- **v0.2** — in-process embed API for Rust CLI authors (`wait` / `ask` / `react`)
-- **Later** — more characters and skits, graphics-protocol backends,
-  community roster
+The banner is the product; everything else is how it's made.
+
+- **Shipping** — profile banners with live numbers, the contribution year, a
+  browser editor with a character studio, and a reusable workflow you call
+  rather than copy
+- **Next** — more beats worth watching, and somewhere to show the characters
+  people draw
+- **Also true** — he's a terminal companion (`watch`, `busy`, `statusline`) and
+  a character engine any CLI can embed. Both work today. Neither is the pitch,
+  and that's a decision, not an oversight: a character card people want beats a
+  library nobody asked for.
 
 ## Promises
 
