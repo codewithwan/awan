@@ -53,6 +53,12 @@ pub mod stats {
     pub use crate::scene::stats::{PANEL, SLOTS, chars_at, panel_at, typing};
 }
 
+/// Where the trophy shelf hangs and how much of it he's filled. The labels
+/// under the cups are the reader's numbers — the engine never sees them.
+pub mod trophies {
+    pub use crate::scene::trophies::{PITCH, SHELF, SLOTS, landed, stand_pct};
+}
+
 /// Where the contribution wall hangs, how far up it is and how lit its month
 /// is. The
 /// squares are the renderer's job — the engine never sees anyone's numbers.

@@ -11,6 +11,7 @@ use image::{Delay, Frame, Rgba, RgbaImage};
 
 use crate::draw::{draw_bits, draw_text, fill};
 use crate::script::{Line, Profile};
+use crate::shelf::shelf;
 use crate::wall::wall;
 use awan_core::icons;
 
@@ -73,6 +74,9 @@ fn rasterize(reel: &Reel, profile: &Profile, t: i32) -> RgbaImage {
     }
     if let Some(k) = profile.stats_at(reel, t) {
         stat_labels(&mut img, profile, k);
+    }
+    if let Some(k) = profile.trophies_at(reel, t) {
+        shelf(&mut img, profile, k);
     }
 
     match profile.sing_at(reel, t) {

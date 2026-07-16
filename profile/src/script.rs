@@ -52,6 +52,10 @@ pub struct Profile {
     pub contributions: String,
     pub contrib_year: u32,
     pub contrib_recent: u32,
+    /// Labels for the `trophies` act, as `"label:value"` — CI fills these.
+    /// Five at most: that's what fits on the shelf, and as many numbers as
+    /// anyone actually reads.
+    pub trophies: Vec<String>,
     pub lyrics: Vec<String>,
     pub output: String,
     pub scenes: Vec<SceneSpec>,
@@ -86,6 +90,11 @@ impl Profile {
     /// If the beat at tick `t` is the stats parade, its tick-within-scene.
     pub fn stats_at(&self, reel: &Reel, t: i32) -> Option<i32> {
         self.beat_at(reel, t, "stats")
+    }
+
+    /// If the beat at tick `t` is the trophy shelf, its tick-within-scene.
+    pub fn trophies_at(&self, reel: &Reel, t: i32) -> Option<i32> {
+        self.beat_at(reel, t, "trophies")
     }
 
     /// If the beat at tick `t` is the year wall, its tick-within-scene.

@@ -28,6 +28,7 @@ pub enum Act {
     Campfire,
     Stats,
     Contributions,
+    Trophies,
     Sleep,
     Dance,
     Soccer,

@@ -19,6 +19,7 @@ pub(crate) mod soccer;
 pub(crate) mod song;
 pub(crate) mod stats;
 pub(crate) mod street;
+pub(crate) mod trophies;
 pub(crate) mod wander;
 
 use crate::grid::{Grid, blit};
@@ -90,6 +91,7 @@ pub(crate) fn scene_for(act: crate::reel::Act) -> Scene {
         Sing => scene(song::DUR, false, song::sing, ""),
         Campfire => scene(campfire::DUR, false, campfire::campfire, ""),
         Stats => scene(stats::DUR, false, stats::stats, ""),
+        Trophies => scene(trophies::DUR, false, trophies::trophies, ""),
         Contributions => scene(contributions::DUR, false, contributions::contributions, ""),
         Sleep => scene(sleep::DUR, false, sleep::sleep, ""),
         Dance => scene(dance::DANCE_TICKS, false, dance::dance, ""),
