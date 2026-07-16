@@ -1,30 +1,23 @@
 # awan ☁️
 
-[![CI](https://github.com/codewithwan/awan/actions/workflows/ci.yml/badge.svg)](https://github.com/codewithwan/awan/actions/workflows/ci.yml)
-[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
-[![Build your banner](https://img.shields.io/badge/build%20your%20banner-codewithwan.github.io%2Fawan-39d353.svg)](https://codewithwan.github.io/awan/)
+[![Build yours](https://img.shields.io/badge/build%20yours-codewithwan.github.io%2Fawan-39d353.svg?style=flat-square)](https://codewithwan.github.io/awan/)
+[![CI](https://img.shields.io/github/actions/workflow/status/codewithwan/awan/ci.yml?label=ci&style=flat-square)](https://github.com/codewithwan/awan/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/awan-cli?style=flat-square)](https://crates.io/crates/awan-cli)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg?style=flat-square)](#license)
 
-> A tiny living character for your terminal — and a **personality layer** any
-> CLI can embed: `wait`, `ask`, `react`.
-
-<p align="center">
-  <img src="assets/banner.gif" alt="awan introducing awan, with this repo's live numbers" width="700">
-</p>
+A tiny pixel character that walks your GitHub contribution year.
 
 <p align="center">
-  <sub>
-    Yes — awan drew that, about itself. It's rendered from
-    <a href="awan.json"><code>awan.json</code></a> by <a href="profile"><code>profile/</code></a>,
-    and the numbers on that terminal are this repo's own, refreshed nightly by
-    <a href=".github/workflows/banner.yml">a workflow</a>. <a href="#profile-gif">Make your own ↓</a>
-  </sub>
+  <img src="assets/banner.gif" alt="awan walking a contribution year on a GitHub profile" width="700">
 </p>
 
-He strolls, bonks into crates, dozes off mid-sit, chases butterflies, freezes
-at falling gems, fetches his little oven to bake (and devour) a cake, dances
-to a silent beat, juggles a ball until it bonks him dizzy, builds a rocket,
-and watches it explode — then shakes off the soot and strolls on. On the very
-first run, he hatches out of an egg. 🥚
+He reads your real numbers, brags when the month went well, and goes to sleep
+when it didn't. A workflow in **your** repo redraws him nightly — nothing to
+host, no account, no token.
+
+<p align="center">
+  <a href="https://codewithwan.github.io/awan/"><b>→ build yours in the browser</b></a>
+</p>
 
 <!-- The banner up top covers this for now; assets/demo.gif is still here if the
      raw terminal loop ever earns the spot back.
@@ -36,7 +29,47 @@ first run, he hatches out of an egg. 🥚
 <p align="center"><sub>One loop of the show, in a real terminal.</sub></p>
 -->
 
-## Quick start
+## Put him on your profile
+
+Three files in the repo named after you. No secrets to set up: the token GitHub
+Actions already gives you reads everything he needs.
+
+<p align="center">
+  <img src="assets/profile-sample.gif" alt="awan telling a profile's story, with that profile's real numbers" width="700">
+</p>
+
+<p align="center">
+  <sub>
+    A real profile, not a mock-up: the streak, the readout and the contribution
+    year are all live numbers a workflow fetched. It's a still preview, so it
+    isn't refreshed — <a href="profile">yours would be</a>, nightly.
+  </sub>
+</p>
+
+**[Build it in the browser →](https://codewithwan.github.io/awan/)** Arrange the
+beats, watch it play, download the folder. The preview runs the real engine
+compiled to wasm, so the frames you see are the frames CI draws — and you can
+draw your own character while you're there.
+
+Nothing is stored and there's no server behind it. Your config lives in your
+repo and the workflow runs there, which is also why this page can't break your
+banner.
+
+Prefer files? Copy the ready-made setup and edit one:
+
+```sh
+cp -r profile/sample/. my-profile/   # awan.json + a GitHub Action + a profile README
+cargo run -p awan-profile -- whoami --config my-profile/awan.json
+```
+
+Full walkthrough and the `awan.json` format: **[`profile/`](profile)**. Built as
+a separate, opt-in crate, so the core `awan` stays untouched.
+
+## He also lives in your terminal
+
+The banner is a side effect: awan is a character engine first, and the same
+character runs in a terminal, reacts to your shell, and can be embedded by any
+CLI that can spawn a process.
 
 ```sh
 npx @codewithwan/awan demo         # try it, no install (needs Node)
@@ -124,50 +157,6 @@ full guide is [**docs/INTEGRATE.md**](docs/INTEGRATE.md).
 Runnable, self-contained examples for each language are in
 [**`usage/`**](usage) — `cd usage/node && npm install && npm start`, and so on.
 From your code it's just `awan.react("task.done")`; you never spawn anything.
-
-## Profile GIF
-
-Turn awan into a **seam-free looping banner for your GitHub profile** — he walks
-in and tells your story (builds a rocket, bakes, warms up by a campfire, prints
-your numbers, walks his own contribution year, sings karaoke, kicks a ball,
-naps), then loops. It's all driven by one editable `awan.json`, scene order
-included.
-
-<p align="center">
-  <img src="assets/profile-sample.gif" alt="awan telling a profile's story, with that profile's real numbers" width="700">
-</p>
-
-<p align="center">
-  <sub>
-    A real profile, not a mock-up: the streak, the readout and the contribution
-    year are all live numbers a workflow fetched. It's a still preview, so it
-    isn't refreshed — <a href="profile">yours would be</a>, nightly.
-  </sub>
-</p>
-
-### Build one without writing any JSON
-
-**[codewithwan.github.io/awan](https://codewithwan.github.io/awan/)** — arrange
-the beats, watch it play, take the three files. The preview is the engine itself
-compiled to wasm, so the frames you're looking at are the frames CI will draw.
-
-Nothing is stored and there's no server behind it: your config lives in your
-repo, and the workflow runs there. That's also why the page can't break your
-banner.
-
-<p align="center">
-  <a href="https://codewithwan.github.io/awan/"><b>→ open the editor</b></a>
-</p>
-
-Prefer files? Copy the ready-made setup and edit one:
-
-```sh
-cp -r profile/sample/. my-profile/   # awan.json + a GitHub Action + a profile README
-cargo run -p awan-profile -- whoami --config my-profile/awan.json
-```
-
-Full walkthrough and the `awan.json` format: **[`profile/`](profile)**. Built as
-a separate, opt-in crate, so the core `awan` stays untouched.
 
 ## Characters
 

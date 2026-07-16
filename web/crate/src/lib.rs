@@ -84,9 +84,23 @@ impl Preview {
     }
 }
 
+/// Why a spec won't load, in the engine's own words — or `None` if it will.
+///
+/// The editor used to re-implement these rules in JavaScript, which meant two
+/// sources of truth and one of them wrong: a character with no eyes fell back
+/// to the built-in buddy *silently*, so you drew a cat and watched a cloud walk
+/// past. The rules live in one place. Ask them.
+#[wasm_bindgen]
+pub fn check_spec(toml: &str) -> Option<String> {
+    match awan_core::spec::parse(toml) {
+        Err(e) => Some(e.to_string()),
+        Ok(spec) => Character::from_spec(&spec).err().map(|e| e.to_string()),
+    }
+}
+
 /// A character from its TOML spec, or the built-in buddy. A spec that doesn't
-/// parse falls back rather than failing: the editor should keep drawing while
-/// someone is halfway through breaking their own file.
+/// parse falls back rather than failing — callers who care whether that
+/// happened should ask [`check_spec`] first, which is what the editor does.
 fn character_of(toml: Option<&str>) -> Character {
     toml.and_then(|t| awan_core::spec::parse(t).ok())
         .and_then(|s| Character::from_spec(&s).ok())

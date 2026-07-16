@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { files, type Identity } from "../lib/config";
 import { downloadZip } from "../lib/zip";
-import { castOf } from "../lib/characters";
+import { castOf, type Cast } from "../lib/characters";
 import type { Scene } from "../lib/acts";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
@@ -9,9 +9,10 @@ import { Code } from "../ui/Code";
 
 /** The whole setup, as a folder — or a file at a time, if that's your way of
  *  working. The zip is the fast path, not the only one. */
-export function StepExport({ id, story, cast }: { id: Identity; story: Scene[]; cast: string }) {
+export function StepExport({ id, story, cast, drawn }: { id: Identity; story: Scene[]; cast: string; drawn?: Cast }) {
   const you = id.username.trim();
-  const bundle = files(id, story, castOf(cast).path);
+  const useMine = cast === "mine" && drawn;
+  const bundle = files(id, story, castOf(cast, drawn).path, useMine ? { path: drawn.path, toml: drawn.toml } : undefined);
 
   return (
     <Card title="Take it home" hint="one zip, or three files — your call">

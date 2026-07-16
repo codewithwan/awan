@@ -67,8 +67,11 @@ export const README_LINE = "![awan](assets/awan.gif)";
 /** The three files, at the paths they belong at. Handing over a zip beats
  *  handing over three clipboards: the paths *are* the instructions, and
  *  ".github/workflows/" is exactly the bit someone gets wrong at midnight. */
-export const files = (id: Identity, story: Scene[], character = "") => ({
-  "awan.json": buildConfig(id, story, character),
+export const files = (id: Identity, story: Scene[], character = "", drawn?: { path: string; toml: string }) => ({
+  "awan.json": buildConfig(id, story, drawn?.path ?? character),
   ".github/workflows/awan.yml": WORKFLOW,
   "README.md": `${README_LINE}\n\n# hi, i'm ${id.name || id.username || "you"}\n`,
+  // a character you drew travels with the config that names it: the zip is the
+  // setup, and a config pointing at a file you don't have isn't a setup
+  ...(drawn ? { [drawn.path]: drawn.toml } : {}),
 });
