@@ -5,19 +5,37 @@ in and tells your story, then loops (~60s). A separate, opt-in tool: it never
 ships with the core `awan`.
 
 <p align="center">
-  <img src="../assets/profile-sample.gif" alt="awan profile banner sample" width="640">
+  <img src="../assets/profile-sample.gif" alt="awan profile banner sample" width="700">
 </p>
 
 Everything is driven by one file, [`awan.json`](sample/awan.json) — you control
 the words **and** the order of the scenes.
 
+## Two flavours, one engine
+
+Same acts, same config shape — only the content differs. Pick a sample and edit:
+
+| Banner | Sample | For |
+|---|---|---|
+| **Profile** | [`sample/awan.json`](sample/awan.json) | your `<you>/<you>` repo — bio, streak, song |
+| **Project** | [`sample/project.json`](sample/project.json) | any repo README — what it does, install, stats |
+
+<p align="center">
+  <img src="../assets/project-sample.gif" alt="awan project banner sample" width="700">
+</p>
+
+*The project flavour: he welcomes you, then opens a terminal and prints the
+repo's numbers.* Drop `{ "act": "stats" }` into **either** config — it reads the
+same `stats` array.
+
 ## Get started
 
-The [`sample/`](sample) folder is a ready-to-copy profile setup:
+The [`sample/`](sample) folder is a ready-to-copy setup:
 
 ```
 sample/
-├── awan.json                     # ← edit this: your bio, streak, song, scenes
+├── awan.json                     # ← profile flavour: bio, streak, song, scenes
+├── project.json                  # ← project flavour: tagline, install, stats
 ├── README.md                     # a starter profile README (shows the GIF)
 └── .github/workflows/awan.yml    # regenerates the GIF on every push
 ```
@@ -37,6 +55,7 @@ its own — no Ctrl+C.
 ```jsonc
 {
   "handle": "codewithwan",
+  "character": "",                      // path to a character TOML; empty = the buddy
   "name": "Muhammad Ridwan",
   "role": "fullstack engineer",
   "location": "Indonesia",
@@ -45,6 +64,9 @@ its own — no Ctrl+C.
   "song": "your favourite song",        // shown as: my fav song "…" - artist
   "artist": "the artist",
   "lyrics": ["your", "favourite", "song lines"],
+  "stats": ["stars:1.2k", "downloads:50k", "contributors:12",
+            "version:v0.0.4", "license:MIT"],   // "label:value" — printed into
+                                        // the terminal window by the `stats` act
   "output": "assets/awan.gif",          // where the GIF is written
   "scenes": [                            // ← reorder / add / remove freely
     { "act": "wave",     "say": "hi there! i'm {name}" },
@@ -71,6 +93,7 @@ its own — no Ctrl+C.
 | `campfire` | drags in wood, throws a spark, the fire catches, then pops |
 | `sing` | steps aside; lyrics play karaoke-style on the left |
 | `soccer` | juggles a ball |
+| `stats` | opens a little terminal window and *prints* your numbers into it, line by line |
 | `sleep` | yawns, dozes (`zzz`), wakes up |
 | `dance` | a little dance |
 
@@ -90,6 +113,14 @@ The workflow in [`sample/.github/`](sample/.github) carries **no personal data**
 ```
 
 Reference the GIF in your profile `README.md`: `![awan](assets/awan.gif)`.
+
+## Live numbers
+
+The renderer never touches the network — that stays a promise of the binary.
+Instead **CI fetches and the binary draws**: the sample workflow pulls the real
+stars / forks / contributors / version / license with `gh api`, writes them into
+`awan.json` with `jq`, then renders. It also runs nightly, so the numbers stay
+fresh without you touching anything.
 
 ## Notes
 

@@ -1,0 +1,44 @@
+{
+  "handle": "codewithwan/awan",
+  "name": "awan",
+  "role": "a tiny living character for your terminal",
+  "stack": "Rust",
+  "stats": [
+    "stars:1.2k",
+    "downloads:50k",
+    "contributors:12",
+    "version:v0.0.4",
+    "license:MIT"
+  ],
+  "output": "assets/project.gif",
+  "scenes": [
+    {
+      "act": "wave",
+      "say": "hi! welcome to {name}"
+    },
+    {
+      "act": "present",
+      "say": "{role}"
+    },
+    {
+      "act": "stroll",
+      "say": "built with {stack}, ships as one binary"
+    },
+    {
+      "act": "stats",
+      "say": "let's see how it's doing"
+    },
+    {
+      "act": "rocket",
+      "say": "npm i @codewithwan/awan"
+    },
+    {
+      "act": "launch",
+      "say": "...and it just runs"
+    },
+    {
+      "act": "dance",
+      "say": "give it a star if it helps!"
+    }
+  ]
+}

@@ -6,10 +6,10 @@
 use std::fs::File;
 
 use awan_core::Reel;
-use font8x8::{BASIC_FONTS, UnicodeFonts};
 use image::codecs::gif::{GifEncoder, Repeat};
 use image::{Delay, Frame, Rgba, RgbaImage};
 
+use crate::draw::{draw_bits, draw_text, fill};
 use crate::icons;
 use crate::script::{Line, Profile};
 
@@ -21,6 +21,8 @@ const CAPTION_H: u32 = 56;
 /// Bitmap-font / icon pixel size for the caption, and the smaller lyric size.
 const SCALE: u32 = 3;
 const LYRIC_SCALE: u32 = 2;
+/// The big number on a bento card.
+const STAT_SCALE: u32 = 3;
 /// Rightmost x the lyric panel may reach, before the character.
 const LYRIC_LIMIT: u32 = 18 * CELL_W;
 /// Backdrop, ground line, caption ink, and icon accent.
@@ -63,12 +65,56 @@ fn rasterize(reel: &Reel, profile: &Profile, t: i32) -> RgbaImage {
     }
     fill(&mut img, 0, ground, w, 2, GROUND);
     streak_badge(&mut img, profile.streak, w);
+    if let Some(k) = profile.stats_at(reel, t) {
+        stat_labels(&mut img, profile, k);
+    }
 
     match profile.sing_at(reel, t) {
         Some(k) => karaoke(&mut img, profile, k, ground),
         None => caption(&mut img, &profile.line(reel, t), w, ground),
     }
     img
+}
+
+/// Print the readout into the little terminal window: the label, a dotted
+/// leader, the value pushed right — each line typing itself out, cursor and
+/// all. Values come from the config as `"label:value"`.
+fn stat_labels(img: &mut RgbaImage, profile: &Profile, k: i32) {
+    let (px, py, pw, ph) = awan_core::stats::PANEL;
+    let (left, top) = (px as u32 * CELL_W, py as u32 * CELL_H);
+    let glyph = 8 * STAT_SCALE;
+    // Fit the readout inside the window's border cells, keeping a glyph of air
+    // on every side, then centre what's left over.
+    let (inner_w, inner_h) = ((pw as u32 - 2) * CELL_W, (ph as u32 - 2) * CELL_H);
+    let room = (inner_w / glyph).saturating_sub(2) as usize;
+    let x = left + CELL_W + (inner_w - room as u32 * glyph) / 2;
+    let step = glyph + 12;
+    let block = (awan_core::stats::SLOTS as u32 - 1) * step + glyph;
+    let y0 = top + CELL_H + (inner_h.saturating_sub(block)) / 2;
+
+    for (i, entry) in profile
+        .stats
+        .iter()
+        .take(awan_core::stats::SLOTS)
+        .enumerate()
+    {
+        let shown = awan_core::stats::chars_at(k, i);
+        if shown == 0 {
+            continue;
+        }
+        let (label, value) = entry.split_once(':').unwrap_or(("", entry.as_str()));
+        // dotted leader, so the values line up down the right edge
+        let gap = room.saturating_sub(label.chars().count() + value.chars().count() + 1);
+        let line = format!("{label}{} {value}", ".".repeat(gap));
+        let text: String = line.chars().take(shown).collect();
+
+        let y = y0 + i as u32 * step;
+        draw_text(img, &text, x, y, STAT_SCALE, INK);
+        if awan_core::stats::typing(k, i) {
+            let cx = x + text.chars().count() as u32 * glyph;
+            fill(img, cx, y, glyph / 2, glyph, INK);
+        }
+    }
 }
 
 /// A centred narration line (icon + text) below the ground.
@@ -109,43 +155,4 @@ fn streak_badge(img: &mut RgbaImage, streak: u32, w: u32) {
     let y = 12;
     draw_bits(img, &icons::FIRE.0, x, y, SCALE, ACCENT);
     draw_text(img, &num, x + 8 * SCALE + SCALE * 2, y, SCALE, ACCENT);
-}
-
-/// Fill a `w`×`h` rectangle at `(x0, y0)`, clipped to the image.
-fn fill(img: &mut RgbaImage, x0: u32, y0: u32, w: u32, h: u32, c: [u8; 3]) {
-    let px = Rgba([c[0], c[1], c[2], 255]);
-    for y in y0..(y0 + h).min(img.height()) {
-        for x in x0..(x0 + w).min(img.width()) {
-            img.put_pixel(x, y, px);
-        }
-    }
-}
-
-/// Draw an 8-row bitmap (font glyph or icon) at `(x, y)`, `scale` px per pixel.
-fn draw_bits(img: &mut RgbaImage, bits: &[u8; 8], x: u32, y: u32, scale: u32, c: [u8; 3]) {
-    for (row, byte) in bits.iter().enumerate() {
-        for col in 0..8u32 {
-            if byte & (1 << col) != 0 {
-                fill(
-                    img,
-                    x + col * scale,
-                    y + row as u32 * scale,
-                    scale,
-                    scale,
-                    c,
-                );
-            }
-        }
-    }
-}
-
-/// Draw `text` starting at `(x, y)` at `scale`, in colour `c`.
-fn draw_text(img: &mut RgbaImage, text: &str, x: u32, y: u32, scale: u32, c: [u8; 3]) {
-    let mut cx = x;
-    for chr in text.chars() {
-        if let Some(glyph) = BASIC_FONTS.get(chr) {
-            draw_bits(img, &glyph, cx, y, scale, c);
-        }
-        cx += 8 * scale;
-    }
 }

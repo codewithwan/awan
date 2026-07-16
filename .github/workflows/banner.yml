@@ -1,32 +1,32 @@
-name: awan profile
+name: banner
 
-# Regenerates assets/awan.gif from awan.json. Triggers when you edit awan.json,
-# nightly (so live numbers stay fresh), or by hand: Actions → Run workflow.
+# Dogfooding: awan renders its own README banner from awan.json, with this
+# repo's real numbers. Same shape as the one we hand to readers in
+# profile/sample/, except it builds the crate straight from this checkout.
 on:
   push:
-    branches: [main, master] # profile repos use either
-    paths: ["awan.json"]
+    branches: [main]
+    paths: ["awan.json", "profile/**", "crates/awan-core/**"]
   schedule:
-    - cron: "0 3 * * *"
+    - cron: "0 3 * * *" # keep the numbers fresh
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  awan:
+  banner:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo install --git https://github.com/codewithwan/awan awan-profile
+      - uses: Swatinem/rust-cache@v2
 
-      # Pull the real numbers and write them into awan.json. The renderer never
-      # touches the network — CI fetches, the binary just draws.
+      # CI fetches, the binary draws — the renderer never touches the network.
       - name: Fetch live stats
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }} # or hard-code any owner/name
+          REPO: ${{ github.repository }}
         run: |
           api() { gh api "$1" --jq "$2" 2>/dev/null || echo "?"; }
           STARS=$(api "repos/$REPO" '.stargazers_count')
@@ -40,15 +40,18 @@ jobs:
                         "version:\($v)", "license:\($l)"]' \
              awan.json > awan.tmp && mv awan.tmp awan.json
 
-      - run: awan-profile whoami --config awan.json
+      - name: Render
+        run: cargo run -q -p awan-profile --release -- whoami --config awan.json
+
       - name: Shrink the GIF
         run: |
           sudo apt-get update && sudo apt-get install -y gifsicle
-          gifsicle -O3 --lossy=80 --colors 64 assets/awan.gif -o assets/awan.gif
+          gifsicle -O3 --lossy=80 --colors 64 assets/banner.gif -o assets/banner.gif
+
       - name: Commit the result
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/awan.gif awan.json
-          git commit -m "chore: refresh awan profile" || echo "no changes"
+          git add assets/banner.gif awan.json
+          git commit -m "chore: refresh the awan banner" || echo "no changes"
           git push
