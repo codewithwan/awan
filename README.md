@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/codewithwan/awan/actions/workflows/ci.yml/badge.svg)](https://github.com/codewithwan/awan/actions/workflows/ci.yml)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
+[![Build your banner](https://img.shields.io/badge/build%20your%20banner-codewithwan.github.io%2Fawan-39d353.svg)](https://codewithwan.github.io/awan/)
 
 > A tiny living character for your terminal — and a **personality layer** any
 > CLI can embed: `wait`, `ask`, `react`.
@@ -144,16 +145,29 @@ included.
   </sub>
 </p>
 
-Copy the ready-made setup and edit one file:
+### Build one without writing any JSON
+
+**[codewithwan.github.io/awan](https://codewithwan.github.io/awan/)** — arrange
+the beats, watch it play, take the three files. The preview is the engine itself
+compiled to wasm, so the frames you're looking at are the frames CI will draw.
+
+Nothing is stored and there's no server behind it: your config lives in your
+repo, and the workflow runs there. That's also why the page can't break your
+banner.
+
+<p align="center">
+  <a href="https://codewithwan.github.io/awan/"><b>→ open the editor</b></a>
+</p>
+
+Prefer files? Copy the ready-made setup and edit one:
 
 ```sh
 cp -r profile/sample/. my-profile/   # awan.json + a GitHub Action + a profile README
 cargo run -p awan-profile -- whoami --config my-profile/awan.json
 ```
 
-Full walkthrough, the `awan.json` format, and how to auto-regenerate it on every
-push: **[`profile/`](profile)**. Built as a separate, opt-in crate, so the core
-`awan` stays untouched.
+Full walkthrough and the `awan.json` format: **[`profile/`](profile)**. Built as
+a separate, opt-in crate, so the core `awan` stays untouched.
 
 ## Characters
 
