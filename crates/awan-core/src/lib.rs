@@ -51,6 +51,13 @@ pub mod stats {
     pub use crate::scene::stats::{PANEL, SLOTS, chars_at, panel_at, typing};
 }
 
+/// Where the contribution wall hangs, how far up it is and how lit its month
+/// is. The
+/// squares are the renderer's job — the engine never sees anyone's numbers.
+pub mod contributions {
+    pub use crate::scene::contributions::{DAYS, RECENT, WALL, WEEKS, fade_pct, glow_pct};
+}
+
 pub use character::Character;
 pub use companion::Companion;
 pub use karaoke::Karaoke;

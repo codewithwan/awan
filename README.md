@@ -127,12 +127,21 @@ From your code it's just `awan.react("task.done")`; you never spawn anything.
 ## Profile GIF
 
 Turn awan into a **seam-free looping banner for your GitHub profile** — he walks
-in and tells your story (builds a rocket, bakes, warms up by a campfire, sings
-your favourite song karaoke-style, kicks a ball, naps), then loops. It's all
-driven by one editable `awan.json`, scene order included.
+in and tells your story (builds a rocket, bakes, warms up by a campfire, prints
+your numbers, walks his own contribution year, sings karaoke, kicks a ball,
+naps), then loops. It's all driven by one editable `awan.json`, scene order
+included.
 
 <p align="center">
-  <img src="assets/profile-sample.gif" alt="awan profile banner sample" width="700">
+  <img src="assets/profile-sample.gif" alt="awan telling a profile's story, with that profile's real numbers" width="700">
+</p>
+
+<p align="center">
+  <sub>
+    A real profile, not a mock-up: the streak, the readout and the contribution
+    year are all live numbers a workflow fetched. It's a still preview, so it
+    isn't refreshed — <a href="profile">yours would be</a>, nightly.
+  </sub>
 </p>
 
 Copy the ready-made setup and edit one file:

@@ -5,6 +5,7 @@
 use awan_core::{Act, Reel};
 
 use crate::icons::{self, Icon};
+use crate::story::{act_of, default_story, icon_of};
 
 /// Ticks each lyric line holds during a singing beat.
 pub const LYRIC_HOLD: i32 = 30;
@@ -15,6 +16,10 @@ pub struct SceneSpec {
     pub act: String,
     #[serde(default)]
     pub say: String,
+    /// A second caption that takes the beat over partway through. The wall uses
+    /// it for the month, so the words land on the same tick as the spotlight.
+    #[serde(default)]
+    pub then: String,
 }
 
 /// A profile, as loaded from `awan.json` (or built from flags).
@@ -34,6 +39,12 @@ pub struct Profile {
     /// Up to five short labels for the `stats` act: the first three ride
     /// balloons, the last two sit in crates. Keep them short (≤ 10 chars).
     pub stats: Vec<String>,
+    /// The contribution calendar for the `contributions` act: one character
+    /// per day, `0`-`4` for GitHub's quartiles and `.` for a day the
+    /// calendar doesn't cover. CI fills this in; nobody types it by hand.
+    pub contributions: String,
+    pub contrib_year: u32,
+    pub contrib_recent: u32,
     pub lyrics: Vec<String>,
     pub output: String,
     pub scenes: Vec<SceneSpec>,
@@ -70,6 +81,11 @@ impl Profile {
         self.beat_at(reel, t, "stats")
     }
 
+    /// If the beat at tick `t` is the year wall, its tick-within-scene.
+    pub fn contributions_at(&self, reel: &Reel, t: i32) -> Option<i32> {
+        self.beat_at(reel, t, "contributions")
+    }
+
     fn beat_at(&self, reel: &Reel, t: i32, act: &str) -> Option<i32> {
         let (i, k) = reel.act_at(t)?;
         (self.story().get(i).map(|s| s.act.as_str()) == Some(act)).then_some(k)
@@ -82,7 +98,21 @@ impl Profile {
         }
         let story = self.story();
         let i = reel.act_at(t).map_or(0, |(i, _)| i).min(story.len() - 1);
-        line(icon_of(&story[i].act), &self.fill(&story[i].say))
+        let spec = &story[i];
+        line(icon_of(&spec.act), &self.fill(self.said(reel, t, spec)))
+    }
+
+    /// A beat's caption — its `then` sentence once the wall's spotlight is up,
+    /// so the month is named at the moment it lights, not a beat later.
+    fn said<'a>(&self, reel: &Reel, t: i32, spec: &'a SceneSpec) -> &'a str {
+        let lit = self
+            .contributions_at(reel, t)
+            .is_some_and(|k| awan_core::contributions::glow_pct(k) > 0);
+        if lit && !spec.then.is_empty() {
+            &spec.then
+        } else {
+            &spec.say
+        }
     }
 
     /// One karaoke line at tick `k` of a singing beat: an intro that names the
@@ -113,59 +143,9 @@ impl Profile {
             .replace("{stack}", &self.stack)
             .replace("{streak}", &self.streak.to_string())
             .replace("{handle}", &self.handle)
+            .replace("{contrib_year}", &self.contrib_year.to_string())
+            .replace("{contrib_recent}", &self.contrib_recent.to_string())
     }
-}
-
-fn act_of(name: &str) -> Act {
-    match name {
-        "wave" => Act::Wave,
-        "stroll" => Act::Stroll,
-        "rocket" => Act::RocketBuild,
-        "launch" => Act::RocketLaunch,
-        "bake" => Act::Bake,
-        "sing" => Act::Sing,
-        "campfire" => Act::Campfire,
-        "stats" => Act::Stats,
-        "sleep" => Act::Sleep,
-        "dance" => Act::Dance,
-        "soccer" => Act::Soccer,
-        _ => Act::Present,
-    }
-}
-
-fn icon_of(act: &str) -> &'static Icon {
-    match act {
-        "wave" => &icons::HEART,
-        "stroll" => &icons::PIN,
-        "rocket" => &icons::CODE,
-        "launch" | "dance" | "soccer" => &icons::STAR,
-        "bake" | "sleep" => &icons::HEART,
-        "campfire" => &icons::FIRE,
-        "stats" => &icons::DIAMOND,
-        "present" => &icons::BRIEFCASE,
-        _ => &icons::DIAMOND,
-    }
-}
-
-fn default_story() -> Vec<SceneSpec> {
-    [
-        ("wave", "hi there! i'm {name}"),
-        ("present", "{role}"),
-        ("stroll", "based in {location}"),
-        ("rocket", "i build things, with {stack}"),
-        ("launch", "...then watch 'em take off!"),
-        ("bake", "and when i'm hungry, i bake"),
-        ("campfire", "{streak}-day streak, still going"),
-        ("sing", ""),
-        ("soccer", "then a bit of football"),
-        ("sleep", "okay... nap time, zzz"),
-    ]
-    .iter()
-    .map(|(a, s)| SceneSpec {
-        act: a.to_string(),
-        say: s.to_string(),
-    })
-    .collect()
 }
 
 fn pick<'a>(value: &'a str, fallback: &'a str) -> &'a str {

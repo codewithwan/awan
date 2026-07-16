@@ -7,6 +7,7 @@
 
 pub(crate) mod bake;
 pub(crate) mod campfire;
+pub(crate) mod contributions;
 pub(crate) mod dance;
 pub(crate) mod gem;
 pub(crate) mod greet;
@@ -89,6 +90,7 @@ pub(crate) fn scene_for(act: crate::reel::Act) -> Scene {
         Sing => scene(song::DUR, false, song::sing, ""),
         Campfire => scene(campfire::DUR, false, campfire::campfire, ""),
         Stats => scene(stats::DUR, false, stats::stats, ""),
+        Contributions => scene(contributions::DUR, false, contributions::contributions, ""),
         Sleep => scene(sleep::DUR, false, sleep::sleep, ""),
         Dance => scene(dance::DANCE_TICKS, false, dance::dance, ""),
         Soccer => scene(soccer::SOCCER_TICKS, false, soccer::soccer, ""),

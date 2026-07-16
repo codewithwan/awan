@@ -27,6 +27,7 @@ pub enum Act {
     Sing,
     Campfire,
     Stats,
+    Contributions,
     Sleep,
     Dance,
     Soccer,
