@@ -58,7 +58,7 @@ export function Reel({
   }
 
   return (
-    <div className="nb p-3">
+    <div className="nb min-w-0 p-3">
       <Stage reel={reel} story={story} tick={tick} id={id} />
       <Transport
         tick={tick}

@@ -20,7 +20,7 @@ export function Meter({ story, at, solo, onPick }: { story: Scene[]; at: number;
   const band = BANDS.find((b) => secs <= b.max)!;
 
   return (
-    <div className="nb p-3">
+    <div className="nb min-w-0 p-3">
       <div className="flex items-baseline gap-2">
         <span className={`text-3xl tabular-nums ${band.tone}`}>{secs.toFixed(0)}s</span>
         <span className={`text-[10px] uppercase ${band.tone}`}>{band.label}</span>

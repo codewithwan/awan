@@ -29,8 +29,11 @@ export function SceneRow({ id, scene, live, onEdit, onDrop }: Props) {
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab px-1 text-faint active:cursor-grabbing"
-          aria-label={`Reorder ${info.label}`}
+          // without this a touch-drag scrolls the page instead, and the row
+          // never moves — the gesture is swallowed before dnd-kit sees it
+          style={{ touchAction: "none" }}
+          className="-m-1 cursor-grab p-2 text-faint active:cursor-grabbing"
+          aria-label={`Reorder ${info.label}. Press space, then use the arrow keys.`}
         >
           ⣿
         </button>

@@ -28,7 +28,7 @@ export function App() {
       <Header />
       <Stepper at={at} onGo={setAt} />
 
-      <main className="flex-1">
+      <main className="min-w-0 flex-1">
         {at === 0 && <StepIdentity id={id} onChange={setId} />}
         {at === 1 && (
           <StepStory

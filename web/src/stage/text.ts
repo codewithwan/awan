@@ -5,6 +5,12 @@ import { glyph, icon } from "../wasm/awan_wasm";
 export const SCALE = 3;
 export const GLYPH = 8 * SCALE;
 export const CAPTION_H = 56;
+/** The karaoke line is smaller and sits up beside him, not under the ground —
+ *  every number from gif.rs. */
+export const LYRIC_SCALE = 2;
+export const LYRIC_LIMIT = 18 * 33;
+/** Ticks a lyric holds before the next one, from script.rs. */
+export const LYRIC_HOLD = 30;
 export const INK = "#9696a0"; // [150, 150, 160] in gif.rs — convert, don't eyeball
 export const ACCENT = "#e6b464"; // [230, 180, 100]
 
@@ -78,4 +84,33 @@ export function drawStreak(ctx: CanvasRenderingContext2D, streak: number, w: num
   const x = w - (8 * SCALE + SCALE * 2 + num.length * GLYPH + 14);
   drawBits(ctx, icon("fire"), x, 12, SCALE, ACCENT);
   drawText(ctx, num, x + 8 * SCALE + SCALE * 2, 12, SCALE, ACCENT);
+}
+
+/** One karaoke line down the left while he sings on the right.
+ *
+ *  Not a caption: `rasterize` picks *either* the strip under the ground *or*
+ *  this, never both, and this one is half the size and up at his shoulder. The
+ *  preview drew the intro line, in the caption strip, at caption size, forever
+ *  — which meant the lyrics somebody had just typed never appeared at all.
+ */
+export function drawKaraoke(
+  ctx: CanvasRenderingContext2D,
+  k: number,
+  ground: number,
+  song: string,
+  artist: string,
+  lyrics: string[],
+) {
+  const step = Math.floor(k / LYRIC_HOLD);
+  const [iconName, text] =
+    step === 0
+      ? ["star", `my fav song "${song || "an old favourite"}" - ${artist || "someone great"}`]
+      : lyrics.length
+        ? ["globe", lyrics[(step - 1) % lyrics.length]]
+        : ["globe", "la la la ~"];
+
+  const fit = Math.floor(Math.max(LYRIC_LIMIT - 24, 0) / (8 * LYRIC_SCALE));
+  const y = Math.floor(ground / 2) - 4 * LYRIC_SCALE;
+  drawBits(ctx, icon(iconName), 24, y, LYRIC_SCALE, ACCENT);
+  drawText(ctx, [...text].slice(0, fit).join(""), 24 + 8 * LYRIC_SCALE + 6, y, LYRIC_SCALE, INK);
 }

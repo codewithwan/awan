@@ -27,13 +27,13 @@ export function StepStory({ story, beat, cast, solo, id, onStory, onBeat, onCast
   const shown = solo >= 0 && story[solo] ? [story[solo]] : story;
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[1.4fr_1fr]">
-      <div className="flex flex-col gap-4">
+    <div className="grid min-w-0 gap-4 xl:grid-cols-[1.4fr_1fr]">
+      <div className="flex min-w-0 flex-col gap-4">
         <Reel story={shown} toml={castOf(cast).toml} id={id} onBeat={(i) => onBeat(solo >= 0 ? solo : i)} />
         <Meter story={story} at={beat} solo={solo} onPick={(i) => onSolo(i === solo ? -1 : i)} />
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex min-w-0 flex-col gap-4">
         <Card title="Who plays him" tone="text-grape-ink">
           <div className="flex flex-wrap gap-2">
             {CAST.map((c) => (

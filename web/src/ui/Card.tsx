@@ -15,7 +15,7 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="nb p-4">
+    <section className="nb min-w-0 p-4">
       {title && (
         <div className="mb-4 flex items-baseline gap-2">
           <h2 className={`text-sm uppercase ${tone}`}>{title}</h2>
