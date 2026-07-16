@@ -1,13 +1,10 @@
 # awan
 
-A tiny living character for your terminal — and a **personality layer** any
-CLI can embed. This package ships the `awan` binary to Node projects.
+A tiny pixel character that walks your GitHub contribution year.
 
-```sh
-npx @codewithwan/awan demo               # try it, no install
-npm i -g @codewithwan/awan && awan demo  # or install the command
-npm i @codewithwan/awan                  # or use it from your project
-```
+**[Build yours →](https://codewithwan.github.io/awan/)** · [source](https://github.com/codewithwan/awan)
+
+He also lives in your terminal — that's what this package installs.
 
 On install it downloads the prebuilt binary for your platform from the
 project's GitHub Releases. No Rust toolchain required.

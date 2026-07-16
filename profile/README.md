@@ -210,4 +210,10 @@ fresh without you touching anything.
 - **Lyrics are yours** — put a couple of lines of your own favourite song in
   `lyrics`. The sample ships original placeholder lines.
 - The GIF is a few MB raw; shrink it with
-  `gifsicle -O3 --lossy=80 --colors 64 assets/awan.gif -o assets/awan.gif`.
+  `gifsicle -O3 --colors 64 assets/awan.gif -o assets/awan.gif`. No `--lossy`:
+  it bought about 6% and ghosted the 14px contribution squares.
+
+---
+
+Why it's built this way — the seam, the CI/binary split, the config's shape:
+[**docs/PROFILE.md**](../docs/PROFILE.md).
