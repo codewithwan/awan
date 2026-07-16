@@ -37,12 +37,23 @@
   --font-pixel: "Silkscreen", "Courier New", monospace;
 }
 
+/* Light mode repaints the furniture, never the stage.
+   The canvas is a GIF for a dark README — recolouring it would be showing
+   someone a banner they aren't going to get. So the page turns and he doesn't. */
+:root[data-skin="light"] {
+  --color-void: #f2f4f8;
+  --color-slab: #ffffff;
+  --color-ink: #0d1117;
+  --color-mute: #5b6472;
+  --color-line: #0d1117;
+}
+
 @layer base {
   html {
     /* a faint tile grid, like a level you're building on */
     background:
-      linear-gradient(#161b2244 1px, transparent 1px) 0 0 / 24px 24px,
-      linear-gradient(90deg, #161b2244 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(color-mix(in srgb, var(--color-mute) 12%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, color-mix(in srgb, var(--color-mute) 12%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
       var(--color-void);
   }
   body {
@@ -73,6 +84,9 @@
     transition: transform 60ms steps(2), box-shadow 60ms steps(2);
   }
   .nb-btn:hover:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 0 var(--color-line); }
+  /* the stage keeps its own dark backdrop whatever the page is doing — that is
+     the colour the GIF actually has */
+  .stage { background: #0d1117; }
   .nb-btn:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 0 var(--color-line); }
   .nb-btn:disabled { opacity: .35; }
 

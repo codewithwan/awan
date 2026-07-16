@@ -109,12 +109,19 @@ impl fmt::Display for SpecError {
 
 impl std::error::Error for SpecError {}
 
-/// Load and validate a character spec from a TOML file.
-pub fn load(path: &Path) -> Result<CharacterSpec, SpecError> {
-    let raw = std::fs::read_to_string(path).map_err(SpecError::Io)?;
-    let spec: CharacterSpec = toml::from_str(&raw).map_err(SpecError::Parse)?;
+/// Parse and validate a character spec from TOML text.
+///
+/// Split out from [`load`] because the browser has the text but no filesystem,
+/// and a preview that can't restyle itself can't show what a character does.
+pub fn parse(raw: &str) -> Result<CharacterSpec, SpecError> {
+    let spec: CharacterSpec = toml::from_str(raw).map_err(SpecError::Parse)?;
     spec.validate()?;
     Ok(spec)
+}
+
+/// Load and validate a character spec from a TOML file.
+pub fn load(path: &Path) -> Result<CharacterSpec, SpecError> {
+    parse(&std::fs::read_to_string(path).map_err(SpecError::Io)?)
 }
 
 impl CharacterSpec {

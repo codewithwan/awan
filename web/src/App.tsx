@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { DEFAULT_STORY, type Scene } from "./lib/acts";
 import { BLANK, type Identity } from "./lib/config";
+import { useDraft } from "./lib/store";
 import { Stepper, STEPS } from "./ui/Stepper";
 import { Button } from "./ui/Button";
 import { PixelIcon } from "./ui/PixelIcon";
+import { SkinToggle } from "./ui/SkinToggle";
+import { GithubMark } from "./ui/GithubMark";
 import { StepIdentity } from "./steps/StepIdentity";
 import { StepStory } from "./steps/StepStory";
 import { StepExport } from "./steps/StepExport";
@@ -12,9 +15,13 @@ import { StepExport } from "./steps/StepExport";
  *  share. Everything that draws lives somewhere else. */
 export function App() {
   const [at, setAt] = useState(0);
-  const [story, setStory] = useState<Scene[]>(DEFAULT_STORY);
-  const [id, setId] = useState<Identity>(BLANK);
+  // the draft survives a refresh — rewriting seven captions because you
+  // reached for reload out of habit is a page you don't come back to
+  const [story, setStory] = useDraft<Scene[]>("story", DEFAULT_STORY);
+  const [id, setId] = useDraft<Identity>("identity", BLANK);
+  const [cast, setCast] = useDraft<string>("cast", "awan");
   const [beat, setBeat] = useState(-1);
+  const [solo, setSolo] = useState(-1);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-4 py-8">
@@ -23,8 +30,19 @@ export function App() {
 
       <main className="flex-1">
         {at === 0 && <StepIdentity id={id} onChange={setId} />}
-        {at === 1 && <StepStory story={story} beat={beat} onStory={setStory} onBeat={setBeat} />}
-        {at === 2 && <StepExport id={id} story={story} />}
+        {at === 1 && (
+          <StepStory
+            story={story}
+            beat={beat}
+            cast={cast}
+            solo={solo}
+            onStory={setStory}
+            onBeat={setBeat}
+            onCast={setCast}
+            onSolo={setSolo}
+          />
+        )}
+        {at === 2 && <StepExport id={id} story={story} cast={cast} />}
       </main>
 
       <nav className="flex gap-2">
@@ -49,9 +67,16 @@ function Header() {
         <h1 className="text-2xl uppercase tracking-tight text-ink">awan</h1>
         <p className="text-[10px] text-mute">a tiny living character for your GitHub profile</p>
       </div>
-      <a href="https://github.com/codewithwan/awan" className="nb-btn ml-auto bg-slab px-3 py-1.5 text-[10px] uppercase text-ink">
-        source ↗
-      </a>
+      <div className="ml-auto flex gap-2">
+        <SkinToggle />
+        <a
+          href="https://github.com/codewithwan/awan"
+          className="nb-btn flex items-center gap-2 bg-slab px-3 py-1.5 text-[10px] uppercase text-ink"
+        >
+          <GithubMark />
+          source
+        </a>
+      </div>
     </header>
   );
 }

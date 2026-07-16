@@ -60,7 +60,7 @@ export function Stage({ reel, story, tick }: Props) {
       ref={ref}
       width={cols * CELL_W}
       height={rows * CELL_H + CAPTION_H}
-      className="block w-full [image-rendering:pixelated]"
+      className="stage block w-full [image-rendering:pixelated]"
       aria-label="Preview of your banner"
     />
   );

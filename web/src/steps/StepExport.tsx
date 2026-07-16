@@ -3,14 +3,16 @@ import { buildConfig, README_LINE, WORKFLOW, type Identity } from "../lib/config
 import type { Scene } from "../lib/acts";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
+import { Code } from "../ui/Code";
+import { castOf } from "../lib/characters";
 
 /** Three files, and the honest version of what happens next. */
-export function StepExport({ id, story }: { id: Identity; story: Scene[] }) {
+export function StepExport({ id, story, cast }: { id: Identity; story: Scene[]; cast: string }) {
   const who = id.handle || "you";
   return (
     <Card title="Take it home" hint={`three files in ${who}/${who}`}>
       <div className="flex flex-col gap-3">
-        <File name="awan.json" body={buildConfig(id, story)} />
+        <File name="awan.json" body={buildConfig(id, story, castOf(cast).path)} />
         <File name=".github/workflows/awan.yml" body={WORKFLOW} />
         <File name="README.md" body={README_LINE} note="add this line anywhere" />
         <p className="text-[10px] leading-relaxed text-mute">
@@ -53,7 +55,7 @@ function File({ name, body, note }: { name: string; body: string; note?: string 
           save
         </Button>
       </div>
-      <pre className="max-h-64 overflow-auto p-2 text-[10px] leading-relaxed text-mute">{body}</pre>
+      <Code body={body} />
     </div>
   );
 }

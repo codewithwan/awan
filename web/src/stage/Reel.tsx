@@ -7,7 +7,15 @@ import { Transport } from "./Transport";
 
 /** The reel: build it, run its clock, hand each tick to the stage. Split from
  *  Stage so that one only ever has to paint. */
-export function Reel({ story, onBeat }: { story: Scene[]; onBeat: (i: number) => void }) {
+export function Reel({
+  story,
+  toml,
+  onBeat,
+}: {
+  story: Scene[];
+  toml: string;
+  onBeat: (i: number) => void;
+}) {
   const [reel, setReel] = useState<Preview | null>(null);
   const [playing, setPlaying] = useState(true);
   const [tick, setTick] = useState(0);
@@ -17,14 +25,14 @@ export function Reel({ story, onBeat }: { story: Scene[]; onBeat: (i: number) =>
     let dead = false;
     loadEngine().then(() => {
       if (dead || !story.length) return;
-      setReel(new Engine(story.map((s) => s.act)));
+      setReel(new Engine(story.map((s) => s.act), toml || undefined));
       setTick(0);
     });
     return () => void (dead = true);
     // rebuilt on running order only: editing a line must not restart the reel
     // under someone's cursor
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order]);
+  }, [order, toml]);
 
   useEffect(() => {
     if (!reel || !playing) return;

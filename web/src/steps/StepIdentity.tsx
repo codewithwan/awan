@@ -1,6 +1,9 @@
 import type { Identity } from "../lib/config";
+import { BLANK } from "../lib/config";
+import { EXAMPLE } from "../lib/example";
 import { Card } from "../ui/Card";
 import { Field } from "../ui/Field";
+import { Button } from "../ui/Button";
 
 const FIELDS: { key: keyof Identity; label: string; hint: string }[] = [
   { key: "handle", label: "handle", hint: "codewithwan" },
@@ -15,9 +18,18 @@ const FIELDS: { key: keyof Identity; label: string; hint: string }[] = [
 /** Who he's talking about. Numbers are deliberately absent: those are CI's job,
  *  and a field for them would only invite someone to invent one. */
 export function StepIdentity({ id, onChange }: { id: Identity; onChange: (id: Identity) => void }) {
+  const filled = Object.values(id).some((v) => (Array.isArray(v) ? v.length : v));
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="About you" hint="these fill the {tokens} in his lines">
+        <div className="mb-3 flex gap-2">
+          <Button tone="gold" onClick={() => onChange(EXAMPLE)}>
+            fill an example
+          </Button>
+          <Button onClick={() => onChange(BLANK)} disabled={!filled}>
+            clear
+          </Button>
+        </div>
         <div className="flex flex-col gap-2">
           {FIELDS.map((f) => (
             <Field

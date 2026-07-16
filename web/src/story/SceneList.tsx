@@ -7,11 +7,15 @@ import { SceneRow } from "./SceneRow";
 export function SceneList({
   story,
   playing,
+  solo,
   onChange,
+  onSolo,
 }: {
   story: Scene[];
   playing: number;
+  solo: number;
   onChange: (s: Scene[]) => void;
+  onSolo: (i: number) => void;
 }) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
   const onDragEnd = ({ active, over }: DragEndEvent) => {
@@ -28,8 +32,10 @@ export function SceneList({
               id={String(i)}
               scene={scene}
               live={i === playing}
+              solo={i === solo}
               onEdit={(next) => onChange(story.map((s, j) => (i === j ? next : s)))}
               onDrop={() => onChange(story.filter((_, j) => j !== i))}
+              onSolo={() => onSolo(i === solo ? -1 : i)}
             />
           ))}
         </ol>

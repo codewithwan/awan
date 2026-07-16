@@ -26,9 +26,9 @@ impl Preview {
     /// `awan.json`. Unknown names fall back to `present`, so a typo costs you a
     /// beat rather than the whole preview.
     #[wasm_bindgen(constructor)]
-    pub fn new(acts: Vec<String>) -> Preview {
+    pub fn new(acts: Vec<String>, character_toml: Option<String>) -> Preview {
         let acts: Vec<Act> = acts.iter().map(|a| act_of(a)).collect();
-        let reel = Reel::story(Character::default(), &acts);
+        let reel = Reel::story(character_of(character_toml.as_deref()), &acts);
         let (cols, rows, _) = reel.pixel_grid(0);
         Preview { reel, cols, rows }
     }
@@ -83,12 +83,21 @@ impl Preview {
     }
 }
 
+/// A character from its TOML spec, or the built-in buddy. A spec that doesn't
+/// parse falls back rather than failing: the editor should keep drawing while
+/// someone is halfway through breaking their own file.
+fn character_of(toml: Option<&str>) -> Character {
+    toml.and_then(|t| awan_core::spec::parse(t).ok())
+        .and_then(|s| Character::from_spec(&s).ok())
+        .unwrap_or_default()
+}
+
 /// How long a story runs, without building it — so the editor can price a beat
 /// before you commit to it. That is the whole reason a reel gets too long: you
 /// cannot feel the cost of an act while you're adding it.
 #[wasm_bindgen]
 pub fn story_ticks(acts: Vec<String>) -> i32 {
-    Preview::new(acts).ticks()
+    Preview::new(acts, None).ticks()
 }
 
 /// Where the overlays go, and how far along they are.

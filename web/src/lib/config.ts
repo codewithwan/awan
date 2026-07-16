@@ -20,10 +20,13 @@ export const BLANK: Identity = {
  *  entire point of the thing. */
 const CI_FILLED = { streak: 0, stats: [], contributions: "", contrib_year: 0, contrib_recent: 0 };
 
-export const buildConfig = (id: Identity, story: Scene[]) =>
+export const buildConfig = (id: Identity, story: Scene[], character = "") =>
   JSON.stringify(
     {
       ...id,
+      // omitted for the built-in buddy: an empty key is a question the reader
+      // has to answer before they know it isn't one
+      ...(character ? { character } : {}),
       lyrics: id.lyrics.filter(Boolean),
       ...CI_FILLED,
       output: "assets/awan.gif",
