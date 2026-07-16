@@ -1,6 +1,6 @@
 [package]
 name = "awan"
-description = "A tiny living character for your terminal — and a personality layer any CLI can embed (wait, ask, react)"
+description = "Embed awan in your own Rust CLI: wait, ask, react"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

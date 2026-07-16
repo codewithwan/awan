@@ -5,7 +5,7 @@
     "access": "public"
   },
   "binaryVersion": "0.0.5",
-  "description": "A tiny living character for your terminal — a personality layer any CLI can embed.",
+  "description": "A tiny pixel character that walks your GitHub contribution year — and lives in your terminal.",
   "keywords": [
     "cli",
     "terminal",
