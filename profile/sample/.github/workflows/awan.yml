@@ -21,30 +21,84 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo install --git https://github.com/codewithwan/awan awan-profile
 
-      # Pull the real numbers and write them into awan.json. The renderer never
-      # touches the network — CI fetches, the binary just draws.
-      - name: Fetch live stats
+      # Pull your numbers and write them into awan.json. The renderer never
+      # touches the network — CI fetches, the binary just draws. These fill the
+      # `stats` act; drop that act and you can delete this whole step.
+      - name: Fetch your numbers
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO: ${{ github.repository }} # or hard-code any owner/name
+          USER: ${{ github.repository_owner }} # or hard-code any username
         run: |
           api() { gh api "$1" --jq "$2" 2>/dev/null || echo "?"; }
-          STARS=$(api "repos/$REPO" '.stargazers_count')
-          FORKS=$(api "repos/$REPO" '.forks_count')
-          PEOPLE=$(api "repos/$REPO/contributors?per_page=100" 'length')
-          VERSION=$(api "repos/$REPO/releases/latest" '.tag_name')
-          LICENSE=$(api "repos/$REPO" '.license.spdx_id')
-          jq --arg s "$STARS" --arg f "$FORKS" --arg p "$PEOPLE" \
-             --arg v "$VERSION" --arg l "$LICENSE" \
-             '.stats = ["stars:\($s)", "forks:\($f)", "contributors:\($p)",
-                        "version:\($v)", "license:\($l)"]' \
+          REPOS=$(api "users/$USER" '.public_repos')
+          FOLLOWERS=$(api "users/$USER" '.followers')
+          FOLLOWING=$(api "users/$USER" '.following')
+          STARS=$(gh api "users/$USER/repos?per_page=100" --paginate \
+                    --jq '[.[].stargazers_count] | add' 2>/dev/null || echo "?")
+          jq --arg r "$REPOS" --arg s "$STARS" --arg f "$FOLLOWERS" --arg g "$FOLLOWING" \
+             '.stats = ["repos:\($r)", "stars earned:\($s)",
+                        "followers:\($f)", "following:\($g)"]' \
              awan.json > awan.tmp && mv awan.tmp awan.json
+
+      # Your contribution calendar, for the `contributions` act. The stock
+      # GITHUB_TOKEN can read this — no PAT, no secret to set up. A year becomes
+      # one string of 371 digits: a quartile per day, "." where the calendar has
+      # no day. Then he brags or copes, depending on the last 30 days.
+      - name: Fetch the contribution calendar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USER: ${{ github.repository_owner }}
+          # He says the year when the wall arrives and the month when the
+          # spotlight hits (both live in awan.json). This is only the mood he
+          # lands on afterwards, and the bar he judges it by.
+          BRAG_OVER: 100 # your bar for "a good month"
+          BRAG_SAY: "i'm so excited!"
+          COPE_SAY: "...i'll fix that, promise"
+        run: |
+          gh api graphql -f query='
+          { user(login: "'"$USER"'") { contributionsCollection { contributionCalendar {
+              totalContributions
+              weeks { contributionDays { weekday contributionLevel contributionCount } }
+          } } } }' > cal.json
+          jq '
+            .data.user.contributionsCollection.contributionCalendar as $c
+            | { "NONE":"0", "FIRST_QUARTILE":"1", "SECOND_QUARTILE":"2",
+                "THIRD_QUARTILE":"3", "FOURTH_QUARTILE":"4" } as $lv
+            | { wall: ($c.weeks[-53:] | map(
+                  (.contributionDays
+                   | map({ key: (.weekday|tostring), value: $lv[.contributionLevel] })
+                   | from_entries) as $d
+                  | [range(0;7)] | map($d[tostring] // ".") | join("")
+                ) | join("")),
+                year: $c.totalContributions,
+                recent: ([$c.weeks[].contributionDays[].contributionCount][-30:] | add),
+                # Current streak, straight off the same calendar: days back from
+                # today with at least one contribution. A blank today doesn't
+                # break it — you still have the rest of the day to fix that.
+                streak: ([$c.weeks[].contributionDays[].contributionCount] | reverse
+                         | (if .[0] == 0 then .[1:] else . end)
+                         | (index(0) // length)) }
+          ' cal.json > wall.json
+          jq --slurpfile w wall.json --argjson bar "$BRAG_OVER" \
+             --arg brag "$BRAG_SAY" --arg cope "$COPE_SAY" '
+            .contributions  = $w[0].wall
+            | .contrib_year   = $w[0].year
+            | .contrib_recent = $w[0].recent
+            | .streak         = $w[0].streak
+            # the mood writes itself from the numbers
+            | .scenes = [ .scenes[] | if .act == "{verdict}" then
+                  (if $w[0].recent >= $bar
+                   then { act: "dance", say: $brag }
+                   else { act: "sleep", say: $cope } end)
+                else . end ]
+          ' awan.json > awan.tmp && mv awan.tmp awan.json
+          rm -f cal.json wall.json
 
       - run: awan-profile whoami --config awan.json
       - name: Shrink the GIF
         run: |
           sudo apt-get update && sudo apt-get install -y gifsicle
-          gifsicle -O3 --lossy=80 --colors 64 assets/awan.gif -o assets/awan.gif
+          gifsicle -O3 --colors 64 assets/awan.gif -o assets/awan.gif
       - name: Commit the result
         run: |
           git config user.name  "github-actions[bot]"

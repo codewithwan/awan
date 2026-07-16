@@ -60,13 +60,23 @@ its own — no Ctrl+C.
   "role": "fullstack engineer",
   "location": "Indonesia",
   "stack": "Rust, Go & TypeScript",
-  "streak": 1975,                       // 🔥 badge, top-right
+  "streak": 0,                          // 🔥 badge, top-right. Leave it at 0:
+                                        // CI counts it off your calendar, and
+                                        // the badge hides itself when it is 0
   "song": "your favourite song",        // shown as: my fav song "…" - artist
   "artist": "the artist",
   "lyrics": ["your", "favourite", "song lines"],
-  "stats": ["stars:1.2k", "downloads:50k", "contributors:12",
-            "version:v0.0.4", "license:MIT"],   // "label:value" — printed into
-                                        // the terminal window by the `stats` act
+  "stats": [],                          // "label:value" pairs, printed into the
+                                        // terminal window by the `stats` act. CI
+                                        // fills these: repos, stars earned,
+                                        // followers, following
+  "contributions": "",                  // one char per day, 0-4 = GitHub's own
+                                        // quartiles, "." = no such day. 371 of
+                                        // them = a year. CI writes it; you don't
+                                        // — until it has, the wall stays empty,
+                                        // so run the workflow once and look
+  "contrib_year": 2060,                 // ↳ both filled in by the workflow too
+  "contrib_recent": 183,
   "output": "assets/awan.gif",          // where the GIF is written
   "scenes": [                            // ← reorder / add / remove freely
     { "act": "wave",     "say": "hi there! i'm {name}" },
@@ -76,6 +86,10 @@ its own — no Ctrl+C.
     { "act": "launch",   "say": "...then watch 'em take off!" },
     { "act": "bake",     "say": "and i love to eat" },
     { "act": "campfire", "say": "{streak}-day streak" },
+    { "act": "contributions",
+      "say":  "i'm very happy, {contrib_year} this year",   // as the wall rises
+      "then": "and {contrib_recent} in the last 30 days" }, // as the month lights
+    { "act": "{verdict}", "say": "CI decides: excited, or not" },
     { "act": "sing" },
     { "act": "soccer",   "say": "then a bit of football" },
     { "act": "sleep",    "say": "okay... nap time, zzz" }
@@ -94,12 +108,44 @@ its own — no Ctrl+C.
 | `sing` | steps aside; lyrics play karaoke-style on the left |
 | `soccer` | juggles a ball |
 | `stats` | opens a little terminal window and *prints* your numbers into it, line by line |
+| `contributions` | your GitHub year rises behind him; he walks over to the newest end and stands there while the last 30 days keep their colour and the year steps back |
 | `sleep` | yawns, dozes (`zzz`), wakes up |
 | `dance` | a little dance |
 
 - **`say`** is the caption; `{name} {role} {location} {stack} {streak} {handle}`
-  are filled in. The `sing` beat needs no `say` — it plays your `lyrics`.
+  are filled in, plus `{contrib_year}` and `{contrib_recent}`. The `sing` beat
+  needs no `say` — it plays your `lyrics`.
 - Omit `scenes` entirely for a sensible default story.
+
+### He reacts to how the month went
+
+It says three things, in three moments. `say` lands as the wall rises — *"i'm
+very happy, 2060 this year"*. **`then` takes over the instant the spotlight
+hits**, so the month is named on the tick it lights up rather than a beat later
+— *"and 183 in the last 30 days"*. Any act can carry a `then`; only the wall
+has a moment worth splitting on.
+
+`streak` comes free with this act: the same calendar already says which days
+you showed up, so the workflow counts back from today and fills it in. A blank
+*today* doesn't break the run — you've still got the rest of the day.
+
+The mood comes last, on its own beat. `{ "act": "{verdict}" }` is filled in by
+the workflow from your own numbers: clear `BRAG_OVER` and he `dance`s, fall
+short and he `sleep`s.
+
+```yaml
+BRAG_OVER: 100 # your bar for "a good month"
+BRAG_SAY: "i'm so excited!"
+COPE_SAY: "...i'll fix that, promise"
+```
+
+Set the bar to your own idea of a good month, and write both lines yourself —
+they should sound like you, not like us. Keep every caption under ~42
+characters or it runs off the edge.
+
+It needs **no PAT and no secret** — the stock `GITHUB_TOKEN` reads a public
+contribution calendar fine. As ever, CI does the fetching and the binary only
+draws, so the renderer still never touches the network.
 
 ## Auto-update on GitHub
 

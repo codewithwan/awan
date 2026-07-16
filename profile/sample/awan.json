@@ -4,7 +4,6 @@
   "role": "fullstack engineer, crafting smooth UX",
   "location": "Indonesia",
   "stack": "Rust, Go & TypeScript",
-  "streak": 1975,
   "song": "your favourite song",
   "artist": "the artist",
   "lyrics": [
@@ -12,17 +11,64 @@
     "la-la, off we go again",
     "the melody walks me home"
   ],
+  "streak": 0,
+  "stats": [],
+  "contributions": "",
+  "contrib_year": 0,
+  "contrib_recent": 0,
   "output": "assets/awan.gif",
   "scenes": [
-    { "act": "wave", "say": "hi there! i'm {name}" },
-    { "act": "present", "say": "{role}" },
-    { "act": "stroll", "say": "based in {location}" },
-    { "act": "rocket", "say": "i build things, with {stack}" },
-    { "act": "launch", "say": "...then watch 'em take off!" },
-    { "act": "bake", "say": "and when i'm hungry, i bake" },
-    { "act": "campfire", "say": "{streak}-day streak, still going" },
-    { "act": "sing" },
-    { "act": "soccer", "say": "then a bit of football" },
-    { "act": "sleep", "say": "okay... nap time, zzz" }
+    {
+      "act": "wave",
+      "say": "hi there! i'm {name}"
+    },
+    {
+      "act": "present",
+      "say": "{role}"
+    },
+    {
+      "act": "stroll",
+      "say": "based in {location}"
+    },
+    {
+      "act": "stats",
+      "say": "the numbers, if you're curious"
+    },
+    {
+      "act": "rocket",
+      "say": "i build things, with {stack}"
+    },
+    {
+      "act": "launch",
+      "say": "...then watch 'em take off!"
+    },
+    {
+      "act": "bake",
+      "say": "and when i'm hungry, i bake"
+    },
+    {
+      "act": "campfire",
+      "say": "{streak}-day streak, still going"
+    },
+    {
+      "act": "contributions",
+      "say": "i'm very happy, {contrib_year} this year",
+      "then": "and {contrib_recent} in the last 30 days"
+    },
+    {
+      "act": "{verdict}",
+      "say": "CI decides: excited, or not"
+    },
+    {
+      "act": "sing"
+    },
+    {
+      "act": "soccer",
+      "say": "then a bit of football"
+    },
+    {
+      "act": "sleep",
+      "say": "okay... nap time, zzz"
+    }
   ]
 }
