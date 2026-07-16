@@ -1,0 +1,11 @@
+node_modules/
+dist/
+
+# wasm-pack output — rebuilt by `npm run wasm`
+src/wasm/
+
+# the crate is its own workspace, so the root's /target rule misses this one
+crate/target/
+
+# tsc incremental cache
+tsconfig.tsbuildinfo

@@ -1,0 +1,60 @@
+name: web
+
+# Builds the config editor and publishes it to Pages. It is a static bundle by
+# design: the page can never be the reason someone's README breaks, because
+# there is nothing running for it to break. Their config lives in their repo and
+# the workflow runs there.
+on:
+  push:
+    branches: [main]
+    paths: ["web/**", "crates/awan-core/**", ".github/workflows/web.yml"]
+  pull_request:
+    paths: ["web/**", "crates/awan-core/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: web/crate
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+        working-directory: web
+      - run: npm run wasm
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          path: web/dist
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

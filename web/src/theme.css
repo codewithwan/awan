@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* A pixel arcade, but a legible one. The character is 33x30px blocks of flat
+   colour; the page should feel like it belongs to him without fighting him for
+   attention. Colour comes from the palette below, structure from hard edges and
+   chunky shadows — no gradients, no blur, nothing that a CRT couldn't do. */
+@theme {
+  --color-void: #0d1117;
+  --color-panel: #161b22;
+  --color-edge: #2d333b;
+  --color-ink: #e6edf3;
+  --color-mute: #8b949e;
+
+  --color-cloud: #7c88f0;
+  --color-lime: #39d353;
+  --color-punch: #ff6b6b;
+  --color-gold: #ffc94d;
+  --color-sky: #4dd4ff;
+  --color-grape: #b072ff;
+
+  --font-pixel: "Courier New", ui-monospace, monospace;
+}
+
+@layer base {
+  html { background: var(--color-void); }
+  body {
+    color: var(--color-ink);
+    font-family: var(--font-pixel);
+    font-weight: 700;
+    /* the whole page is pixel art; never let a browser soften it */
+    image-rendering: pixelated;
+    -webkit-font-smoothing: none;
+  }
+  ::selection { background: var(--color-lime); color: var(--color-void); }
+}
+
+@layer components {
+  /* A hard 4px shadow instead of a soft one: the only depth cue a pixel
+     display ever had, and it reads at any zoom. */
+  .px-box {
+    border: 2px solid var(--color-edge);
+    box-shadow: 4px 4px 0 0 #05070a;
+    background: var(--color-panel);
+  }
+  .px-btn {
+    border: 2px solid var(--color-edge);
+    box-shadow: 3px 3px 0 0 #05070a;
+    transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+  }
+  .px-btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 0 #05070a; }
+  .px-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 #05070a; }
+  .px-btn:disabled { opacity: .4; transform: none; box-shadow: 3px 3px 0 0 #05070a; }
+}
+
+/* Steps(), not ease. Nothing in this world moves on a curve. */
+@keyframes px-blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+.px-caret { animation: px-blink 1s steps(1) infinite; }
