@@ -4,9 +4,9 @@
   "role": "a tiny living character for your terminal",
   "stack": "Rust",
   "stats": [
-    "stars:3",
+    "stars:4",
     "forks:0",
-    "contributors:1",
+    "contributors:2",
     "version:v0.0.4",
     "license:Apache-2.0"
   ],
