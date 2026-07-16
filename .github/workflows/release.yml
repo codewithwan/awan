@@ -8,7 +8,10 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      # Semver only. "v*" also caught the moving @v0 tag the profile workflow
+      # is pinned by, and every time we advanced it this job failed on a tag it
+      # was never meant to see.
+      - "v*.*.*"
 
 permissions:
   contents: write
