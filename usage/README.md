@@ -1,9 +1,11 @@
-# Usage examples
+# Using awan from your code
 
-What is awan *for*? It's a **personality layer** for command-line tools — drop a
-little character into the moments your program already has (a long task running,
-a job finishing, a prompt redrawing) so the terminal feels alive instead of
-silent.
+awan is **a binary plus a text protocol**, not a library you link. Anything that
+can spawn a process and write a line can embed it — no SDK.
+
+These are the embed examples. The character most people meet is the one on a
+[profile README](https://codewithwan.github.io/awan/); this is the same engine,
+called from your own tool.
 
 Each folder is a **self-contained, runnable example** for one language, showing
 the same use case: *keep a companion on screen while a slow task runs, then

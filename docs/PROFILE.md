@@ -1,9 +1,13 @@
-# awan profile generator (design)
+# awan profile generator — design notes
+
+> **Using it?** You want [`profile/`](../profile) for the format and
+> [the editor](https://codewithwan.github.io/awan/) for the fast way. This file
+> is why it's built the way it is, for anyone changing it.
 
 A **seamless looping animation** generated from one JSON file, for a GitHub
-profile README. Users edit `awan.json`, add one workflow, and a GitHub Action
-regenerates the GIF on every push. This is a **separate, opt-in** layer — the
-core personality-layer CLI is untouched.
+profile README. The reader edits `awan.json`, calls one reusable workflow, and
+an Action redraws the GIF nightly. It's a **separate, opt-in** layer — the core
+engine and CLI are untouched by it.
 
 ## Separation
 

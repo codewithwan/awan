@@ -8,7 +8,7 @@
 A tiny pixel character that walks your GitHub contribution year.
 
 <p align="center">
-  <img src="assets/banner.gif" alt="awan walking a contribution year on a GitHub profile" width="700">
+  <img src="assets/profile-sample.gif" alt="awan walking a real contribution year, then reacting to it" width="700">
 </p>
 
 He reads your real numbers, brags when the month went well, and goes to sleep
@@ -33,18 +33,6 @@ host, no account, no token.
 
 Three files in the repo named after you. No secrets to set up: the token GitHub
 Actions already gives you reads everything he needs.
-
-<p align="center">
-  <img src="assets/profile-sample.gif" alt="awan telling a profile's story, with that profile's real numbers" width="700">
-</p>
-
-<p align="center">
-  <sub>
-    A real profile, not a mock-up: the streak, the readout and the contribution
-    year are all live numbers a workflow fetched. It's a still preview, so it
-    isn't refreshed — <a href="profile">yours would be</a>, nightly.
-  </sub>
-</p>
 
 **[Build it in the browser →](https://codewithwan.github.io/awan/)** Arrange the
 beats, watch it play, download the folder. The preview runs the real engine
@@ -239,6 +227,20 @@ work. See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 MIT OR Apache-2.0, at your option.
+
+---
+
+<p align="center">
+  <img src="assets/banner.gif" alt="awan introducing awan, with this repo's own live numbers" width="700">
+</p>
+
+<p align="center">
+  <sub>
+    And that one is awan describing awan — same engine, same workflow, this
+    repo's own stars and version, redrawn every night. If it ever breaks, you'll
+    see it here first.
+  </sub>
+</p>
 
 ---
 

@@ -1,12 +1,10 @@
 # awan-cli
 
-A tiny living character for your terminal — and a **personality layer** any CLI
-can embed. This package ships the `awan` command (and a Python API) to PyPI.
+A tiny pixel character that walks your GitHub contribution year.
 
-```sh
-pip install awan-cli
-awan demo
-```
+**[Build yours →](https://codewithwan.github.io/awan/)** · [source](https://github.com/codewithwan/awan)
+
+He also lives in your terminal — that's what this package installs.
 
 On first run it downloads the prebuilt binary for your platform from the
 project's GitHub Releases and caches it under `~/.cache/awan`. No Rust
