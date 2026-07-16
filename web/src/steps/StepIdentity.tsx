@@ -20,7 +20,7 @@ const FIELDS: { key: keyof Identity; label: string; hint: string }[] = [
 export function StepIdentity({ id, onChange }: { id: Identity; onChange: (id: Identity) => void }) {
   const filled = Object.values(id).some((v) => (Array.isArray(v) ? v.length : v));
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid min-w-0 gap-4 lg:grid-cols-2">
       <Card title="About you" hint="these fill the {tokens} in his lines">
         <div className="mb-3 flex gap-2">
           <Button tone="gold" onClick={() => onChange(EXAMPLE)}>

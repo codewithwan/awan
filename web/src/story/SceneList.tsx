@@ -1,6 +1,19 @@
-import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { Scene } from "../lib/acts";
 import { SceneRow } from "./SceneRow";
 
@@ -13,7 +26,18 @@ export function SceneList({
   playing: number;
   onChange: (s: Scene[]) => void;
 }) {
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  // A finger that starts on the handle has to mean "drag", not "scroll" — and
+  // a phone can't tell until you've already moved, by which point the page has
+  // gone. The delay is the tell: hold, then drag. Move first and it scrolls,
+  // which is what a finger on a long page usually wants.
+  //
+  // Keyboard too. This is a list you reorder; a list you can only reorder by
+  // dragging is a list some people can't reorder.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     if (over && active.id !== over.id) onChange(arrayMove(story, +active.id, +over.id));
   };

@@ -19,7 +19,11 @@ export const SAMPLE = {
 
 /** Whatever the reader has typed so far — every field is optional because a
  *  half-filled form still deserves a preview. */
-export type Tokens = Partial<Record<string, unknown>> & { song?: string; artist?: string };
+export type Tokens = Partial<Record<string, unknown>> & {
+  song?: string;
+  artist?: string;
+  lyrics?: string[];
+};
 
 /** Fill the `{tokens}` a caption carries.
  *

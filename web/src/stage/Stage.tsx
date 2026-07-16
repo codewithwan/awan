@@ -4,7 +4,7 @@ import type { Scene } from "../lib/acts";
 import type { Tokens } from "../lib/sample";
 import { actIcon } from "../lib/acts";
 import { fill } from "../lib/sample";
-import { drawCaption, drawStreak, CAPTION_H } from "./text";
+import { drawCaption, drawKaraoke, drawStreak, CAPTION_H } from "./text";
 import { drawStats, drawWall } from "./overlays";
 import { SAMPLE } from "../lib/sample";
 
@@ -53,7 +53,12 @@ export function Stage({ reel, story, tick, id }: Props) {
     if (scene?.act === "stats") drawStats(ctx, k);
     else drawStreak(ctx, SAMPLE.streak, w);
 
-    drawCaption(ctx, actIcon(scene?.act), captionOf(scene, k, leaving, id), w, ground);
+    // the renderer picks one or the other, never both
+    if (scene?.act === "sing" && !leaving) {
+      drawKaraoke(ctx, k, ground, id.song ?? "", id.artist ?? "", id.lyrics ?? []);
+    } else {
+      drawCaption(ctx, actIcon(scene?.act), captionOf(scene, k, leaving, id), w, ground);
+    }
   }, [reel, story, tick, cols, rows, id]);
 
   return (
@@ -61,7 +66,7 @@ export function Stage({ reel, story, tick, id }: Props) {
       ref={ref}
       width={cols * CELL_W}
       height={rows * CELL_H + CAPTION_H}
-      className="stage block w-full [image-rendering:pixelated]"
+      className="stage block w-full max-w-full [image-rendering:pixelated]"
       aria-label="Preview of your banner"
     />
   );
@@ -72,11 +77,6 @@ export function Stage({ reel, story, tick, id }: Props) {
 function captionOf(scene: Scene | undefined, k: number, leaving: boolean, id: Tokens): string {
   if (leaving) return "thanks for stopping by ~";
   if (!scene) return "";
-  if (scene.act === "sing") {
-    const song = id.song?.trim() || "an old favourite";
-    const artist = id.artist?.trim() || "someone great";
-    return fill(`my fav song "${song}" - ${artist}`, id);
-  }
   const line = scene.then && k >= GLOW_AT ? scene.then : (scene.say ?? "");
   return fill(line, id);
 }
