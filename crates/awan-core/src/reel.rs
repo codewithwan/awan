@@ -26,6 +26,7 @@ pub enum Act {
     Bake,
     Sing,
     Campfire,
+    Stats,
     Sleep,
     Dance,
     Soccer,
