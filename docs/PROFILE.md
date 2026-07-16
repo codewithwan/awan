@@ -56,8 +56,9 @@ a default story.
 
 ## Scenes (acts)
 
-`wave`, `present`, `stroll`, `rocket`, `launch`, `bake`, `campfire`, `sing`,
-`soccer`, `sleep`, `dance`. Each `say` is drawn with a small **pixel icon**
+`wave`, `present`, `stroll`, `rocket`, `launch`, `bake`, `campfire`, `stats`
+(a terminal window that prints the numbers), `sing`, `soccer`, `sleep`, `dance`. Each `say` is
+drawn with a small **pixel icon**
 chosen by the act (pin, briefcase, code, fire, star, heart). Karaoke (`sing`)
 has no mic — he steps to the right and the lyrics play on the left, one line at
 a time. The campfire is built (haul wood → toss a spark → it catches → pops).
@@ -65,9 +66,10 @@ The ground scrolls only during walking beats; only the clouds always drift.
 
 ## Dynamic data & the badge
 
-A `🔥N` streak badge is pinned top-right every frame. The number is `streak` in
-the config; a CI job can fetch the real value (GitHub contributions) and write
-it into `awan.json` before rendering, keeping the binary deterministic.
+A `🔥N` streak badge is pinned top-right every frame. Numbers — the badge and
+the `stats` readout — live in `awan.json`; the CI job fetches the real values
+(`gh api` → `jq`) and writes them in before rendering, so the binary stays
+deterministic and offline.
 
 ## Rendering to GIF
 

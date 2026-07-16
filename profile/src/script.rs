@@ -22,6 +22,8 @@ pub struct SceneSpec {
 #[serde(default)]
 pub struct Profile {
     pub handle: String,
+    /// Path to a character TOML spec. Empty = the built-in buddy.
+    pub character: String,
     pub name: String,
     pub role: String,
     pub location: String,
@@ -29,6 +31,9 @@ pub struct Profile {
     pub streak: u32,
     pub song: String,
     pub artist: String,
+    /// Up to five short labels for the `stats` act: the first three ride
+    /// balloons, the last two sit in crates. Keep them short (≤ 10 chars).
+    pub stats: Vec<String>,
     pub lyrics: Vec<String>,
     pub output: String,
     pub scenes: Vec<SceneSpec>,
@@ -57,8 +62,17 @@ impl Profile {
 
     /// If the beat at tick `t` is a singing beat, its tick-within-scene.
     pub fn sing_at(&self, reel: &Reel, t: i32) -> Option<i32> {
+        self.beat_at(reel, t, "sing")
+    }
+
+    /// If the beat at tick `t` is the stats parade, its tick-within-scene.
+    pub fn stats_at(&self, reel: &Reel, t: i32) -> Option<i32> {
+        self.beat_at(reel, t, "stats")
+    }
+
+    fn beat_at(&self, reel: &Reel, t: i32, act: &str) -> Option<i32> {
         let (i, k) = reel.act_at(t)?;
-        (self.story().get(i).map(|s| s.act.as_str()) == Some("sing")).then_some(k)
+        (self.story().get(i).map(|s| s.act.as_str()) == Some(act)).then_some(k)
     }
 
     /// The bottom caption at tick `t` (used off the singing beats).
@@ -111,6 +125,7 @@ fn act_of(name: &str) -> Act {
         "bake" => Act::Bake,
         "sing" => Act::Sing,
         "campfire" => Act::Campfire,
+        "stats" => Act::Stats,
         "sleep" => Act::Sleep,
         "dance" => Act::Dance,
         "soccer" => Act::Soccer,
@@ -126,6 +141,7 @@ fn icon_of(act: &str) -> &'static Icon {
         "launch" | "dance" | "soccer" => &icons::STAR,
         "bake" | "sleep" => &icons::HEART,
         "campfire" => &icons::FIRE,
+        "stats" => &icons::DIAMOND,
         "present" => &icons::BRIEFCASE,
         _ => &icons::DIAMOND,
     }

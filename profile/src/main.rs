@@ -12,6 +12,7 @@ use std::time::Duration;
 
 use awan_core::{Character, Reel, Size};
 
+mod draw;
 mod gif;
 mod icons;
 mod script;
@@ -38,7 +39,7 @@ fn main() {
         None => (from_flags(&args), flag(&args, "--gif")),
     };
 
-    let reel = Reel::story(Character::default(), &profile.acts()).with_size(Size::Seamless);
+    let reel = Reel::story(character_of(&profile), &profile.acts()).with_size(Size::Seamless);
     match output {
         Some(path) => match gif::render_gif(&reel, &profile, &path) {
             Ok(()) => eprintln!("wrote {path} ({} frames)", reel.ticks()),
@@ -46,6 +47,16 @@ fn main() {
         },
         None => play(&reel, &profile),
     }
+}
+
+/// The character to star in the reel: a TOML spec if given, else the built-in.
+fn character_of(profile: &Profile) -> Character {
+    if profile.character.is_empty() {
+        return Character::default();
+    }
+    let spec = awan_core::spec::load(std::path::Path::new(&profile.character))
+        .unwrap_or_else(|e| fail(&format!("{}: {e}", profile.character)));
+    Character::from_spec(&spec).unwrap_or_else(|e| fail(&format!("{}: {e}", profile.character)))
 }
 
 /// Load and parse an `awan.json` profile, exiting with a message on error.
@@ -58,6 +69,7 @@ fn load(path: &str) -> Profile {
 fn from_flags(args: &[String]) -> Profile {
     Profile {
         handle: args.get(1).cloned().unwrap_or_default(),
+        character: flag(args, "-c").unwrap_or_default(),
         name: flag(args, "--name").unwrap_or_default(),
         role: flag(args, "--role").unwrap_or_default(),
         location: flag(args, "--location").unwrap_or_default(),
@@ -70,6 +82,7 @@ fn from_flags(args: &[String]) -> Profile {
         lyrics: flag(args, "--lyrics")
             .map(|s| s.split('|').map(str::trim).map(str::to_string).collect())
             .unwrap_or_default(),
+        stats: Vec::new(),
         output: String::new(),
         scenes: Vec::new(),
     }
