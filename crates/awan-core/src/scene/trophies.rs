@@ -164,6 +164,6 @@ mod tests {
     #[test]
     fn the_cups_fit_the_shelf() {
         let (_, _, w) = SHELF;
-        assert!(1 + PITCH * SLOTS as i32 <= w, "cups overrun the plank");
+        assert!(PITCH * (SLOTS as i32) < w, "cups overrun the plank");
     }
 }
