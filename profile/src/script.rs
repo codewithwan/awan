@@ -4,8 +4,8 @@
 
 use awan_core::{Act, Reel};
 
-use awan_core::icons::{self, Icon};
 use crate::story::{act_of, default_story, icon_of};
+use awan_core::icons::{self, Icon};
 
 /// Ticks each lyric line holds during a singing beat.
 pub const LYRIC_HOLD: i32 = 30;

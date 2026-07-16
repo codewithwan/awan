@@ -5,8 +5,8 @@
 
 use awan_core::Act;
 
-use awan_core::icons::{self, Icon};
 use crate::script::SceneSpec;
+use awan_core::icons::{self, Icon};
 
 pub fn act_of(name: &str) -> Act {
     match name {
