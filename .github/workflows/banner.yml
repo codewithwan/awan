@@ -46,7 +46,7 @@ jobs:
       - name: Shrink the GIF
         run: |
           sudo apt-get update && sudo apt-get install -y gifsicle
-          gifsicle -O3 --lossy=80 --colors 64 assets/banner.gif -o assets/banner.gif
+          gifsicle -O3 --colors 64 assets/banner.gif -o assets/banner.gif
 
       - name: Commit the result
         run: |

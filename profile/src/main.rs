@@ -16,6 +16,8 @@ mod draw;
 mod gif;
 mod icons;
 mod script;
+mod story;
+mod wall;
 
 use script::Profile;
 
@@ -82,9 +84,8 @@ fn from_flags(args: &[String]) -> Profile {
         lyrics: flag(args, "--lyrics")
             .map(|s| s.split('|').map(str::trim).map(str::to_string).collect())
             .unwrap_or_default(),
-        stats: Vec::new(),
-        output: String::new(),
-        scenes: Vec::new(),
+        // the rest are config-only — no flag reaches for them
+        ..Profile::default()
     }
 }
 

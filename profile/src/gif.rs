@@ -12,10 +12,11 @@ use image::{Delay, Frame, Rgba, RgbaImage};
 use crate::draw::{draw_bits, draw_text, fill};
 use crate::icons;
 use crate::script::{Line, Profile};
+use crate::wall::wall;
 
 /// Pixels per canvas cell (32 cols × this ≈ 1050 px wide — safe in VHS too).
-const CELL_W: u32 = 33;
-const CELL_H: u32 = 30;
+pub const CELL_W: u32 = 33;
+pub const CELL_H: u32 = 30;
 /// The caption strip below the ground line.
 const CAPTION_H: u32 = 56;
 /// Bitmap-font / icon pixel size for the caption, and the smaller lyric size.
@@ -26,7 +27,7 @@ const STAT_SCALE: u32 = 3;
 /// Rightmost x the lyric panel may reach, before the character.
 const LYRIC_LIMIT: u32 = 18 * CELL_W;
 /// Backdrop, ground line, caption ink, and icon accent.
-const BG: [u8; 4] = [13, 17, 23, 255];
+pub const BG: [u8; 3] = [13, 17, 23];
 const GROUND: [u8; 3] = [80, 84, 96];
 const INK: [u8; 3] = [150, 150, 160];
 const ACCENT: [u8; 3] = [230, 180, 100];
@@ -56,7 +57,7 @@ fn rasterize(reel: &Reel, profile: &Profile, t: i32) -> RgbaImage {
     let (cols, rows, cells) = reel.pixel_grid(t);
     let w = cols as u32 * CELL_W;
     let ground = rows as u32 * CELL_H;
-    let mut img = RgbaImage::from_pixel(w, ground + CAPTION_H, Rgba(BG));
+    let mut img = RgbaImage::from_pixel(w, ground + CAPTION_H, Rgba([BG[0], BG[1], BG[2], 255]));
 
     for (i, cell) in cells.iter().enumerate() {
         let Some([r, g, b]) = *cell else { continue };
@@ -64,7 +65,12 @@ fn rasterize(reel: &Reel, profile: &Profile, t: i32) -> RgbaImage {
         fill(&mut img, x0, y0, CELL_W, CELL_H, [r, g, b]);
     }
     fill(&mut img, 0, ground, w, 2, GROUND);
-    streak_badge(&mut img, profile.streak, w);
+    match profile.contributions_at(reel, t) {
+        // the sign rolls straight through the badge's corner, so the badge
+        // stands down for the one beat it would collide with
+        Some(k) => wall(&mut img, profile, k),
+        None => streak_badge(&mut img, profile.streak, w),
+    }
     if let Some(k) = profile.stats_at(reel, t) {
         stat_labels(&mut img, profile, k);
     }
