@@ -6,7 +6,7 @@ import { Field } from "../ui/Field";
 import { Button } from "../ui/Button";
 
 const FIELDS: { key: keyof Identity; label: string; hint: string }[] = [
-  { key: "handle", label: "handle", hint: "codewithwan" },
+  { key: "username", label: "username", hint: "codewithwan" },
   { key: "name", label: "name", hint: "what he calls you" },
   { key: "role", label: "role", hint: "fullstack engineer" },
   { key: "location", label: "location", hint: "Indonesia" },
@@ -43,7 +43,7 @@ export function StepIdentity({ id, onChange }: { id: Identity; onChange: (id: Id
         </div>
       </Card>
 
-      <Card title="Lyrics" hint="he sings these, one line at a time" tone="text-grape">
+      <Card title="Lyrics" hint="he sings these, one line at a time" tone="text-grape-ink">
         <div className="flex flex-col gap-2">
           {[0, 1, 2].map((i) => (
             <Field

@@ -57,7 +57,7 @@ export const TOKENS: Record<string, string> = {
   "{role}": "your role",
   "{location}": "where you are",
   "{stack}": "what you build with",
-  "{handle}": "your handle",
+  "{username}": "your GitHub username",
   "{streak}": "days in a row, counted from your calendar",
   "{contrib_year}": "contributions this year",
   "{contrib_recent}": "contributions in the last 30 days",

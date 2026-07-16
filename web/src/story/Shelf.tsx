@@ -16,7 +16,7 @@ export function Shelf({ onAdd }: { onAdd: (s: Scene) => void }) {
           <div className="flex items-center gap-2">
             <PixelIcon id={a.id} />
             <span className="text-[10px] uppercase text-ink">{a.label}</span>
-            <span className="ml-auto text-[9px] tabular-nums text-mute/60">{(a.ticks * 0.09).toFixed(1)}s</span>
+            <span className="ml-auto text-[9px] tabular-nums text-faint">{(a.ticks * 0.09).toFixed(1)}s</span>
           </div>
           <p className="mt-1 text-[9px] leading-tight text-mute">{a.blurb}</p>
         </button>

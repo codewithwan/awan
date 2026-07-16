@@ -11,7 +11,7 @@ export const SAMPLE = {
   role: "your role",
   location: "where you are",
   stack: "what you build with",
-  handle: "your handle",
+  username: "your username",
   streak: 4,
   contrib_year: 2060,
   contrib_recent: 183,

@@ -34,18 +34,49 @@
   --color-sky: #4dd4ff;
   --color-grape: #b072ff;
 
+  /* An accent does two jobs and they want opposite things. As a *fill* it
+     carries dark text, so it has to stay bright in both skins. As *text* it
+     sits on the slab, so on white it has to go dark. One token can't be both —
+     hence the -ink pair. In dark mode they're the same value. */
+  --color-cloud-ink: #7c88f0;
+  --color-lime-ink: #39d353;
+  --color-punch-ink: #ff5c5c;
+  --color-gold-ink: #ffc94d;
+  --color-sky-ink: #4dd4ff;
+  --color-grape-ink: #b072ff;
+
+  /* One token for the quiet text instead of ten opacities. An opacity that
+     reads as "subdued" on a dark slab reads as "gone" on a white one, and the
+     hint you can't see is a hint you didn't write. */
+  --color-faint: #6b7482;
+
   --font-pixel: "Silkscreen", "Courier New", monospace;
 }
 
 /* Light mode repaints the furniture, never the stage.
    The canvas is a GIF for a dark README — recolouring it would be showing
-   someone a banner they aren't going to get. So the page turns and he doesn't. */
+   someone a banner they aren't going to get. So the page turns and he doesn't.
+
+   The accents are re-tuned rather than reused. His palette is built to glow on
+   #0d1117, and on white it stops being a colour: the gold measured 1.5:1
+   against a 4.5:1 requirement, the sky 1.7:1, the lime 2.0:1. Same identity,
+   same job, enough ink to survive the paper. */
 :root[data-skin="light"] {
-  --color-void: #f2f4f8;
+  --color-void: #eef1f6;
   --color-slab: #ffffff;
   --color-ink: #0d1117;
-  --color-mute: #5b6472;
+  --color-mute: #4a5462;  /* 7.7:1 */
+  --color-faint: #5f6875; /* 5.6:1 — still quiet, still there */
   --color-line: #0d1117;
+
+  /* Fills keep their glow: a bright block carries #0d1117 text at ~10:1
+     whichever skin you're in. Only the text versions move. */
+  --color-cloud-ink: #4049b8;  /* 7.3:1 on white */
+  --color-lime-ink: #137a33;   /* 5.4:1 */
+  --color-punch-ink: #c31d29;  /* 6.0:1 */
+  --color-gold-ink: #8a5a00;   /* 5.9:1 */
+  --color-sky-ink: #0860c4;    /* 6.0:1 */
+  --color-grape-ink: #6b31c9;  /* 7.2:1 */
 }
 
 @layer base {

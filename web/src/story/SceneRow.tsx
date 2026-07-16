@@ -29,7 +29,7 @@ export function SceneRow({ id, scene, live, onEdit, onDrop }: Props) {
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab px-1 text-mute/60 active:cursor-grabbing"
+          className="cursor-grab px-1 text-faint active:cursor-grabbing"
           aria-label={`Reorder ${info.label}`}
         >
           ⣿
@@ -38,7 +38,7 @@ export function SceneRow({ id, scene, live, onEdit, onDrop }: Props) {
         <span className="text-xs uppercase text-ink">{info.label}</span>
         {info.live && <span className="bg-lime px-1 text-[9px] uppercase text-line">live</span>}
         <span className="ml-auto text-[10px] tabular-nums text-mute">{(info.ticks * 0.09).toFixed(1)}s</span>
-        <button onClick={onDrop} className="nb-btn bg-slab px-1.5 py-0.5 text-[10px] text-punch" aria-label={`Remove ${info.label}`}>
+        <button onClick={onDrop} className="nb-btn bg-slab px-1.5 py-0.5 text-[10px] text-punch-ink" aria-label={`Remove ${info.label}`}>
           ✕
         </button>
       </div>
@@ -62,7 +62,7 @@ export function SceneRow({ id, scene, live, onEdit, onDrop }: Props) {
             />
           )}
           {(scene.say ?? "").includes("{") && (
-            <p className="text-[10px] text-mute/70">→ {fill(scene.say ?? "")}</p>
+            <p className="text-[10px] text-faint">→ {fill(scene.say ?? "")}</p>
           )}
         </div>
       )}

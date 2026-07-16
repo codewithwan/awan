@@ -3,18 +3,18 @@
  *  the file, only make a wall of grey stop being a wall of grey, and shipping a
  *  syntax library to colour twenty lines is not a trade worth making. */
 const RULES: [RegExp, string][] = [
-  [/(^|\s)(#.*)$/gm, "text-mute/50"], // yaml comment
-  [/"([^"\\]|\\.)*"(?=\s*:)/g, "text-sky"], // json key
-  [/^\s*[\w.-]+(?=:)/gm, "text-sky"], // yaml key
-  [/"([^"\\]|\\.)*"/g, "text-gold"], // string
-  [/\b\d+\b/g, "text-grape"], // number
+  [/(^|\s)(#.*)$/gm, "text-faint"], // yaml comment
+  [/"([^"\\]|\\.)*"(?=\s*:)/g, "text-sky-ink"], // json key
+  [/^\s*[\w.-]+(?=:)/gm, "text-sky-ink"], // yaml key
+  [/"([^"\\]|\\.)*"/g, "text-gold-ink"], // string
+  [/\b\d+\b/g, "text-grape-ink"], // number
 ];
 
 type Tok = { text: string; cls?: string };
 
 export function Code({ body }: { body: string }) {
   return (
-    <pre className="max-h-64 overflow-auto p-2 text-[10px] leading-relaxed text-ink/70">
+    <pre className="max-h-64 overflow-auto p-2 text-[10px] leading-relaxed text-ink">
       {paint(body).map((t, i) => (
         <span key={i} className={t.cls}>
           {t.text}

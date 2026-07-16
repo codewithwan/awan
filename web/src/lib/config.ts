@@ -1,7 +1,9 @@
 import type { Scene } from "./acts";
 
 export type Identity = {
-  handle: string;
+  /** Your GitHub username. It names the repo this goes in, it's who CI reads
+   *  the numbers for, and it's what he calls you when `name` is blank. */
+  username: string;
   name: string;
   role: string;
   location: string;
@@ -12,7 +14,7 @@ export type Identity = {
 };
 
 export const BLANK: Identity = {
-  handle: "", name: "", role: "", location: "", stack: "", song: "", artist: "", lyrics: [],
+  username: "", name: "", role: "", location: "", stack: "", song: "", artist: "", lyrics: [],
 };
 
 /** Everything CI writes. They ship as zeroes rather than invented numbers on
@@ -61,3 +63,12 @@ jobs:
 `;
 
 export const README_LINE = "![awan](assets/awan.gif)";
+
+/** The three files, at the paths they belong at. Handing over a zip beats
+ *  handing over three clipboards: the paths *are* the instructions, and
+ *  ".github/workflows/" is exactly the bit someone gets wrong at midnight. */
+export const files = (id: Identity, story: Scene[], character = "") => ({
+  "awan.json": buildConfig(id, story, character),
+  ".github/workflows/awan.yml": WORKFLOW,
+  "README.md": `${README_LINE}\n\n# hi, i'm ${id.name || id.username || "you"}\n`,
+});

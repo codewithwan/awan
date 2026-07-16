@@ -8,10 +8,10 @@ import { barOf } from "../lib/hues";
  *  pays for. Bands and the KB slope come from real renders — 20s ≈ 444 KB,
  *  31s ≈ 532 KB, 53s ≈ 705 KB, 77s ≈ 936 KB. */
 const BANDS = [
-  { max: 25, label: "tight", tone: "text-lime", note: "people watch this one to the end" },
-  { max: 40, label: "good", tone: "text-sky", note: "a comfortable length for a profile" },
-  { max: 60, label: "long", tone: "text-gold", note: "the last beats rarely get seen" },
-  { max: Infinity, label: "too long", tone: "text-punch", note: "nobody waits this long — cut a beat" },
+  { max: 25, label: "tight", tone: "text-lime-ink", note: "people watch this one to the end" },
+  { max: 40, label: "good", tone: "text-sky-ink", note: "a comfortable length for a profile" },
+  { max: 60, label: "long", tone: "text-gold-ink", note: "the last beats rarely get seen" },
+  { max: Infinity, label: "too long", tone: "text-punch-ink", note: "nobody waits this long — cut a beat" },
 ];
 
 export function Meter({ story, at, solo, onPick }: { story: Scene[]; at: number; solo: number; onPick?: (i: number) => void }) {
@@ -47,7 +47,7 @@ export function Meter({ story, at, solo, onPick }: { story: Scene[]; at: number;
 
       <p className="mt-2 text-[10px] text-mute">
         {band.note} ·{" "}
-        <span className="text-mute/60">
+        <span className="text-faint">
           {solo >= 0 ? "playing one beat — click it again for the whole story" : "click a block to play that beat alone"}
         </span>
       </p>

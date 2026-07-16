@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 export function Card({
   title,
   hint,
-  tone = "text-gold",
+  tone = "text-gold-ink",
   children,
 }: {
   title?: string;

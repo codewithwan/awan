@@ -22,11 +22,11 @@ export function Field({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className={`nb-input min-w-0 flex-1 px-2 py-1.5 text-xs text-ink placeholder:text-mute/40
+        className={`nb-input min-w-0 flex-1 px-2 py-1.5 text-xs text-ink placeholder:text-faint
           ${over ? "border-punch" : ""}`}
       />
       {limit !== undefined && (
-        <span className={`w-10 text-right text-[10px] tabular-nums ${over ? "text-punch" : "text-mute/50"}`}>
+        <span className={`w-10 text-right text-[10px] tabular-nums ${over ? "text-punch-ink" : "text-faint"}`}>
           {value.length}/{limit}
         </span>
       )}

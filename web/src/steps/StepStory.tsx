@@ -34,7 +34,7 @@ export function StepStory({ story, beat, cast, solo, id, onStory, onBeat, onCast
       </div>
 
       <div className="flex flex-col gap-4">
-        <Card title="Who plays him" tone="text-grape">
+        <Card title="Who plays him" tone="text-grape-ink">
           <div className="flex flex-wrap gap-2">
             {CAST.map((c) => (
               <button
@@ -53,11 +53,11 @@ export function StepStory({ story, beat, cast, solo, id, onStory, onBeat, onCast
           </p>
         </Card>
 
-        <Card title="Running order" hint="drag to reorder" tone="text-lime">
+        <Card title="Running order" hint="drag to reorder" tone="text-lime-ink">
           <SceneList story={story} playing={beat} onChange={onStory} />
         </Card>
 
-        <Card title="Add a beat" tone="text-sky">
+        <Card title="Add a beat" tone="text-sky-ink">
           <Shelf onAdd={(s) => onStory([...story, s])} />
         </Card>
       </div>

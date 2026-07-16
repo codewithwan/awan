@@ -7,14 +7,14 @@ export function Stepper({ at, onGo }: { at: number; onGo: (i: number) => void })
   return (
     <ol className="flex flex-wrap items-stretch gap-2">
       {STEPS.map((label, i) => {
-        const state = i === at ? "bg-lime text-line" : i < at ? "bg-slab text-lime" : "bg-slab text-mute";
+        const state = i === at ? "bg-lime text-line" : i < at ? "bg-slab text-lime-ink" : "bg-slab text-mute";
         return (
           <li key={label} className="flex items-center gap-2">
             <button onClick={() => onGo(i)} className={`nb-btn px-3 py-2 text-xs uppercase ${state}`}>
               <span className="tabular-nums">{i + 1}</span>
               <span className="ml-2 hidden sm:inline">{label}</span>
             </button>
-            {i < STEPS.length - 1 && <span className="text-mute/40">›</span>}
+            {i < STEPS.length - 1 && <span className="text-faint">›</span>}
           </li>
         );
       })}
