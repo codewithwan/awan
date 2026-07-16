@@ -8,6 +8,21 @@ your repo and the workflow runs on your runner. The moment this page grows a
 server, it becomes something that can go down and take READMEs with it. So:
 no API routes, no database, no accounts, no stored links.
 
+## Layout
+
+```
+crate/          wasm-bindgen bridge over awan-core
+src/lib/        data and pure helpers — acts, config, sample numbers, pixel art
+src/ui/         primitives — Button, Card, Field, PixelIcon, Stepper
+src/stage/      the reel: clock, canvas, overlays, transport, meter
+src/story/      the running order: list, row, shelf
+src/steps/      one file per step of the wizard
+```
+
+`Card` doesn't nest on purpose. A card inside a card is two borders and two
+shadows saying the same thing; if something inside needs separating, space or a
+rule does it.
+
 ## The preview is the engine
 
 `crate/` is a thin `wasm-bindgen` bridge over `awan-core`. The engine is a pure
@@ -18,6 +33,24 @@ does rather than an impression of them.
 That split matters for the overlays too. The engine draws a scene's *shapes*
 and leaves its *words and numbers* to the renderer; `overlays.ts` is that
 renderer, doing for the canvas what `profile/src/` does for the GIF.
+
+**The canvas is 1056×416, including the caption strip, in the engine's own
+font8x8 glyphs at the renderer's own scale.** That is not decoration. An earlier
+build drew the caption in HTML underneath in Courier, and it looked close enough
+to ship and wrong enough to notice — which is the worst thing a preview can be,
+because someone builds a config against it and CI hands them something else.
+
+Two things caught that, and both are worth knowing about:
+
+- **Integer division.** Rust computes `303 / 2 = 151`; JavaScript gives `151.5`,
+  which lands a glyph on a half-pixel, and the canvas antialiases every edge. A
+  third of the ink stops matching. Every position here is `Math.floor`d.
+- **Colour by hand.** `[150, 150, 160]` is `#9696a0`, not `#96969f`. Convert;
+  don't eyeball.
+
+You can check it: render a GIF and the preview from the same config and seed,
+then compare the caption strip. It should be identical, pixel for pixel — ink
+count and bounding box both.
 
 ## What the preview can't know
 

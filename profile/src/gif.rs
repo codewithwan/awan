@@ -10,7 +10,7 @@ use image::codecs::gif::{GifEncoder, Repeat};
 use image::{Delay, Frame, Rgba, RgbaImage};
 
 use crate::draw::{draw_bits, draw_text, fill};
-use crate::icons;
+use awan_core::icons;
 use crate::script::{Line, Profile};
 use crate::wall::wall;
 

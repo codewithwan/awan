@@ -4,7 +4,7 @@
 
 use awan_core::{Act, Reel};
 
-use crate::icons::{self, Icon};
+use awan_core::icons::{self, Icon};
 use crate::story::{act_of, default_story, icon_of};
 
 /// Ticks each lyric line holds during a singing beat.

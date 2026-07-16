@@ -1,5 +1,6 @@
-import * as w from "./wasm/awan_wasm";
-import { SAMPLE_STATS, SAMPLE_WALL } from "./sample";
+import * as w from "../wasm/awan_wasm";
+import { SAMPLE_STATS, SAMPLE_WALL } from "../lib/sample";
+import { drawText, GLYPH, INK, SCALE } from "./text";
 
 /** Pixels per canvas cell — the GIF renderer's own numbers. */
 const CELL_W = 33;
@@ -16,23 +17,18 @@ const YEAR_FADE = 45;
 const mix = (a: readonly number[], b: readonly number[], pct: number) =>
   `rgb(${a.map((v, i) => Math.round((v * (100 - pct) + b[i] * pct) / 100)).join(",")})`;
 
-/** The readout, typing itself into the window the engine opened. The engine
- *  says how much has printed; the words are the reader's, so they're ours to
- *  draw — the same division the GIF renderer works to. */
+/** The readout, typing itself into the window the engine opened — in the
+ *  engine's own font, at the renderer's own scale. The engine says how much has
+ *  printed; the words are the reader's, so they're ours to draw. */
 export function drawStats(ctx: CanvasRenderingContext2D, k: number) {
   const [px, py, pw, ph] = w.stats_panel();
-  const glyph = 24;
   const innerW = (pw - 2) * CELL_W;
   const innerH = (ph - 2) * CELL_H;
-  const room = Math.max(Math.floor(innerW / glyph) - 2, 8);
-  const x = px * CELL_W + CELL_W + (innerW - room * glyph) / 2;
-  const step = glyph + 12;
+  const room = Math.max(Math.floor(innerW / GLYPH) - 2, 8);
+  const x = px * CELL_W + CELL_W + Math.floor((innerW - room * GLYPH) / 2);
+  const step = GLYPH + 12;
   const slots = w.stats_slots();
-  const y0 = py * CELL_H + CELL_H + Math.max(innerH - ((slots - 1) * step + glyph), 0) / 2;
-
-  ctx.font = `${glyph}px ui-monospace, monospace`;
-  ctx.textBaseline = "top";
-  ctx.fillStyle = "#96969f";
+  const y0 = py * CELL_H + CELL_H + Math.floor(Math.max(innerH - ((slots - 1) * step + GLYPH), 0) / 2);
 
   SAMPLE_STATS.slice(0, slots).forEach((entry, i) => {
     const shown = w.stats_chars_at(k, i);
@@ -41,8 +37,11 @@ export function drawStats(ctx: CanvasRenderingContext2D, k: number) {
     const gap = Math.max(room - label.length - value.length - 1, 0);
     const line = `${label}${".".repeat(gap)} ${value}`.slice(0, shown);
     const y = y0 + i * step;
-    ctx.fillText(line, x, y);
-    if (w.stats_typing(k, i)) ctx.fillRect(x + line.length * glyph * 0.6, y, glyph / 2, glyph);
+    drawText(ctx, line, x, y, SCALE, INK);
+    if (w.stats_typing(k, i)) {
+      ctx.fillStyle = INK;
+      ctx.fillRect(x + line.length * GLYPH, y, GLYPH / 2, GLYPH);
+    }
   });
 }
 
@@ -56,8 +55,8 @@ export function drawWall(ctx: CanvasRenderingContext2D, k: number) {
   const [weeks, rows, recent] = w.wall_shape();
   const glow = w.wall_glow(k);
 
-  const x0 = (32 * CELL_W - weeks * PITCH) / 2;
-  const y0 = by * CELL_H + (bh * CELL_H - rows * PITCH) / 2;
+  const x0 = Math.floor((32 * CELL_W - weeks * PITCH) / 2);
+  const y0 = by * CELL_H + Math.floor((bh * CELL_H - rows * PITCH) / 2);
   const first = Math.floor((SAMPLE_WALL.length - recent) / rows);
 
   if (glow) {

@@ -6,7 +6,8 @@ export type ActInfo = {
   id: string;
   label: string;
   blurb: string;
-  icon: string;
+  /** Which of the engine's 8×8 caption icons this beat carries. */
+  caption: string;
   /** Ticks, straight from the engine's `scene_for`. 11 ticks ≈ 1 second. */
   ticks: number;
   /** Whether the act reads numbers CI fetches, rather than words you write. */
@@ -23,24 +24,28 @@ export const TICK_MS = 90;
 /** The shelf. Durations mirror `scene_for` in awan-core; if that changes, this
  *  lies, so the preview clock is the thing that would catch it. */
 export const ACTS: ActInfo[] = [
-  { id: "wave", label: "Wave", blurb: "bounces in an excited hello", icon: "👋", ticks: 30 },
-  { id: "present", label: "Present", blurb: "stands and introduces himself", icon: "🎁", ticks: 60 },
-  { id: "stroll", label: "Stroll", blurb: "walks along, ground scrolling past", icon: "🚶", ticks: 30 },
-  { id: "stats", label: "Stats", blurb: "types your numbers into a terminal", icon: "📊", ticks: 150, live: true },
-  { id: "contributions", label: "Year wall", blurb: "walks his contribution year", icon: "🟩", ticks: 150, live: true, splits: true },
-  { id: "rocket", label: "Rocket", blurb: "builds a rocket", icon: "🛠️", ticks: 40 },
-  { id: "launch", label: "Launch", blurb: "...and watches it explode", icon: "🚀", ticks: 50 },
-  { id: "bake", label: "Bake", blurb: "fetches an oven, bakes, devours", icon: "🎂", ticks: 118 },
-  { id: "campfire", label: "Campfire", blurb: "drags in wood, the fire catches", icon: "🔥", ticks: 90 },
-  { id: "sing", label: "Sing", blurb: "karaoke — plays your lyrics", icon: "🎤", ticks: 150, mute: true },
-  { id: "soccer", label: "Soccer", blurb: "juggles until it bonks him", icon: "⚽", ticks: 66 },
-  { id: "dance", label: "Dance", blurb: "a little dance", icon: "🕺", ticks: 48 },
-  { id: "sleep", label: "Sleep", blurb: "yawns, dozes, wakes up", icon: "😴", ticks: 80 },
-  { id: "{verdict}", label: "Verdict", blurb: "CI picks: dance if the month was good, sleep if not", icon: "🎲", ticks: 48 },
+  { id: "wave", caption: "heart", label: "Wave", blurb: "bounces in an excited hello", ticks: 30 },
+  { id: "present", caption: "briefcase", label: "Present", blurb: "stands and introduces himself", ticks: 60 },
+  { id: "stroll", caption: "pin", label: "Stroll", blurb: "walks along, ground scrolling past", ticks: 30 },
+  { id: "stats", caption: "diamond", label: "Stats", blurb: "types your numbers into a terminal", ticks: 150, live: true },
+  { id: "contributions", caption: "code", label: "Year wall", blurb: "walks his contribution year", ticks: 150, live: true, splits: true },
+  { id: "rocket", caption: "code", label: "Rocket", blurb: "builds a rocket", ticks: 40 },
+  { id: "launch", caption: "star", label: "Launch", blurb: "...and watches it explode", ticks: 50 },
+  { id: "bake", caption: "heart", label: "Bake", blurb: "fetches an oven, bakes, devours", ticks: 118 },
+  { id: "campfire", caption: "fire", label: "Campfire", blurb: "drags in wood, the fire catches", ticks: 90 },
+  { id: "sing", caption: "globe", label: "Sing", blurb: "karaoke — plays your lyrics", ticks: 150, mute: true },
+  { id: "soccer", caption: "star", label: "Soccer", blurb: "juggles until it bonks him", ticks: 66 },
+  { id: "dance", caption: "star", label: "Dance", blurb: "a little dance", ticks: 48 },
+  { id: "sleep", caption: "heart", label: "Sleep", blurb: "yawns, dozes, wakes up", ticks: 80 },
+  { id: "{verdict}", caption: "star", label: "Verdict", blurb: "CI picks: dance if the month was good, sleep if not", ticks: 48 },
 ];
 
 export const actInfo = (id: string): ActInfo =>
-  ACTS.find((a) => a.id === id) ?? { id, label: id, blurb: "", icon: "❓", ticks: 60 };
+  ACTS.find((a) => a.id === id) ?? { id, caption: "diamond", label: id, blurb: "", ticks: 60 };
+
+/** The caption icon a beat carries — the engine's own bitmap, so the strip
+ *  under the ground matches the GIF glyph for glyph. */
+export const actIcon = (id?: string): string => (id ? actInfo(id).caption : "heart");
 
 /** Placeholders CI fills in. Shown so nobody wonders where the numbers come
  *  from — and so a preview can stand in for them. */

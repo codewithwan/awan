@@ -8,7 +8,8 @@
 //! It hands JavaScript flat buffers rather than objects: one allocation per
 //! frame instead of 384, which keeps a 60fps canvas loop honest.
 
-use awan_core::{Act, Character, Reel};
+use awan_core::{Act, Character, Reel, icons};
+use font8x8::{BASIC_FONTS, UnicodeFonts};
 use wasm_bindgen::prelude::*;
 
 /// A reel built from a story, ready to draw.
@@ -146,6 +147,31 @@ pub fn wall_shape() -> Vec<usize> {
         awan_core::contributions::DAYS,
         awan_core::contributions::RECENT,
     ]
+}
+
+/// The 8×8 bitmap for `ch` — the exact glyph the GIF renderer draws, from the
+/// same font crate. Eight bytes, one per row; bit `1 << col` is a lit pixel.
+/// Empty for a character the font doesn't carry, which is what the renderer
+/// does too: it skips the glyph and still advances the cursor.
+#[wasm_bindgen]
+pub fn glyph(ch: char) -> Vec<u8> {
+    BASIC_FONTS.get(ch).map(|g| g.to_vec()).unwrap_or_default()
+}
+
+/// The 8×8 icon a caption carries, by name. Same bitmaps the GIF draws.
+#[wasm_bindgen]
+pub fn icon(name: &str) -> Vec<u8> {
+    let i = match name {
+        "heart" => icons::HEART,
+        "pin" => icons::PIN,
+        "code" => icons::CODE,
+        "star" => icons::STAR,
+        "fire" => icons::FIRE,
+        "briefcase" => icons::BRIEFCASE,
+        "globe" => icons::GLOBE,
+        _ => icons::DIAMOND,
+    };
+    i.0.to_vec()
 }
 
 /// The act vocabulary, mirrored from the profile generator. Kept as strings on

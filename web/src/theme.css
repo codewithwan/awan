@@ -1,57 +1,88 @@
 @import "tailwindcss";
 
-/* A pixel arcade, but a legible one. The character is 33x30px blocks of flat
-   colour; the page should feel like it belongs to him without fighting him for
-   attention. Colour comes from the palette below, structure from hard edges and
-   chunky shadows — no gradients, no blur, nothing that a CRT couldn't do. */
+/* Self-hosted on purpose: a CDN is a third party that can go down, and this
+   page's whole claim is that it can't take anything with it. */
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/font/silkscreen.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/font/silkscreen-bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Neobrutalism, played straight: thick black outlines, hard offset shadows,
+   flat saturated colour, nothing rounded, nothing blurred. It suits him — he is
+   33x30px blocks of flat colour, and a soft interface around him would read as
+   an apology for how he's drawn. */
 @theme {
   --color-void: #0d1117;
-  --color-panel: #161b22;
-  --color-edge: #2d333b;
-  --color-ink: #e6edf3;
+  --color-slab: #161b22;
+  --color-line: #05070a;
+  --color-ink: #f4f7fb;
   --color-mute: #8b949e;
 
+  /* His own palette, straight off the sprite and the scenes. */
   --color-cloud: #7c88f0;
   --color-lime: #39d353;
-  --color-punch: #ff6b6b;
+  --color-punch: #ff5c5c;
   --color-gold: #ffc94d;
   --color-sky: #4dd4ff;
   --color-grape: #b072ff;
 
-  --font-pixel: "Courier New", ui-monospace, monospace;
+  --font-pixel: "Silkscreen", "Courier New", monospace;
 }
 
 @layer base {
-  html { background: var(--color-void); }
+  html {
+    /* a faint tile grid, like a level you're building on */
+    background:
+      linear-gradient(#161b2244 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, #161b2244 1px, transparent 1px) 0 0 / 24px 24px,
+      var(--color-void);
+  }
   body {
     color: var(--color-ink);
     font-family: var(--font-pixel);
-    font-weight: 700;
-    /* the whole page is pixel art; never let a browser soften it */
     image-rendering: pixelated;
     -webkit-font-smoothing: none;
   }
-  ::selection { background: var(--color-lime); color: var(--color-void); }
+  ::selection { background: var(--color-lime); color: var(--color-line); }
+  /* focus has to survive a page with no rounded corners to soften it */
+  :focus-visible { outline: 3px solid var(--color-sky); outline-offset: 2px; }
 }
 
 @layer components {
-  /* A hard 4px shadow instead of a soft one: the only depth cue a pixel
-     display ever had, and it reads at any zoom. */
-  .px-box {
-    border: 2px solid var(--color-edge);
-    box-shadow: 4px 4px 0 0 #05070a;
-    background: var(--color-panel);
+  /* Hard 6px shadow, no blur — the only depth cue a sprite ever had. */
+  .nb {
+    border: 3px solid var(--color-line);
+    box-shadow: 6px 6px 0 0 var(--color-line);
+    background: var(--color-slab);
   }
-  .px-btn {
-    border: 2px solid var(--color-edge);
-    box-shadow: 3px 3px 0 0 #05070a;
-    transition: transform 80ms steps(2), box-shadow 80ms steps(2);
+  .nb-tight { border: 3px solid var(--color-line); box-shadow: 3px 3px 0 0 var(--color-line); }
+
+  /* Buttons press into the page like a physical key. steps(), never ease:
+     nothing in his world moves on a curve. */
+  .nb-btn {
+    border: 3px solid var(--color-line);
+    box-shadow: 4px 4px 0 0 var(--color-line);
+    transition: transform 60ms steps(2), box-shadow 60ms steps(2);
   }
-  .px-btn:hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 0 #05070a; }
-  .px-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 0 #05070a; }
-  .px-btn:disabled { opacity: .4; transform: none; box-shadow: 3px 3px 0 0 #05070a; }
+  .nb-btn:hover:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 0 var(--color-line); }
+  .nb-btn:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 0 var(--color-line); }
+  .nb-btn:disabled { opacity: .35; }
+
+  .nb-input {
+    border: 3px solid var(--color-line);
+    background: var(--color-void);
+    box-shadow: inset 2px 2px 0 0 #00000066;
+  }
+  .nb-input:focus { border-color: var(--color-sky); outline: none; }
 }
 
-/* Steps(), not ease. Nothing in this world moves on a curve. */
-@keyframes px-blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
-.px-caret { animation: px-blink 1s steps(1) infinite; }
+@keyframes nb-blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+.nb-caret { animation: nb-blink 1s steps(1) infinite; }

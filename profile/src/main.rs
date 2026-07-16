@@ -14,7 +14,6 @@ use awan_core::{Character, Reel, Size};
 
 mod draw;
 mod gif;
-mod icons;
 mod script;
 mod story;
 mod wall;
