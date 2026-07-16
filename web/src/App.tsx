@@ -46,13 +46,16 @@ export function App() {
         {at === 2 && <StepExport id={id} story={story} cast={cast} />}
       </main>
 
+      {/* Neither arrow appears where it has nowhere to go. A button whose only
+          job is to be greyed out is furniture, and the last step's Next was
+          worse than furniture: it implied a fourth step that doesn't exist. */}
       <nav className="flex gap-2">
-        {/* no Back on the first step: a button whose only job is to be greyed
-            out is furniture, and this page has enough */}
         {at > 0 && <Button onClick={() => setAt((i) => i - 1)}>‹ back</Button>}
-        <Button tone="lime" onClick={() => setAt((i) => i + 1)} disabled={at === STEPS.length - 1} className="ml-auto">
-          next ›
-        </Button>
+        {at < STEPS.length - 1 && (
+          <Button tone="lime" onClick={() => setAt((i) => i + 1)} className="ml-auto">
+            next ›
+          </Button>
+        )}
       </nav>
 
       <Footer />
