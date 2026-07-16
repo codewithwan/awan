@@ -33,22 +33,30 @@ const HOME_END: i32 = HOME + SHIFT * STEP;
 
 /// How many cups the shelf holds.
 ///
-/// Four, and that's arithmetic rather than taste. He takes eleven of the
-/// stage's thirty-two cells, leaving nineteen. A cup is three cells and needs
-/// one of air, so four cups is seventeen — and each label gets 132px, which is
-/// eight glyphs, which is "commits" with room to spare. Five cups fits nothing
-/// legible at any spacing.
-pub const SLOTS: usize = 4;
+/// Three, and the count comes *last*. A cup needs a bowl, handles, a stem and a
+/// base or it isn't a cup — that's five cells, and no fewer: the first draft
+/// picked four slots, shrank the art to three cells to make them fit, and
+/// rendered four gold letter-Ts. He takes eleven of the stage's thirty-two
+/// cells; nineteen are left; three five-cell cups with air between them is
+/// nineteen exactly. Fit the count to the art, never the art to the count.
+pub const SLOTS: usize = 3;
 /// The shelf, in cells: `(x, y, w)` — beside him, not above. Labels need the
 /// rows underneath, and his head was already using them.
-pub const SHELF: (i32, i32, i32) = (13, 5, 17);
-/// Cells between one cup and the next: three for the cup, one for air.
-pub const PITCH: i32 = 4;
+pub const SHELF: (i32, i32, i32) = (13, 5, 19);
+/// Cells between one cup and the next: five for the cup, one for air.
+pub const PITCH: i32 = 6;
 
-/// A little cup: bowl, stem, base. Three cells wide, because five of anything
-/// six cells wide is thirty cells of a thirty-two cell stage — a gold fence,
-/// not a shelf. The engine's props are this size for the same reason.
-const CUP: &[&str] = &["###", "#-#", " # ", "###"];
+/// A cup: handles, bowl, taper, stem, base. Five by five.
+///
+/// Every number here was arrived at by drawing it. Five wide is the floor —
+/// four reads as a mug, three as a letter T. Five *tall* is also the floor: the
+/// taper is what turns two bars and a stick into a bowl, and dropping it to
+/// save a row rendered three gold dumbbells.
+///
+/// Which leaves no room: he owns rows 6-11, so the shelf has six rows, and a
+/// five-row cup on a one-row plank is seven. So the cup's base *is* the plank —
+/// it lands on the shelf's own row, gold on brown, and the sky keeps row 0.
+const CUP: &[&str] = &["#---#", "#####", " ### ", "  #  ", "#####"];
 
 /// How far right of home he is at tick `k`. He starts *at* home — a scene that
 /// opens with him already somewhere else has teleported him, and the reel's
