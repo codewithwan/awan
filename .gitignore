@@ -21,3 +21,6 @@ CLAUDE.md
 # Node
 node_modules/
 usage/node/package-lock.json
+
+# Personal recordings (not part of the project)
+assets/codewithwan_profile.*

@@ -1,0 +1,57 @@
+name: banner
+
+# Dogfooding: awan renders its own README banner from awan.json, with this
+# repo's real numbers. Same shape as the one we hand to readers in
+# profile/sample/, except it builds the crate straight from this checkout.
+on:
+  push:
+    branches: [main]
+    paths: ["awan.json", "profile/**", "crates/awan-core/**"]
+  schedule:
+    - cron: "0 3 * * *" # keep the numbers fresh
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  banner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      # CI fetches, the binary draws — the renderer never touches the network.
+      - name: Fetch live stats
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          api() { gh api "$1" --jq "$2" 2>/dev/null || echo "?"; }
+          STARS=$(api "repos/$REPO" '.stargazers_count')
+          FORKS=$(api "repos/$REPO" '.forks_count')
+          PEOPLE=$(api "repos/$REPO/contributors?per_page=100" 'length')
+          VERSION=$(api "repos/$REPO/releases/latest" '.tag_name')
+          LICENSE=$(api "repos/$REPO" '.license.spdx_id')
+          jq --arg s "$STARS" --arg f "$FORKS" --arg p "$PEOPLE" \
+             --arg v "$VERSION" --arg l "$LICENSE" \
+             '.stats = ["stars:\($s)", "forks:\($f)", "contributors:\($p)",
+                        "version:\($v)", "license:\($l)"]' \
+             awan.json > awan.tmp && mv awan.tmp awan.json
+
+      - name: Render
+        run: cargo run -q -p awan-profile --release -- whoami --config awan.json
+
+      - name: Shrink the GIF
+        run: |
+          sudo apt-get update && sudo apt-get install -y gifsicle
+          gifsicle -O3 --lossy=80 --colors 64 assets/banner.gif -o assets/banner.gif
+
+      - name: Commit the result
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/banner.gif awan.json
+          git commit -m "chore: refresh the awan banner" || echo "no changes"
+          git push
