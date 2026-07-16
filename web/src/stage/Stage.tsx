@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Preview } from "../lib/engine";
 import type { Scene } from "../lib/acts";
+import type { Tokens } from "../lib/sample";
 import { actIcon } from "../lib/acts";
 import { fill } from "../lib/sample";
 import { drawCaption, drawStreak, CAPTION_H } from "./text";
@@ -15,12 +16,12 @@ const CELL_H = 30;
 const GLOW_AT = 40;
 const GROUND = "#505460"; // [80, 84, 96] in gif.rs
 
-type Props = { reel: Preview; story: Scene[]; tick: number };
+type Props = { reel: Preview; story: Scene[]; tick: number; id: Tokens };
 
 /** One frame of the reel, painted the way the encoder paints it: cells, wall,
  *  ground line, readout, badge, caption. Same order, same font, same 1056×416
  *  as the file CI commits. */
-export function Stage({ reel, story, tick }: Props) {
+export function Stage({ reel, story, tick, id }: Props) {
   const ref = useRef<HTMLCanvasElement>(null);
   const cols = reel.cols();
   const rows = reel.rows();
@@ -52,8 +53,8 @@ export function Stage({ reel, story, tick }: Props) {
     if (scene?.act === "stats") drawStats(ctx, k);
     else drawStreak(ctx, SAMPLE.streak, w);
 
-    drawCaption(ctx, actIcon(scene?.act), captionOf(scene, k, leaving), w, ground);
-  }, [reel, story, tick, cols, rows]);
+    drawCaption(ctx, actIcon(scene?.act), captionOf(scene, k, leaving, id), w, ground);
+  }, [reel, story, tick, cols, rows, id]);
 
   return (
     <canvas
@@ -68,10 +69,14 @@ export function Stage({ reel, story, tick }: Props) {
 
 /** Which of a beat's lines is speaking. The wall's `then` takes over the tick
  *  the spotlight lands, so the preview tells the joke on the same beat CI does. */
-function captionOf(scene: Scene | undefined, k: number, leaving: boolean): string {
+function captionOf(scene: Scene | undefined, k: number, leaving: boolean, id: Tokens): string {
   if (leaving) return "thanks for stopping by ~";
   if (!scene) return "";
-  if (scene.act === "sing") return 'my fav song "..." - the artist';
+  if (scene.act === "sing") {
+    const song = id.song?.trim() || "an old favourite";
+    const artist = id.artist?.trim() || "someone great";
+    return fill(`my fav song "${song}" - ${artist}`, id);
+  }
   const line = scene.then && k >= GLOW_AT ? scene.then : (scene.say ?? "");
-  return fill(line);
+  return fill(line, id);
 }

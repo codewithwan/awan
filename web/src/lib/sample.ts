@@ -17,12 +17,22 @@ export const SAMPLE = {
   contrib_recent: 183,
 };
 
-/** Fill the `{tokens}` a caption carries, so the preview reads like a sentence
- *  instead of a template. */
-export function fill(text: string): string {
-  return text.replace(/\{(\w+)\}/g, (whole, key: string) =>
-    key in SAMPLE ? String(SAMPLE[key as keyof typeof SAMPLE]) : whole,
-  );
+/** Whatever the reader has typed so far — every field is optional because a
+ *  half-filled form still deserves a preview. */
+export type Tokens = Partial<Record<string, unknown>> & { song?: string; artist?: string };
+
+/** Fill the `{tokens}` a caption carries.
+ *
+ *  Yours first, ours only where you've left a blank. A preview that ignores
+ *  what you just typed is a preview of somebody else's banner — and the numbers
+ *  stay ours regardless, because those are CI's to fetch.
+ */
+export function fill(text: string, id?: Tokens): string {
+  return text.replace(/\{(\w+)\}/g, (whole, key: string) => {
+    const mine = id?.[key];
+    if (typeof mine === "string" && mine.trim()) return mine;
+    return key in SAMPLE ? String(SAMPLE[key as keyof typeof SAMPLE]) : whole;
+  });
 }
 
 /** The readout's stand-in lines. Real ones arrive as "label:value" from CI. */

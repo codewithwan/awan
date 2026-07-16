@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { loadEngine, type Preview } from "../lib/engine";
 import { Preview as Engine } from "../wasm/awan_wasm";
 import { TICK_MS, type Scene } from "../lib/acts";
+import type { Tokens } from "../lib/sample";
 import { Stage } from "./Stage";
 import { Transport } from "./Transport";
 
@@ -10,10 +11,12 @@ import { Transport } from "./Transport";
 export function Reel({
   story,
   toml,
+  id,
   onBeat,
 }: {
   story: Scene[];
   toml: string;
+  id: Tokens;
   onBeat: (i: number) => void;
 }) {
   const [reel, setReel] = useState<Preview | null>(null);
@@ -56,7 +59,7 @@ export function Reel({
 
   return (
     <div className="nb p-3">
-      <Stage reel={reel} story={story} tick={tick} />
+      <Stage reel={reel} story={story} tick={tick} id={id} />
       <Transport
         tick={tick}
         total={reel.ticks()}

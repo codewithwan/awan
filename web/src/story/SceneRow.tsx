@@ -9,15 +9,13 @@ type Props = {
   id: string;
   scene: Scene;
   live: boolean;
-  solo: boolean;
   onEdit: (s: Scene) => void;
   onDrop: () => void;
-  onSolo: () => void;
 };
 
 /** One beat: what it is, what it costs, and what it says. Reordering and
  *  rewording are the same task, so they belong in the same place. */
-export function SceneRow({ id, scene, live, solo, onEdit, onDrop, onSolo }: Props) {
+export function SceneRow({ id, scene, live, onEdit, onDrop }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const info = actInfo(scene.act);
 
@@ -40,14 +38,6 @@ export function SceneRow({ id, scene, live, solo, onEdit, onDrop, onSolo }: Prop
         <span className="text-xs uppercase text-ink">{info.label}</span>
         {info.live && <span className="bg-lime px-1 text-[9px] uppercase text-line">live</span>}
         <span className="ml-auto text-[10px] tabular-nums text-mute">{(info.ticks * 0.09).toFixed(1)}s</span>
-        <button
-          onClick={onSolo}
-          className={`nb-btn px-1.5 py-0.5 text-[10px] ${solo ? "bg-sky text-line" : "bg-slab text-sky"}`}
-          aria-label={solo ? `Play the whole story` : `Play only ${info.label}`}
-          title={solo ? "back to the whole story" : "play this beat on its own"}
-        >
-          {solo ? "◼" : "▶"}
-        </button>
         <button onClick={onDrop} className="nb-btn bg-slab px-1.5 py-0.5 text-[10px] text-punch" aria-label={`Remove ${info.label}`}>
           ✕
         </button>

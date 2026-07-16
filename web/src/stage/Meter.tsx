@@ -14,7 +14,7 @@ const BANDS = [
   { max: Infinity, label: "too long", tone: "text-punch", note: "nobody waits this long — cut a beat" },
 ];
 
-export function Meter({ story, at, onPick }: { story: Scene[]; at: number; onPick?: (i: number) => void }) {
+export function Meter({ story, at, solo, onPick }: { story: Scene[]; at: number; solo: number; onPick?: (i: number) => void }) {
   const ticks = story.reduce((n, s) => n + actInfo(s.act).ticks, 0) + 22; // walk on + off
   const secs = (ticks * TICK_MS) / 1000;
   const band = BANDS.find((b) => secs <= b.max)!;
@@ -35,9 +35,10 @@ export function Meter({ story, at, onPick }: { story: Scene[]; at: number; onPic
             <button
               key={i}
               onClick={() => onPick?.(i)}
-              title={`${info.label} — ${(info.ticks * 0.09).toFixed(1)}s`}
-              aria-label={`Jump to ${info.label}`}
-              className={`${barOf(info.hue)} ${i === at ? "" : "opacity-40"}`}
+              title={`${info.label} — ${(info.ticks * 0.09).toFixed(1)}s · click to play it alone`}
+              aria-label={i === solo ? "Play the whole story" : `Play only ${info.label}`}
+              className={`${barOf(info.hue)} ${i === at || i === solo ? "" : "opacity-40"}
+                ${i === solo ? "outline-2 outline-ink" : ""}`}
               style={{ flexGrow: info.ticks }}
             />
           );
@@ -45,7 +46,10 @@ export function Meter({ story, at, onPick }: { story: Scene[]; at: number; onPic
       </div>
 
       <p className="mt-2 text-[10px] text-mute">
-        {band.note} · <span className="text-mute/60">click a block to jump to it</span>
+        {band.note} ·{" "}
+        <span className="text-mute/60">
+          {solo >= 0 ? "playing one beat — click it again for the whole story" : "click a block to play that beat alone"}
+        </span>
       </p>
     </div>
   );

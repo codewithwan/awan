@@ -51,7 +51,14 @@ export function drawStats(ctx: CanvasRenderingContext2D, k: number) {
 export function drawWall(ctx: CanvasRenderingContext2D, k: number) {
   const up = w.wall_fade(k);
   if (!up) return;
-  const [, by, , bh] = w.wall_band();
+  const [bx, by, bw, bh] = w.wall_band();
+
+  // Sink the band toward the page before drawing a single square. The engine
+  // stopped clearing this patch of sky when the wall started fading in — the
+  // fade *is* the clearing — so without this the clouds drift straight through
+  // the gaps between days, and a calendar you can see weather behind reads as
+  // broken rather than atmospheric.
+  veil(ctx, bx * CELL_W, by * CELL_H, bw * CELL_W, bh * CELL_H, up);
   const [weeks, rows, recent] = w.wall_shape();
   const glow = w.wall_glow(k);
 
@@ -74,6 +81,19 @@ export function drawWall(ctx: CanvasRenderingContext2D, k: number) {
       ctx.fillRect(x0 + c * PITCH, y0 + d * PITCH, SQUARE, SQUARE);
     }
   }
+}
+
+/** Mix a whole region `pct` of the way to the page background — `veil` in
+ *  wall.rs, moved across unchanged. */
+function veil(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, pct: number) {
+  const img = ctx.getImageData(x, y, w, h);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    d[i] = (d[i] * (100 - pct) + BG[0] * pct) / 100;
+    d[i + 1] = (d[i + 1] * (100 - pct) + BG[1] * pct) / 100;
+    d[i + 2] = (d[i + 2] * (100 - pct) + BG[2] * pct) / 100;
+  }
+  ctx.putImageData(img, x, y);
 }
 
 const hexToRgb = (h: string): [number, number, number] => [

@@ -36,6 +36,7 @@ export function App() {
             beat={beat}
             cast={cast}
             solo={solo}
+            id={id}
             onStory={setStory}
             onBeat={setBeat}
             onCast={setCast}
