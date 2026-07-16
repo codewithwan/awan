@@ -1,0 +1,26 @@
+# Its own workspace on purpose: wasm-bindgen's dependency tree is heavier than
+# the engine's MSRV allows, and the root workspace's CI matrix builds every
+# member on Rust 1.85. Keeping this out means the web app can move fast without
+# dragging the engine's floor up with it.
+[workspace]
+
+[package]
+name = "awan-wasm"
+version = "0.0.5"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+awan-core = { path = "../../crates/awan-core" }
+wasm-bindgen = "0.2"
+# the same glyphs the GIF renderer draws — a preview with its own font is a
+# preview that lies about what CI will produce
+font8x8 = "0.3"
+
+[profile.release]
+opt-level = "s"
+lto = true

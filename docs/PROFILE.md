@@ -27,12 +27,12 @@ core personality-layer CLI is untouched.
 
 Identity fields, a streak, a song + lyrics, an `output` path, and a `scenes`
 array of `{ act, say }` beats. `say` supports `{name} {role} {location} {stack}
-{streak} {handle}`; the `sing` beat plays `lyrics` instead. See the full,
+{streak} {username}`; the `sing` beat plays `lyrics` instead. See the full,
 copy-ready file in [`profile/sample/awan.json`](../profile/sample/awan.json):
 
 ```jsonc
 {
-  "handle": "codewithwan",
+  "username": "codewithwan",
   "name": "Muhammad Ridwan",
   "role": "fullstack engineer",
   "stack": "Rust, Go & TypeScript",

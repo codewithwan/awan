@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+/* Self-hosted on purpose: a CDN is a third party that can go down, and this
+   page's whole claim is that it can't take anything with it. */
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/font/silkscreen.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/font/silkscreen-bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* Neobrutalism, played straight: thick black outlines, hard offset shadows,
+   flat saturated colour, nothing rounded, nothing blurred. It suits him — he is
+   33x30px blocks of flat colour, and a soft interface around him would read as
+   an apology for how he's drawn. */
+@theme {
+  --color-void: #0d1117;
+  --color-slab: #161b22;
+  --color-line: #05070a;
+  --color-ink: #f4f7fb;
+  --color-mute: #8b949e;
+
+  /* His own palette, straight off the sprite and the scenes. */
+  --color-cloud: #7c88f0;
+  --color-lime: #39d353;
+  --color-punch: #ff5c5c;
+  --color-gold: #ffc94d;
+  --color-sky: #4dd4ff;
+  --color-grape: #b072ff;
+
+  /* An accent does two jobs and they want opposite things. As a *fill* it
+     carries dark text, so it has to stay bright in both skins. As *text* it
+     sits on the slab, so on white it has to go dark. One token can't be both —
+     hence the -ink pair. In dark mode they're the same value. */
+  --color-cloud-ink: #7c88f0;
+  --color-lime-ink: #39d353;
+  --color-punch-ink: #ff5c5c;
+  --color-gold-ink: #ffc94d;
+  --color-sky-ink: #4dd4ff;
+  --color-grape-ink: #b072ff;
+
+  /* One token for the quiet text instead of ten opacities. An opacity that
+     reads as "subdued" on a dark slab reads as "gone" on a white one, and the
+     hint you can't see is a hint you didn't write. */
+  --color-faint: #6b7482;
+
+  --font-pixel: "Silkscreen", "Courier New", monospace;
+}
+
+/* Light mode repaints the furniture, never the stage.
+   The canvas is a GIF for a dark README — recolouring it would be showing
+   someone a banner they aren't going to get. So the page turns and he doesn't.
+
+   The accents are re-tuned rather than reused. His palette is built to glow on
+   #0d1117, and on white it stops being a colour: the gold measured 1.5:1
+   against a 4.5:1 requirement, the sky 1.7:1, the lime 2.0:1. Same identity,
+   same job, enough ink to survive the paper. */
+:root[data-skin="light"] {
+  --color-void: #eef1f6;
+  --color-slab: #ffffff;
+  --color-ink: #0d1117;
+  --color-mute: #4a5462;  /* 7.7:1 */
+  --color-faint: #5f6875; /* 5.6:1 — still quiet, still there */
+  --color-line: #0d1117;
+
+  /* Fills keep their glow: a bright block carries #0d1117 text at ~10:1
+     whichever skin you're in. Only the text versions move. */
+  --color-cloud-ink: #4049b8;  /* 7.3:1 on white */
+  --color-lime-ink: #137a33;   /* 5.4:1 */
+  --color-punch-ink: #c31d29;  /* 6.0:1 */
+  --color-gold-ink: #8a5a00;   /* 5.9:1 */
+  --color-sky-ink: #0860c4;    /* 6.0:1 */
+  --color-grape-ink: #6b31c9;  /* 7.2:1 */
+}
+
+@layer base {
+  html {
+    /* a faint tile grid, like a level you're building on */
+    background:
+      linear-gradient(color-mix(in srgb, var(--color-mute) 12%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+      linear-gradient(90deg, color-mix(in srgb, var(--color-mute) 12%, transparent) 1px, transparent 1px) 0 0 / 24px 24px,
+      var(--color-void);
+  }
+  body {
+    color: var(--color-ink);
+    font-family: var(--font-pixel);
+    image-rendering: pixelated;
+    -webkit-font-smoothing: none;
+  }
+  ::selection { background: var(--color-lime); color: var(--color-line); }
+  /* focus has to survive a page with no rounded corners to soften it */
+  :focus-visible { outline: 3px solid var(--color-sky); outline-offset: 2px; }
+}
+
+@layer components {
+  /* Hard 6px shadow, no blur — the only depth cue a sprite ever had. */
+  .nb {
+    border: 3px solid var(--color-line);
+    box-shadow: 6px 6px 0 0 var(--color-line);
+    background: var(--color-slab);
+  }
+  .nb-tight { border: 3px solid var(--color-line); box-shadow: 3px 3px 0 0 var(--color-line); }
+
+  /* Buttons press into the page like a physical key. steps(), never ease:
+     nothing in his world moves on a curve. */
+  .nb-btn {
+    border: 3px solid var(--color-line);
+    box-shadow: 4px 4px 0 0 var(--color-line);
+    transition: transform 60ms steps(2), box-shadow 60ms steps(2);
+  }
+  .nb-btn:hover:not(:disabled) { transform: translate(2px, 2px); box-shadow: 2px 2px 0 0 var(--color-line); }
+  /* the stage keeps its own dark backdrop whatever the page is doing — that is
+     the colour the GIF actually has */
+  .stage { background: #0d1117; }
+  .nb-btn:active:not(:disabled) { transform: translate(4px, 4px); box-shadow: 0 0 0 0 var(--color-line); }
+  .nb-btn:disabled { opacity: .35; }
+
+  .nb-input {
+    border: 3px solid var(--color-line);
+    background: var(--color-void);
+    box-shadow: inset 2px 2px 0 0 #00000066;
+  }
+  .nb-input:focus { border-color: var(--color-sky); outline: none; }
+}
+
+@keyframes nb-blink { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+.nb-caret { animation: nb-blink 1s steps(1) infinite; }

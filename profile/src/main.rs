@@ -14,7 +14,6 @@ use awan_core::{Character, Reel, Size};
 
 mod draw;
 mod gif;
-mod icons;
 mod script;
 mod story;
 mod wall;
@@ -70,7 +69,7 @@ fn load(path: &str) -> Profile {
 /// Build a profile from command-line flags.
 fn from_flags(args: &[String]) -> Profile {
     Profile {
-        handle: args.get(1).cloned().unwrap_or_default(),
+        username: args.get(1).cloned().unwrap_or_default(),
         character: flag(args, "-c").unwrap_or_default(),
         name: flag(args, "--name").unwrap_or_default(),
         role: flag(args, "--role").unwrap_or_default(),

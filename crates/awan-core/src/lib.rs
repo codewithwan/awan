@@ -47,6 +47,8 @@ mod statusline;
 
 /// Layout of the `stats` act, for renderers that print the numbers onto the
 /// bento cards the character sets out.
+pub mod icons;
+
 pub mod stats {
     pub use crate::scene::stats::{PANEL, SLOTS, chars_at, panel_at, typing};
 }

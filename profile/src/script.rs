@@ -4,8 +4,8 @@
 
 use awan_core::{Act, Reel};
 
-use crate::icons::{self, Icon};
 use crate::story::{act_of, default_story, icon_of};
+use awan_core::icons::{self, Icon};
 
 /// Ticks each lyric line holds during a singing beat.
 pub const LYRIC_HOLD: i32 = 30;
@@ -26,7 +26,14 @@ pub struct SceneSpec {
 #[derive(Default, serde::Deserialize)]
 #[serde(default)]
 pub struct Profile {
-    pub handle: String,
+    /// Your GitHub username — what he calls you by, and the account CI reads.
+    ///
+    /// Accepts `handle` too. That's what this was called first, and a rename
+    /// that silently blanks somebody's config is not a rename, it's a trap:
+    /// every field here is `#[serde(default)]`, so the old key wouldn't error,
+    /// it would just quietly go missing.
+    #[serde(alias = "handle")]
+    pub username: String,
     /// Path to a character TOML spec. Empty = the built-in buddy.
     pub character: String,
     pub name: String,
@@ -133,7 +140,7 @@ impl Profile {
     /// Substitute `{name} {role} {location} {stack} {streak} {handle}`.
     fn fill(&self, s: &str) -> String {
         let name = if self.name.is_empty() {
-            &self.handle
+            &self.username
         } else {
             &self.name
         };
@@ -142,7 +149,9 @@ impl Profile {
             .replace("{location}", &self.location)
             .replace("{stack}", &self.stack)
             .replace("{streak}", &self.streak.to_string())
-            .replace("{handle}", &self.handle)
+            .replace("{username}", &self.username)
+            // the old spelling still fills, for configs written before the rename
+            .replace("{handle}", &self.username)
             .replace("{contrib_year}", &self.contrib_year.to_string())
             .replace("{contrib_recent}", &self.contrib_recent.to_string())
     }

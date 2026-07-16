@@ -54,7 +54,7 @@ its own — no Ctrl+C.
 
 ```jsonc
 {
-  "handle": "codewithwan",
+  "username": "codewithwan",
   "character": "",                      // path to a character TOML; empty = the buddy
   "name": "Muhammad Ridwan",
   "role": "fullstack engineer",
@@ -112,7 +112,7 @@ its own — no Ctrl+C.
 | `sleep` | yawns, dozes (`zzz`), wakes up |
 | `dance` | a little dance |
 
-- **`say`** is the caption; `{name} {role} {location} {stack} {streak} {handle}`
+- **`say`** is the caption; `{name} {role} {location} {stack} {streak} {username}`
   are filled in, plus `{contrib_year}` and `{contrib_recent}`. The `sing` beat
   needs no `say` — it plays your `lyrics`.
 - Omit `scenes` entirely for a sensible default story.

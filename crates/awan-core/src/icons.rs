@@ -1,6 +1,10 @@
-//! Tiny 8×8 pixel icons drawn beside profile lines. Each `u8` is a row; bit
-//! `1 << col` is the pixel at column `col` (0 = left), matching the font byte
-//! order so they rasterise with the same routine.
+//! Tiny 8×8 pixel icons a renderer can draw beside a line. Each `u8` is a row;
+//! bit `1 << col` is the pixel at column `col` (0 = left), matching font8x8's
+//! byte order so they rasterise with the same routine.
+//!
+//! They live in the engine rather than next to one renderer because there are
+//! two now — the GIF encoder and the browser preview — and a preview that
+//! draws its own idea of these icons is a preview that lies.
 
 pub struct Icon(pub [u8; 8]);
 

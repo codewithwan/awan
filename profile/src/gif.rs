@@ -10,9 +10,9 @@ use image::codecs::gif::{GifEncoder, Repeat};
 use image::{Delay, Frame, Rgba, RgbaImage};
 
 use crate::draw::{draw_bits, draw_text, fill};
-use crate::icons;
 use crate::script::{Line, Profile};
 use crate::wall::wall;
+use awan_core::icons;
 
 /// Pixels per canvas cell (32 cols × this ≈ 1050 px wide — safe in VHS too).
 pub const CELL_W: u32 = 33;
