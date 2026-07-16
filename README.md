@@ -59,6 +59,18 @@ The banner is a side effect: awan is a character engine first, and the same
 character runs in a terminal, reacts to your shell, and can be embedded by any
 CLI that can spawn a process.
 
+<p align="center">
+  <img src="assets/banner.gif" alt="awan introducing awan and its install command, with this repo's own live numbers" width="700">
+</p>
+
+<p align="center">
+  <sub>
+    That's awan introducing awan — his own welcome, his own install line, and
+    this repo's real stars and version, redrawn every night by the same workflow
+    you'd use. If it ever breaks, you'll see it here first.
+  </sub>
+</p>
+
 ```sh
 npx @codewithwan/awan demo         # try it, no install (needs Node)
 npm i -g @codewithwan/awan         # npm      → prebuilt binary
@@ -227,20 +239,6 @@ work. See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## License
 
 MIT OR Apache-2.0, at your option.
-
----
-
-<p align="center">
-  <img src="assets/banner.gif" alt="awan introducing awan, with this repo's own live numbers" width="700">
-</p>
-
-<p align="center">
-  <sub>
-    And that one is awan describing awan — same engine, same workflow, this
-    repo's own stars and version, redrawn every night. If it ever breaks, you'll
-    see it here first.
-  </sub>
-</p>
 
 ---
 
