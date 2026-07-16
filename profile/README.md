@@ -1,4 +1,9 @@
-# awan profile generator
+# awan profile
+
+> **[Build one in the browser →](https://codewithwan.github.io/awan/)** Arrange
+> the beats, watch it play, download the folder. The preview runs the real
+> engine, so it draws the frames CI draws. Everything below is the same thing,
+> by hand. generator
 
 Turn awan into a **seam-free looping banner for your GitHub profile** — he walks
 in and tells your story, then loops (~60s). A separate, opt-in tool: it never
