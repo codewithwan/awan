@@ -7,16 +7,33 @@
 > CLI can embed: `wait`, `ask`, `react`.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="awan strolling through his show in the terminal" width="700">
+  <img src="assets/banner.gif" alt="awan introducing awan, with this repo's live numbers" width="700">
 </p>
 
-*He strolls in, bumps into a box, and dozes off — one loop of the show.*
+<p align="center">
+  <sub>
+    Yes — awan drew that, about itself. It's rendered from
+    <a href="awan.json"><code>awan.json</code></a> by <a href="profile"><code>profile/</code></a>,
+    and the numbers on that terminal are this repo's own, refreshed nightly by
+    <a href=".github/workflows/banner.yml">a workflow</a>. <a href="#profile-gif">Make your own ↓</a>
+  </sub>
+</p>
 
 He strolls, bonks into crates, dozes off mid-sit, chases butterflies, freezes
 at falling gems, fetches his little oven to bake (and devour) a cake, dances
 to a silent beat, juggles a ball until it bonks him dizzy, builds a rocket,
 and watches it explode — then shakes off the soot and strolls on. On the very
 first run, he hatches out of an egg. 🥚
+
+<!-- The banner up top covers this for now; assets/demo.gif is still here if the
+     raw terminal loop ever earns the spot back.
+
+<p align="center">
+  <img src="assets/demo.gif" alt="awan strolling through his show in the terminal" width="700">
+</p>
+
+<p align="center"><sub>One loop of the show, in a real terminal.</sub></p>
+-->
 
 ## Quick start
 
@@ -133,10 +150,23 @@ push: **[`profile/`](profile)**. Built as a separate, opt-in crate, so the core
 
 Characters are plain TOML — pixel rows plus a palette, **zero Rust**:
 
-| Spec | Who |
-|---|---|
-| [characters/awan.toml](characters/awan.toml) | Awan ☁️ — the reference cloud buddy |
-| [characters/oyen.toml](characters/oyen.toml) | Oyen 🐈 — a chunky orange cat |
+### The cast
+
+**Awan** ☁️ — the reference cloud buddy · [`characters/awan.toml`](characters/awan.toml)
+
+<p align="center">
+  <img src="assets/char-awan.gif" alt="Awan, the cloud buddy" width="700">
+</p>
+
+**Oyen** 🐈 — a chunky orange cat · [`characters/oyen.toml`](characters/oyen.toml)
+
+<p align="center">
+  <img src="assets/char-oyen.gif" alt="Oyen, the orange cat" width="700">
+</p>
+
+Every scene works with every character — bake, sing, juggle, nap. Point
+`"character"` at any spec and the whole reel restyles itself; adding one to the
+cast is TOML only.
 
 The heart of a spec is the pixel art — here's the sprite block, abridged
 (`eye_row`/`mouth_row`/`legs_row` point the engine at the rows to animate):
