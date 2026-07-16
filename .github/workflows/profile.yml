@@ -1,0 +1,154 @@
+name: awan profile
+
+# The machinery behind a profile GIF, so a profile repo doesn't have to carry a
+# photocopy of it. Everything here used to be pasted into every reader's repo —
+# ~86 lines of jq that went stale the moment we fixed a bug in ours. Now a fix
+# reaches everyone by moving a tag.
+#
+# Call it from a profile repo:
+#
+#   jobs:
+#     awan:
+#       uses: codewithwan/awan/.github/workflows/profile.yml@v0
+#       permissions:
+#         contents: write
+#
+# @v0 moves forward as we release. Pin @v0.0.5 to freeze it — that tag's copy
+# of this file pins the renderer to the matching release, so the GIF it draws
+# never changes under you.
+
+on:
+  workflow_call:
+    inputs:
+      user:
+        description: "GitHub username to read. Defaults to the calling repo's owner."
+        type: string
+        default: ""
+      config:
+        description: "Path to your awan.json."
+        type: string
+        default: "awan.json"
+      brag_over:
+        description: "Contributions in the last 30 days that count as a good month."
+        type: number
+        default: 100
+      brag_say:
+        description: "What he says when you clear that bar."
+        type: string
+        default: "i'm so excited!"
+      cope_say:
+        description: "What he says when you don't."
+        type: string
+        default: "...i'll fix that, promise"
+
+env:
+  # The release this copy of the file was cut with. Bump it when you tag.
+  AWAN_VERSION: v0.0.5
+
+jobs:
+  awan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The renderer is pinned, so this cache key is stable and the ~2 minute
+      # build only ever happens once per release.
+      - name: Restore the renderer
+        id: cached
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/awan-profile
+          key: awan-profile-${{ env.AWAN_VERSION }}-${{ runner.os }}
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.cached.outputs.cache-hit != 'true'
+      - name: Build the renderer
+        if: steps.cached.outputs.cache-hit != 'true'
+        run: |
+          cargo install --git https://github.com/codewithwan/awan \
+            --tag "$AWAN_VERSION" --locked awan-profile
+
+      # Pull your numbers and write them into awan.json. The renderer never
+      # touches the network — CI fetches, the binary just draws, which is what
+      # keeps its frames deterministic.
+      - name: Fetch your numbers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USER: ${{ inputs.user || github.repository_owner }}
+          CONFIG: ${{ inputs.config }}
+          BRAG_OVER: ${{ inputs.brag_over }}
+          BRAG_SAY: ${{ inputs.brag_say }}
+          COPE_SAY: ${{ inputs.cope_say }}
+        run: |
+          set -euo pipefail
+          api() { gh api "$1" --jq "$2" 2>/dev/null || echo "?"; }
+          REPOS=$(api "users/$USER" '.public_repos')
+          FOLLOWERS=$(api "users/$USER" '.followers')
+          FOLLOWING=$(api "users/$USER" '.following')
+          STARS=$(gh api "users/$USER/repos?per_page=100" --paginate \
+                    --jq '[.[].stargazers_count] | add' 2>/dev/null || echo "?")
+
+          # A year of contributions. The stock GITHUB_TOKEN reads a public
+          # calendar, so nobody needs a PAT or a secret.
+          gh api graphql -f query='
+          { user(login: "'"$USER"'") { contributionsCollection { contributionCalendar {
+              totalContributions
+              weeks { contributionDays { weekday contributionLevel contributionCount } }
+          } } } }' > cal.json
+
+          # One character per day: a GitHub quartile, "." where the calendar has
+          # no day. 371 of them beats 371 JSON numbers.
+          jq '
+            .data.user.contributionsCollection.contributionCalendar as $c
+            | { "NONE":"0", "FIRST_QUARTILE":"1", "SECOND_QUARTILE":"2",
+                "THIRD_QUARTILE":"3", "FOURTH_QUARTILE":"4" } as $lv
+            | { wall: ($c.weeks[-53:] | map(
+                  (.contributionDays
+                   | map({ key: (.weekday|tostring), value: $lv[.contributionLevel] })
+                   | from_entries) as $d
+                  | [range(0;7)] | map($d[tostring] // ".") | join("")
+                ) | join("")),
+                year: $c.totalContributions,
+                recent: ([$c.weeks[].contributionDays[].contributionCount][-30:] | add),
+                # Current streak: days back from today with at least one
+                # contribution. A blank today does not break it — you still
+                # have the rest of the day to fix that.
+                streak: ([$c.weeks[].contributionDays[].contributionCount] | reverse
+                         | (if .[0] == 0 then .[1:] else . end)
+                         | (index(0) // length)) }
+          ' cal.json > wall.json
+
+          jq --slurpfile w wall.json --argjson bar "$BRAG_OVER" \
+             --arg r "$REPOS" --arg s "$STARS" --arg f "$FOLLOWERS" --arg g "$FOLLOWING" \
+             --arg brag "$BRAG_SAY" --arg cope "$COPE_SAY" '
+              .stats = ["repos:\($r)", "stars earned:\($s)",
+                        "followers:\($f)", "following:\($g)"]
+            | .contributions  = $w[0].wall
+            | .contrib_year   = $w[0].year
+            | .contrib_recent = $w[0].recent
+            | .streak         = $w[0].streak
+            # the mood writes itself from the numbers
+            | .scenes = [ .scenes[] | if .act == "{verdict}" then
+                  (if $w[0].recent >= $bar
+                   then { act: "dance", say: $brag }
+                   else { act: "sleep", say: $cope } end)
+                else . end ]
+          ' "$CONFIG" > awan.tmp && mv awan.tmp "$CONFIG"
+          rm -f cal.json wall.json
+
+      - name: Draw it
+        run: awan-profile whoami --config "${{ inputs.config }}"
+
+      - name: Shrink the GIF
+        run: |
+          sudo apt-get update && sudo apt-get install -y gifsicle
+          OUT=$(jq -r '.output // "assets/awan.gif"' "${{ inputs.config }}")
+          gifsicle -O3 --colors 64 "$OUT" -o "$OUT"
+
+      - name: Commit the result
+        run: |
+          OUT=$(jq -r '.output // "assets/awan.gif"' "${{ inputs.config }}")
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$OUT" "${{ inputs.config }}"
+          git commit -m "chore: refresh awan profile" || echo "no changes"
+          git push
