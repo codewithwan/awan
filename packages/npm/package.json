@@ -1,10 +1,10 @@
 {
   "name": "@codewithwan/awan",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publishConfig": {
     "access": "public"
   },
-  "binaryVersion": "0.0.4",
+  "binaryVersion": "0.0.5",
   "description": "A tiny living character for your terminal — a personality layer any CLI can embed.",
   "keywords": [
     "cli",

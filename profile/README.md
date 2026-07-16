@@ -149,16 +149,48 @@ draws, so the renderer still never touches the network.
 
 ## Auto-update on GitHub
 
-The workflow in [`sample/.github/`](sample/.github) carries **no personal data**
-— it just reads your `awan.json`, so you only ever edit that one file:
+Two files in your profile repo, and only one of them is yours to think about.
+The machinery lives here, so our bug fixes reach you by tag instead of by you
+re-copying anything:
 
 ```yaml
-- run: cargo install --git https://github.com/codewithwan/awan awan-profile
-- run: awan-profile whoami --config awan.json
-# …then commit the generated GIF back
+# .github/workflows/awan.yml
+name: awan profile
+on:
+  push: { branches: [main, master], paths: ["awan.json"] }
+  schedule: [{ cron: "0 3 * * *" }]
+  workflow_dispatch:
+
+jobs:
+  awan:
+    uses: codewithwan/awan/.github/workflows/profile.yml@v0
+    permissions:
+      contents: write
+    with:
+      brag_over: 100 # your bar for "a good month"
+      brag_say: "i'm so excited!"
+      cope_say: "...i'll fix that, promise"
 ```
 
-Reference the GIF in your profile `README.md`: `![awan](assets/awan.gif)`.
+Then reference the GIF in your profile `README.md`: `![awan](assets/awan.gif)`.
+No secrets to set up: the stock `GITHUB_TOKEN` reads everything this needs.
+
+| input | default | what it does |
+|---|---|---|
+| `user` | the repo's owner | whose numbers to read |
+| `config` | `awan.json` | where your config lives |
+| `brag_over` | `100` | last-30 contributions that count as a good month |
+| `brag_say` / `cope_say` | see above | what he says either side of that bar |
+
+### Which tag to point at
+
+`@v0` **moves** as we release — new scenes and fixes arrive on their own, and
+we keep `awan.json` compatible. It's the same deal as `actions/checkout@v4`.
+
+`@v0.0.5` **freezes**. That tag's copy of the workflow pins the renderer to the
+matching release, so the GIF it draws never changes under you. Pin it if you'd
+rather read the thing once and know it can't move — it runs in your repo with
+`contents: write`, and that's a reasonable thing to be careful about.
 
 ## Live numbers
 
