@@ -15,6 +15,7 @@ use awan_core::{Character, Reel, Size};
 mod draw;
 mod gif;
 mod script;
+mod statsbanner;
 mod story;
 mod wall;
 
@@ -25,19 +26,37 @@ const FRAME_DELAY: Duration = Duration::from_millis(90);
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    if args.first().map(String::as_str) != Some("whoami") {
-        eprintln!("usage: awan-profile whoami --config awan.json");
-        eprintln!("   or: awan-profile whoami <handle> [--name ..] [--gif out.gif]");
-        std::process::exit(2);
+    match args.first().map(String::as_str) {
+        Some("whoami") => whoami(&args),
+        Some("stats") => stats(&args),
+        _ => {
+            eprintln!("usage: awan-profile whoami --config awan.json [--gif out.gif]");
+            eprintln!("   or: awan-profile stats  --config awan.json [--out banner.png]");
+            std::process::exit(2);
+        }
     }
+}
 
-    let (profile, output) = match flag(&args, "--config") {
+/// Render the standalone stats banner (no character) to a PNG.
+fn stats(args: &[String]) {
+    let path = flag(args, "--config").unwrap_or_else(|| fail("stats needs --config awan.json"));
+    let profile = load(&path);
+    let out = flag(args, "--out").unwrap_or_else(|| "stats.png".to_string());
+    match statsbanner::render_stats(&profile, &out) {
+        Ok(()) => eprintln!("wrote {out}"),
+        Err(e) => fail(&e.to_string()),
+    }
+}
+
+/// Play or render the character reel.
+fn whoami(args: &[String]) {
+    let (profile, output) = match flag(args, "--config") {
         Some(path) => {
             let p = load(&path);
-            let out = flag(&args, "--gif").or_else(|| non_empty(&p.output));
+            let out = flag(args, "--gif").or_else(|| non_empty(&p.output));
             (p, out)
         }
-        None => (from_flags(&args), flag(&args, "--gif")),
+        None => (from_flags(args), flag(args, "--gif")),
     };
 
     let reel = Reel::story(character_of(&profile), &profile.acts()).with_size(Size::Seamless);

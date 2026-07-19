@@ -55,6 +55,22 @@ pub struct Profile {
     pub lyrics: Vec<String>,
     pub output: String,
     pub scenes: Vec<SceneSpec>,
+    /// Boxes for the standalone stats banner (`awan-profile stats`) — no
+    /// character, just three metrics with their date context. CI fills these.
+    pub stat_boxes: Vec<StatBox>,
+}
+
+/// One box on the stats banner: a headline number, what it counts, and the
+/// span it covers. All three are plain strings so CI can format them (commas,
+/// dates) and the renderer just lays them out.
+#[derive(Clone, Default, serde::Deserialize)]
+pub struct StatBox {
+    /// The number, pre-formatted: `"1,247"`, `"12 days"`.
+    pub value: String,
+    /// What it is: `"ALL COMMITS"`, `"CURRENT STREAK"`.
+    pub label: String,
+    /// The date context: `"since 12 Mar 2021"`, `"3 Feb - 12 Mar 2024"`.
+    pub note: String,
 }
 
 /// One narration line: an optional icon and its text.
