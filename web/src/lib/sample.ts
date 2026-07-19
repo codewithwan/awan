@@ -39,13 +39,16 @@ export function fill(text: string, id?: Tokens): string {
   });
 }
 
-/** The readout's stand-in lines. Real ones arrive as "label:value" from CI. */
+/** The readout's stand-in lines — the exact four CI writes (`repos`, `stars
+ *  earned`, `followers`, `following`), in that order, so the preview's readout
+ *  matches the real one. The streak is *not* one of them: it's the 🔥 badge, not
+ *  a readout line, and listing it here drew a fifth row the real banner never
+ *  has. Real values arrive as "label:value" from CI. */
 export const SAMPLE_STATS = [
   "repos:71",
   "stars earned:82",
   "followers:42",
   "following:36",
-  "streak:4",
 ];
 
 /** A stand-in year: 53 weeks x 7 days, a GitHub quartile per day, -1 where the
