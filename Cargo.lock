@@ -16,7 +16,7 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "awan"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "awan-core",
  "awan-render",
@@ -24,7 +24,7 @@ dependencies = [
 
 [[package]]
 name = "awan-cli"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "awan-core",
  "awan-render",
@@ -33,7 +33,7 @@ dependencies = [
 
 [[package]]
 name = "awan-core"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "serde",
  "toml",
@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "awan-render"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "awan-core",
 ]

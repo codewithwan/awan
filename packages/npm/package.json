@@ -1,10 +1,10 @@
 {
   "name": "@codewithwan/awan",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "publishConfig": {
     "access": "public"
   },
-  "binaryVersion": "0.0.6",
+  "binaryVersion": "0.0.7",
   "description": "A tiny pixel character that walks your GitHub contribution year — and lives in your terminal.",
   "keywords": [
     "cli",
