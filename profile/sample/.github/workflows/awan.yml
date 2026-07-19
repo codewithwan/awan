@@ -24,3 +24,7 @@ jobs:
       brag_over: 100 # your bar for "a good month"
       brag_say: "i'm so excited!"
       cope_say: "...i'll fix that, promise"
+      # Also draw the standalone stats banner (all-time commits, current and
+      # longest streak, with dates). Delete this line to skip it — you add
+      # nothing to awan.json either way, the workflow fills the numbers.
+      stats_banner: assets/stats-banner.gif

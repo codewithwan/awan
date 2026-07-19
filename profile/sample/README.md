@@ -7,6 +7,8 @@
 
 ![awan](assets/awan.gif)
 
+![my github, at a glance](assets/stats-banner.gif)
+
 # hi, i'm Muhammad Ridwan 👋
 
 fullstack engineer · Indonesia · building with Rust, Go & TypeScript

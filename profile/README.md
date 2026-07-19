@@ -33,6 +33,42 @@ Same acts, same config shape — only the content differs. Pick a sample and edi
 repo's numbers.* Drop `{ "act": "stats" }` into **either** config — it reads the
 same `stats` array.
 
+## The stats banner
+
+A third output, and the only one with **no character**: three numbers in a row,
+split by vertical rules — your all-time commits, your current streak, your
+longest streak — each with the dates it covers. It wants the whole width to
+itself, so it's a separate image from the walking banner.
+
+<p align="center">
+  <img src="../assets/stats-banner.gif" alt="all commits, current streak, longest streak — with dates" width="700">
+</p>
+
+```sh
+awan-profile stats --config awan.json --out assets/stats-banner.gif   # drifting clouds, loops
+awan-profile stats --config awan.json --out assets/stats-banner.png   # a still
+```
+
+The `.gif` drifts soft clouds behind the numbers and loops; the `.png` is a
+still. Same command — the extension picks.
+
+The three boxes come from `stat_boxes` in your config, which **CI fills** (like
+`stats` and the streak) — you don't write them by hand. Each box is a
+pre-formatted `value`, a `label`, and a `note` for the dates:
+
+```jsonc
+"stat_boxes": [
+  { "value": "1,247",   "label": "ALL COMMITS",    "note": "since 12 Mar 2021" },
+  { "value": "12 days", "label": "CURRENT STREAK", "note": "since 8 Jul" },
+  { "value": "38 days", "label": "LONGEST STREAK", "note": "3 Feb - 12 Mar 2024" }
+]
+```
+
+To get it drawn and refreshed nightly, set the `stats_banner` input on the
+workflow (see [Auto-update](#auto-update-on-github)). The all-time figures need
+the calendar walked year by year from the year you joined, so the workflow only
+does that when you ask for the banner.
+
 ## Get started
 
 The [`sample/`](sample) folder is a ready-to-copy setup:
@@ -82,6 +118,9 @@ its own — no Ctrl+C.
                                         // so run the workflow once and look
   "contrib_year": 2060,                 // ↳ both filled in by the workflow too
   "contrib_recent": 183,
+  "stat_boxes": [],                     // the stats banner's 3 boxes (no
+                                        // character). CI fills these too — see
+                                        // "The stats banner". Leave it empty.
   "output": "assets/awan.gif",          // where the GIF is written
   "scenes": [                            // ← reorder / add / remove freely
     { "act": "wave",     "say": "hi there! i'm {name}" },
@@ -175,9 +214,16 @@ jobs:
       brag_over: 100 # your bar for "a good month"
       brag_say: "i'm so excited!"
       cope_say: "...i'll fix that, promise"
+      stats_banner: assets/stats-banner.gif # optional; see "The stats banner"
 ```
 
-Then reference the GIF in your profile `README.md`: `![awan](assets/awan.gif)`.
+Then reference the outputs in your profile `README.md`:
+
+```markdown
+![awan](assets/awan.gif)
+![my github, at a glance](assets/stats-banner.gif)
+```
+
 No secrets to set up: the stock `GITHUB_TOKEN` reads everything this needs.
 
 | input | default | what it does |
@@ -186,6 +232,7 @@ No secrets to set up: the stock `GITHUB_TOKEN` reads everything this needs.
 | `config` | `awan.json` | where your config lives |
 | `brag_over` | `100` | last-30 contributions that count as a good month |
 | `brag_say` / `cope_say` | see above | what he says either side of that bar |
+| `stats_banner` | *(off)* | path for the stats banner; set it to draw one |
 
 ### Which tag to point at
 
