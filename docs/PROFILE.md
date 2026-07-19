@@ -78,7 +78,7 @@ deterministic and offline.
 ## The stats banner
 
 A separate output (`awan-profile stats`), and the only one with no character:
-three metrics — all-time commits, current streak, longest streak — in a row,
+three metrics — all-time contributions, current streak, longest streak — in a row,
 split by vertical rules, each with the dates it covers. It answers a different
 question ("the numbers, at a glance") and wants the full width, so it isn't a
 scene in the reel.

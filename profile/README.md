@@ -36,7 +36,7 @@ same `stats` array.
 ## The stats banner
 
 A third output, and the only one with **no character**: three numbers in a row,
-split by vertical rules — your all-time commits, your current streak, your
+split by vertical rules — your all-time contributions, your current streak, your
 longest streak — each with the dates it covers. It wants the whole width to
 itself, so it's a separate image from the walking banner.
 
@@ -58,7 +58,7 @@ pre-formatted `value`, a `label`, and a `note` for the dates:
 
 ```jsonc
 "stat_boxes": [
-  { "value": "1,247",   "label": "ALL COMMITS",    "note": "since 12 Mar 2021" },
+  { "value": "1,247",   "label": "CONTRIBUTIONS",  "note": "since 12 Mar 2021" },
   { "value": "12 days", "label": "CURRENT STREAK", "note": "since 8 Jul" },
   { "value": "38 days", "label": "LONGEST STREAK", "note": "3 Feb - 12 Mar 2024" }
 ]

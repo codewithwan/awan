@@ -49,7 +49,7 @@ on:
 
 env:
   # The release this copy of the file was cut with. Bump it when you tag.
-  AWAN_VERSION: v0.0.7
+  AWAN_VERSION: v0.0.8
 
 jobs:
   awan:
@@ -142,10 +142,10 @@ jobs:
           rm -f cal.json wall.json
 
       # The stats banner wants numbers the one-year calendar can't give — an
-      # all-time commit count from your first commit, and your longest streak
-      # ever — so this walks the contribution calendar year by year, from the
-      # year you joined to now, and writes stat_boxes into your config. Only runs
-      # when you asked for the banner, so nobody else pays for the extra calls.
+      # all-time contribution total from your first contribution, and your longest
+      # streak ever — so this walks the contribution calendar year by year, from
+      # the year you joined to now, and writes stat_boxes into your config. Only
+      # runs when you asked for the banner, so nobody else pays for the extra calls.
       - name: Fill the stats banner numbers
         if: inputs.stats_banner != ''
         env:
@@ -156,34 +156,32 @@ jobs:
           set -euo pipefail
           FROM=$(gh api "users/$USER" --jq '.created_at' | cut -c1-4)
           TO=$(date -u +%Y)
-          COMMITS=0
           echo '[]' > days.json
           for Y in $(seq "$FROM" "$TO"); do
             gh api graphql -f query='
             { user(login: "'"$USER"'") { contributionsCollection(
                 from: "'"$Y"'-01-01T00:00:00Z", to: "'"$Y"'-12-31T23:59:59Z") {
-                totalCommitContributions
                 contributionCalendar { weeks { contributionDays { date contributionCount } } }
             } } }' > y.json || continue
-            C=$(jq '.data.user.contributionsCollection.totalCommitContributions // 0' y.json)
-            COMMITS=$((COMMITS + C))
             jq -s '.[0] + (.[1].data.user.contributionsCollection.contributionCalendar.weeks
                            | map(.contributionDays[]?))' days.json y.json > d.tmp && mv d.tmp days.json
           done
 
-          # sort the days, then in one pass: the earliest active day (first
-          # commit), and the longest run of consecutive active days with its ends.
-          # The reduce is wrapped in parens and piped to `.best`: older jq (the
-          # runner's) won't bind a bare `reduce … as $x`, only a parenthesised
-          # term, and the local jq that let it through was newer.
+          # sort the days, then in one pass: the all-time total (every day's
+          # contributions summed — the same figure GitHub headlines, commits +
+          # PRs + issues + reviews), the earliest active day, and the longest run
+          # of consecutive active days with its ends. The reduce is wrapped in
+          # parens and piped to `.best`: older jq (the runner's) won't bind a bare
+          # `reduce … as $x`, only a parenthesised term.
           jq 'sort_by(.date) | unique_by(.date)
+              | (map(.contributionCount) | add // 0) as $total
               | (map(select(.contributionCount > 0)) | .[0].date) as $first
               | (reduce .[] as $d ({run: [], best: []};
                   if $d.contributionCount > 0
                   then (.run + [$d.date]) as $r
                        | {run: $r, best: (if ($r|length) > (.best|length) then $r else .best end)}
                   else {run: [], best: .best} end) | .best) as $best
-              | {first: $first, len: ($best|length),
+              | {total: $total, first: $first, len: ($best|length),
                  from: ($best[0] // ""), to: ($best[-1] // "")}' \
              days.json > life.json
 
@@ -196,17 +194,18 @@ jobs:
           else
             SSTART="not today"
           fi
+          TOTAL=$(jq -r '.total // 0' life.json)
           FIRST=$(jq -r '.first // ""' life.json)
           LFROM=$(jq -r '.from // ""' life.json); LTO=$(jq -r '.to // ""' life.json)
           LLEN=$(jq -r '.len // 0' life.json)
 
-          jq --argjson n "$COMMITS" --arg fc "since $(fmt "$FIRST")" \
+          jq --argjson n "$TOTAL" --arg fc "since $(fmt "$FIRST")" \
              --arg cs "$STREAK days" --arg css "$SSTART" \
              --arg ls "$LLEN days"   --arg lss "$(fmts "$LFROM") - $(fmt "$LTO")" '
             def commas: tostring | . as $s | ($s | length) as $L
               | if $L <= 3 then $s else ($s[:$L-3] | commas) + "," + $s[$L-3:] end;
             .stat_boxes = [
-              {value: ($n | commas), label: "ALL COMMITS",    note: $fc},
+              {value: ($n | commas), label: "CONTRIBUTIONS",  note: $fc},
               {value: $cs,           label: "CURRENT STREAK", note: $css},
               {value: $ls,           label: "LONGEST STREAK", note: $lss}
             ]' "$CONFIG" > awan.tmp && mv awan.tmp "$CONFIG"

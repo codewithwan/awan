@@ -51,7 +51,7 @@ cargo run -p awan-profile -- whoami --config my-profile/awan.json
 ```
 
 Want the numbers without the character too? A one-line workflow input also draws
-a **stats banner** — all-time commits, current and longest streak, with dates —
+a **stats banner** — all-time contributions, current and longest streak, with dates —
 as its own image. See [`profile/`](profile#the-stats-banner).
 
 Full walkthrough and the `awan.json` format: **[`profile/`](profile)**. Built as
@@ -222,7 +222,7 @@ library — no Rust, no rebuild of the engine.
 The banner is the product; everything else is how it's made.
 
 - **Shipping** — profile banners with live numbers, the contribution year, a
-  standalone stats banner (all-time commits and streaks, no character), a
+  standalone stats banner (all-time contributions and streaks, no character), a
   browser editor with a character studio, and a reusable workflow you call
   rather than copy
 - **Next** — more beats worth watching, and somewhere to show the characters
