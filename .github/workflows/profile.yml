@@ -49,7 +49,7 @@ on:
 
 env:
   # The release this copy of the file was cut with. Bump it when you tag.
-  AWAN_VERSION: v0.0.8
+  AWAN_VERSION: v0.0.9
 
 jobs:
   awan:

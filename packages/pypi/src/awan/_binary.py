@@ -15,7 +15,7 @@ import tarfile
 import urllib.request
 import zipfile
 
-BINARY_VERSION = "0.0.8"
+BINARY_VERSION = "0.0.9"
 REPO = "codewithwan/awan"
 
 # (system, machine) -> Rust target triple

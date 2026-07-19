@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "awan-cli"
-version = "0.0.8"
+version = "0.0.9"
 description = "A tiny pixel character that walks your GitHub contribution year — and lives in your terminal."
 readme = "README.md"
 requires-python = ">=3.8"
