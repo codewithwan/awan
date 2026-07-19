@@ -49,3 +49,39 @@ pub fn draw_text(img: &mut RgbaImage, text: &str, x: u32, y: u32, scale: u32, c:
         cx += 8 * scale;
     }
 }
+
+/// Width in px of `text` drawn at `num/den` scale (e.g. 3/2 = 1.5×).
+pub fn text_w_frac(text: &str, num: u32, den: u32) -> u32 {
+    text.chars().count() as u32 * 8 * num / den
+}
+
+/// Draw `text` at a fractional `num/den` scale — for sizes the integer font
+/// can't hit (8px, 16px…). Each font pixel spans `num/den` px, with the
+/// boundaries floored so widths distribute evenly (1.5× → 1,2,1,2…), which reads
+/// clean at caption size.
+pub fn draw_text_frac(
+    img: &mut RgbaImage,
+    text: &str,
+    x: u32,
+    y: u32,
+    num: u32,
+    den: u32,
+    c: [u8; 3],
+) {
+    let span = |i: u32| i * num / den; // px offset of font-pixel edge `i`
+    let mut cx = x;
+    for chr in text.chars() {
+        if let Some(glyph) = BASIC_FONTS.get(chr) {
+            for (row, byte) in glyph.iter().enumerate() {
+                let (ry0, ry1) = (span(row as u32), span(row as u32 + 1));
+                for col in 0..8u32 {
+                    if byte & (1 << col) != 0 {
+                        let (rx0, rx1) = (span(col), span(col + 1));
+                        fill(img, cx + rx0, y + ry0, rx1 - rx0, ry1 - ry0, c);
+                    }
+                }
+            }
+        }
+        cx += 8 * num / den;
+    }
+}

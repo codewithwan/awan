@@ -17,7 +17,7 @@ use std::fs::File;
 use image::codecs::gif::{GifEncoder, Repeat};
 use image::{Delay, Frame, Rgba, RgbaImage};
 
-use crate::draw::{draw_text, fill};
+use crate::draw::{draw_text, draw_text_frac, fill, text_w_frac};
 use crate::gif::BG;
 use crate::script::Profile;
 
@@ -91,9 +91,11 @@ fn banner(profile: &Profile, t: Option<i32>) -> RgbaImage {
     }
     for (i, b) in boxes.iter().enumerate() {
         let cx = i as u32 * col + col / 2;
-        centered(&mut img, &b.value, cx, 46, 5, GOLD);
-        centered(&mut img, &b.label, cx, 122, 2, INK);
-        centered(&mut img, &b.note, cx, 160, 1, DIM);
+        centered(&mut img, &b.value, cx, 42, 5, GOLD);
+        centered(&mut img, &b.label, cx, 118, 2, INK);
+        // the note sits at 1.5× — between the font's 8px and 16px steps
+        let nw = text_w_frac(&b.note, 3, 2);
+        draw_text_frac(&mut img, &b.note, cx.saturating_sub(nw / 2), 158, 3, 2, DIM);
     }
     img
 }
