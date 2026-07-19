@@ -75,6 +75,26 @@ the `stats` readout — live in `awan.json`; the CI job fetches the real values
 (`gh api` → `jq`) and writes them in before rendering, so the binary stays
 deterministic and offline.
 
+## The stats banner
+
+A separate output (`awan-profile stats`), and the only one with no character:
+three metrics — all-time commits, current streak, longest streak — in a row,
+split by vertical rules, each with the dates it covers. It answers a different
+question ("the numbers, at a glance") and wants the full width, so it isn't a
+scene in the reel.
+
+The split mirrors the rest: the engine knows nothing about it. The renderer lays
+out `stat_boxes` (three `{value, label, note}` strings) in the 8×8 pixel font, so
+it matches the character banner beside it; CI formats the strings. A `.gif` drifts
+soft clouds behind the numbers and loops (two parallax clouds, each crossing a
+whole number of spans per loop, so `frame(0) == frame(N)`); a `.png` is the still.
+
+The numbers it wants reach past the one-year calendar the walking banner uses —
+an all-time count from the first commit, the longest streak *ever* — so the
+workflow walks the contribution calendar year by year from the year the account
+was created, and only when the `stats_banner` input is set, so the extra API
+calls are opt-in.
+
 ## Rendering to GIF
 
 The generator lives in the `publish = false` `profile/` crate, so the `image` /

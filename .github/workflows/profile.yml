@@ -40,10 +40,16 @@ on:
         description: "What he says when you don't."
         type: string
         default: "...i'll fix that, promise"
+      stats_banner:
+        description: "Path for the standalone stats banner (no character). Empty
+          = don't build it. Set it and the workflow fills your all-time numbers
+          and draws it — you add nothing to awan.json."
+        type: string
+        default: ""
 
 env:
   # The release this copy of the file was cut with. Bump it when you tag.
-  AWAN_VERSION: v0.0.5
+  AWAN_VERSION: v0.0.6
 
 jobs:
   awan:
@@ -135,14 +141,90 @@ jobs:
           ' "$CONFIG" > awan.tmp && mv awan.tmp "$CONFIG"
           rm -f cal.json wall.json
 
+      # The stats banner wants numbers the one-year calendar can't give — an
+      # all-time commit count from your first commit, and your longest streak
+      # ever — so this walks the contribution calendar year by year, from the
+      # year you joined to now, and writes stat_boxes into your config. Only runs
+      # when you asked for the banner, so nobody else pays for the extra calls.
+      - name: Fill the stats banner numbers
+        if: inputs.stats_banner != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USER: ${{ inputs.user || github.repository_owner }}
+          CONFIG: ${{ inputs.config }}
+        run: |
+          set -euo pipefail
+          FROM=$(gh api "users/$USER" --jq '.created_at' | cut -c1-4)
+          TO=$(date -u +%Y)
+          COMMITS=0
+          echo '[]' > days.json
+          for Y in $(seq "$FROM" "$TO"); do
+            gh api graphql -f query='
+            { user(login: "'"$USER"'") { contributionsCollection(
+                from: "'"$Y"'-01-01T00:00:00Z", to: "'"$Y"'-12-31T23:59:59Z") {
+                totalCommitContributions
+                contributionCalendar { weeks { contributionDays { date contributionCount } } }
+            } } }' > y.json || continue
+            C=$(jq '.data.user.contributionsCollection.totalCommitContributions // 0' y.json)
+            COMMITS=$((COMMITS + C))
+            jq -s '.[0] + (.[1].data.user.contributionsCollection.contributionCalendar.weeks
+                           | map(.contributionDays[]?))' days.json y.json > d.tmp && mv d.tmp days.json
+          done
+
+          # sort the days, then in one pass: the earliest active day (first
+          # commit), and the longest run of consecutive active days with its ends.
+          jq 'sort_by(.date) | unique_by(.date)
+              | (map(select(.contributionCount > 0)) | .[0].date) as $first
+              | reduce .[] as $d ({run: [], best: []};
+                  if $d.contributionCount > 0
+                  then (.run + [$d.date]) as $r
+                       | {run: $r, best: (if ($r|length) > (.best|length) then $r else .best end)}
+                  else {run: [], best: .best} end) as $s
+              | {first: $first, len: ($s.best|length),
+                 from: ($s.best[0] // ""), to: ($s.best[-1] // "")}' \
+             days.json > life.json
+
+          fmt()  { date -u -d "$1" +"%-d %b %Y" 2>/dev/null || echo "$1"; }
+          fmts() { date -u -d "$1" +"%-d %b"    2>/dev/null || echo "$1"; }
+
+          STREAK=$(jq -r '.streak // 0' "$CONFIG")
+          if [ "$STREAK" -gt 0 ]; then
+            SSTART="since $(date -u -d "-$((STREAK-1)) days" +"%-d %b")"
+          else
+            SSTART="not today"
+          fi
+          FIRST=$(jq -r '.first // ""' life.json)
+          LFROM=$(jq -r '.from // ""' life.json); LTO=$(jq -r '.to // ""' life.json)
+          LLEN=$(jq -r '.len // 0' life.json)
+
+          jq --argjson n "$COMMITS" --arg fc "since $(fmt "$FIRST")" \
+             --arg cs "$STREAK days" --arg css "$SSTART" \
+             --arg ls "$LLEN days"   --arg lss "$(fmts "$LFROM") - $(fmt "$LTO")" '
+            def commas: tostring | . as $s | ($s | length) as $L
+              | if $L <= 3 then $s else ($s[:$L-3] | commas) + "," + $s[$L-3:] end;
+            .stat_boxes = [
+              {value: ($n | commas), label: "ALL COMMITS",    note: $fc},
+              {value: $cs,           label: "CURRENT STREAK", note: $css},
+              {value: $ls,           label: "LONGEST STREAK", note: $lss}
+            ]' "$CONFIG" > awan.tmp && mv awan.tmp "$CONFIG"
+          rm -f y.json days.json life.json
+
       - name: Draw it
         run: awan-profile whoami --config "${{ inputs.config }}"
 
-      - name: Shrink the GIF
+      - name: Draw the stats banner
+        if: inputs.stats_banner != ''
+        run: awan-profile stats --config "${{ inputs.config }}" --out "${{ inputs.stats_banner }}"
+
+      - name: Shrink the GIFs
         run: |
           sudo apt-get update && sudo apt-get install -y gifsicle
           OUT=$(jq -r '.output // "assets/awan.gif"' "${{ inputs.config }}")
           gifsicle -O3 --colors 64 "$OUT" -o "$OUT"
+          BANNER="${{ inputs.stats_banner }}"
+          if [ -n "$BANNER" ] && [ "${BANNER##*.}" = "gif" ]; then
+            gifsicle -O3 --colors 64 "$BANNER" -o "$BANNER"
+          fi
 
       - name: Commit the result
         run: |
@@ -150,5 +232,6 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add "$OUT" "${{ inputs.config }}"
+          [ -n "${{ inputs.stats_banner }}" ] && git add "${{ inputs.stats_banner }}" || true
           git commit -m "chore: refresh awan profile" || echo "no changes"
           git push
